@@ -11,15 +11,19 @@ import {
   createRoutesFromElements,
 } from "react-router-dom";
 import { Lock } from "./pages/lock.jsx";
-import { Root } from "./pages/root.jsx";
+import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
+import { RequireAuth } from './hooks/RequireAuth.js'
 
 const router = createHashRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Root />}>
-      <Route path="lock" element={<Lock />} />
-      <Route path="vault" element={<Vault />} />
-    </Route>
+    // <Route path="/" element={<Root />}>
+    <>
+      <Route path="/" element={<Email/>}/>
+      <Route path="/lock" element={<Lock />} />
+      <Route path="vault" element={<RequireAuth><Vault/></RequireAuth>}/>
+    </>
+    // </Route>
   )
 );
 
