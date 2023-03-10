@@ -1,6 +1,7 @@
+import * as React from 'react';
 
-// export default function Lock() {
-//   return(
-//     <h1>Lock</h1>
-//   );
-// }
+export function Lock():JSX.Element {
+  return(
+    <h1>Lock</h1>
+  );
+}

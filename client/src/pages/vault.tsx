@@ -1,7 +1,7 @@
-import { FC } from "react"; // functional component
+import * as React from 'react';
 
-export default function Vault() {
+export function Vault(): JSX.Element {
   return (
-    <h1>Vault</h1>
+    <h1>Vault </h1>
   );
 }
