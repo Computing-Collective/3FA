@@ -1,14 +1,14 @@
-import { useContext } from "react";
-import { useLocation } from "react-router-dom";
+import * as React from "react";
+import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
 
 export function RequireAuth({ children }) {
-  const [auth, setAuth] = useContext(authContext);
-  const location = useLocation();
+  const auth = React.useContext(authContext);
+  const authed = login(auth);
 
-  return authed === true ? (
+  return auth === true ? (
     children
   ) : (
-    <Navigate to="/vault" replace state={{ path: location.pathname }} />
+    <Navigate to="/" replace state={{ path: location.pathname }} />
   );
 }

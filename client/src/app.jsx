@@ -15,6 +15,10 @@ import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
 import { RequireAuth } from "./hooks/RequireAuth.js";
 
+// variables for authentication with admin
+export const authContext = React.createContext(null);
+export const sessionContext = React.createContext(null);
+
 const router = createHashRouter(
   createRoutesFromElements(
     <>
@@ -31,9 +35,6 @@ const router = createHashRouter(
     </>
   )
 );
-// variables for authentication with admin
-export const authContext = React.createContext(null);
-export const sessionContext = React.createContext(null);
 
 const App = () => {
   // the states for the authentication (to modify context later)
