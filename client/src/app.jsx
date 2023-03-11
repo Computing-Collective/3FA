@@ -13,22 +13,39 @@ import {
 import { Lock } from "./pages/lock.jsx";
 import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
-import { RequireAuth } from './hooks/RequireAuth.js'
+import { RequireAuth } from "./hooks/RequireAuth.js";
 
 const router = createHashRouter(
   createRoutesFromElements(
-    // <Route path="/" element={<Root />}>
     <>
-      <Route path="/" element={<Email/>}/>
+      <Route path="/" element={<Email />} />
       <Route path="/lock" element={<Lock />} />
-      <Route path="vault" element={<RequireAuth><Vault/></RequireAuth>}/>
+      <Route
+        path="/vault"
+        element={
+          <RequireAuth>
+            <Vault />
+          </RequireAuth>
+        }
+      />
     </>
-    // </Route>
   )
 );
+// variables for authentication with admin
+export const authContext = React.createContext(null);
+export const sessionContext = React.createContext(null);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  // the states for the authentication (to modify context later)
+  const [session, setSession] = React.useState(null);
+  const [auth, setAuth] = React.useState(null);
+  return (
+    <authContext.Provider value={[auth, setAuth]}>
+      <sessionContext.Provider value={[session, setSession]}>
+        <RouterProvider router={router} />
+      </sessionContext.Provider>
+    </authContext.Provider>
+  );
 };
 
 const rootElement = document.getElementById("root");

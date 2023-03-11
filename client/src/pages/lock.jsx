@@ -1,15 +1,22 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import { handleSubmit } from "../hooks/handleSubmit";
-// import { useAuth } from "../hooks/useAuth";
+import { sessionContext } from "../app.jsx";
+import { Backdoor } from "./backdoor.jsx";
 
 export function Lock() {
   const [password, setPassword] = React.useState("");
-  // const { login } = useAuth();
+  const navigate = useNavigate();
+  const [session, setSession] = React.useContext(sessionContext);
 
   return (
     <>
       <h1>Enter your password</h1>
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={(event) => {
+          handleSubmit(event, { endpoint: "email", data: password, navigate: navigate });
+        }}
+      >
         <input
           type="password"
           value={password}
@@ -17,6 +24,7 @@ export function Lock() {
         />
         <input type="submit" value="Submit" />
       </form>
+      <Backdoor />
     </>
   );
 }
