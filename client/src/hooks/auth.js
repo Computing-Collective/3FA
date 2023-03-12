@@ -3,7 +3,7 @@ import { authContext } from "../app.jsx";
 
 export function login(key) {
   return (key) => {
-    setAuth(key);
+    // setAuth(key);
     // TODO send API req with auth, return true if ok.
   };
 }

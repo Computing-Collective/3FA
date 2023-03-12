@@ -47,7 +47,7 @@ module.exports = [
   // for pngs
   {
     test: /\.(jpe?g|png|gif|svg)$/i,
-    loader: "file-loader",
+    loader: "url-loader",
     options: {
       name: "/public/icons/[name].[ext]",
     },
