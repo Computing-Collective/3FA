@@ -13,6 +13,7 @@ export function Backdoor() {
       <button onClick={() => navigate("/")}>Email</button>
       <button onClick={() => navigate("/lock")}>Lock</button>
       <button onClick={() => navigate("/sensor")}>Sensor</button>
+      <button onClick={() => navigate("/camera")}>Camera</button>
       <button onClick={() => navigate("/vault")}>Vault</button>
     </>
   );

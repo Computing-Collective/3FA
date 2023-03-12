@@ -15,6 +15,7 @@ import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
 import { RequireAuth } from "./hooks/RequireAuth.js";
 import { Sensor } from "./pages/sensor.jsx";
+import { Camera } from "./pages/camera.jsx";
 
 // variables for authentication with admin
 export const authContext = React.createContext(null);
@@ -26,6 +27,7 @@ const router = createHashRouter(
       <Route path="/" element={<Email />} />
       <Route path="/lock" element={<Lock />} />
       <Route path="/sensor" element={<Sensor />} />
+      <Route path="/camera" element={<Camera />} />
       <Route
         path="/vault"
         element={
