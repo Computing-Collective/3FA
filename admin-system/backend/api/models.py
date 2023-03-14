@@ -84,6 +84,12 @@ class User(db.Model):
     def check_motion_pattern(self, motion_pattern):
         return check_password_hash(self.motion_pattern, motion_pattern)
 
+    def check_face_recognition(self, file):
+        # TODO: load the ML model and check the image against the output classification (email preferred)
+        # Preview the received image - testing only
+        # file.save('instance/' + self.email + '.jpg')
+        return True
+
 
 class UserFiles(db.Model):
     """The table of files attached to each user"""

@@ -192,6 +192,20 @@ def get_next_auth_stage(session: models.LoginSession) -> str:
             return key
 
 
+def create_auth_session(user: models.User) -> models.AuthSession:
+    """Create an auth session for a user"""
+    auth_session: models.AuthSession = models.AuthSession(
+        session_id=uuid.uuid4(),
+        id=user.id,
+        date=datetime.now(),
+    )
+
+    db.session.add(auth_session)
+    db.session.commit()
+
+    return auth_session
+
+
 def create_fail_event(session: models.LoginSession,
                       text: str = None,
                       exception: Exception = None,
@@ -207,9 +221,50 @@ def create_fail_event(session: models.LoginSession,
     if exception:
         fail_event.event = str(exception)
     if photo:
-        fail_event.photo = photo
+        fail_event.photo = photo.read()
 
     db.session.add(fail_event)
     db.session.commit()
 
     return fail_event
+
+
+def get_failed_events_as_dict(user: models.User, session: models.LoginSession) -> list[dict]:
+    """
+    Get a list of failed events as a dictionary.
+
+    If a user is provided, only get the failed events for that user.
+    If a session is provided, only get the failed events for that session.
+    """
+    failed_events = get_failed_events(user, session)
+
+    output = []
+
+    for event in failed_events:
+        output.append({
+            "id": str(event.id),
+            "session_id": str(event.session_id),
+            "date": event.date.strftime("%d/%m/%Y %H:%M:%S"),
+            "event": event.event,
+            "photo": str(event.photo)
+        })
+
+    return output
+
+
+def get_failed_events(user: models.User, session: models.LoginSession) -> list[models.FailedEvent]:
+    """
+    Get a list of failed events.
+
+    If a user is provided, only get the failed events for that user.
+    If a session is provided, only get the failed events for that session.
+    """
+    if user:
+        return db.session.execute(db.select(models.FailedEvent)
+                                  .filter(models.FailedEvent.session_id == models.LoginSession.session_id
+                                          and models.LoginSession.id == user.id)).scalars().all()
+    elif session:
+        return db.session.execute(db.select(models.FailedEvent)
+                                  .filter(models.FailedEvent.session_id == session.session_id)).scalars().all()
+
+    return db.session.execute(db.select(models.FailedEvent)).scalars().all()
