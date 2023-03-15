@@ -9,16 +9,18 @@ import down from "../../public/icons/down.png";
 import left from "../../public/icons/left.png";
 import right from "../../public/icons/right.png";
 import { getUniquePicoID } from "../hooks/auth";
+import { DisplayText } from "../components/DisplayText.jsx";
 
-const moves = [
+// TODO do this
+const possMoves = [
   "forward",
-  "back",
-  "left",
-  "right",
-  "up",
-  "down",
-  "clockwise",
-  "counter-clockwise",
+  // "back",
+  // "left",
+  // "right",
+  // "up",
+  // "down",
+  // "clockwise",
+  // "counter-clockwise",
 ];
 
 const picObj = {
@@ -29,53 +31,54 @@ const picObj = {
 };
 
 export function Sensor() {
-  const [sensor, setSensor] = React.useState(
-    _.sample(moves, 3) // initialize sensor with randomized moves
+  const [moves, setMoves] = React.useState(
+    _.sample(possMoves, 3) // initialize sensor with randomized moves
   );
   const navigate = useNavigate();
   const [session, setSession] = React.useContext(sessionContext);
   const [auth, setAuth] = React.useContext(authContext);
-  const [pico_id, setPico_id] = React.useState(getUniquePicoID(crypto.randomUUID()));
   // generate random pico_id by paging API
+  const uid = getUniquePicoID(crypto.randomUUID());
+  const [pico_id, setPico_id] = React.useState(uid);
+  // text
+  const [text, setText] = React.useState("");
+  const submitButton = document.getElementById("submitButton");
+
+  React.useEffect(() => {
+    setText(""); // clear text on submit
+  }, [submitButton]);
 
   // TODO send matt a pico_id
 
   return (
     <>
       <h1>Move your sensor!</h1>
-      <h3>Additionally, add these moves to the end of your sequence: {sensor}</h3>
-      <Pictures sensor={sensor} />
+      <h3>Additionally, add these moves to the end of your sequence: {moves}</h3>
+      <Pictures sensor={moves} />
+      <DisplayText text={text} />
       <form
         onSubmit={(event) => {
           handleSubmit(event, {
             endpoint: "motion_pattern/initialize",
-            data: sensor,
+            data: moves,
             navigate: navigate,
             session: session,
             pico_id: pico_id,
+            setText: setText,
+            auth: auth,
+            setAuth: setAuth,
           });
         }}
       >
-        <input type="submit" value="Start" />
+        <input id="submitButton" type="submit" value="Start" />
       </form>
-      <Backdoor />
+      <Backdoor pico_id={pico_id} />
     </>
   );
 }
 
 function Pictures(props) {
   const sensor = props.sensor;
-  // let components = [];
-  // for (let motion of sensor) {
-  //   let pic = () => {
-  //     return (
-  //       <>
-  //         <img src={_.get(picObj, motion)} />
-  //       </>
-  //     );
-  //   };
-  //   components.push({ pic });
-  // }
   let count = 0;
   return (
     <>

@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useLocation, Navigate, useNavigate, useFetcher } from "react-router-dom";
 import { sessionContext, authContext } from "./auth";
+import { login } from "./auth";
 
 // import crypto library
 
@@ -20,6 +20,9 @@ export async function handleSubmit(event, props) {
   const text = props.text;
   const setText = props.setText;
 
+  // for sensor
+  const pico_id = props.pico_id;
+
   const api_endpoint = process.env.API_ENDPOINT;
   const url = `${api_endpoint}/api/login/${endpoint}/`;
 
@@ -28,8 +31,8 @@ export async function handleSubmit(event, props) {
     method: "POST",
     body: JSON.stringify({
       data: data,
-      session_id: props.session,
-      pico_id: props.pico_id,
+      session_id: session,
+      pico_id: pico_id,
     }),
     headers: { "Content-Type": "application/json" },
   });
@@ -47,9 +50,14 @@ export async function handleSubmit(event, props) {
   }
 
   // go to vault
-  if (response.ok && next === undefined) {
+  if (response.ok && next === null) {
+    console.log(auth);
     setAuth(json.auth_session_id);
-    login();
+    console.log(auth);
+    // const authenticated = login(json.auth_session_id);
+    // console.log("3");
+    // authenticated ? navigate("/vault") : navigate("/");
+    navigate("/vault");
     return;
   }
   /* 
@@ -68,6 +76,9 @@ export async function handleSubmit(event, props) {
   switch (next) {
     case "motion_pattern":
       navigate("/sensor");
+      return;
+    case "face_recognition":
+      navigate("/camera");
       return;
   }
   navigate(`/${json.next}`);

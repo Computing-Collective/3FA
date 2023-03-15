@@ -29,7 +29,7 @@ export function Password() {
             navigate: navigate,
             session: session,
             auth: auth,
-            setAuth: auth,
+            setAuth: setAuth,
             setText: setText,
           });
         }}

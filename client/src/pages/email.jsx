@@ -2,7 +2,7 @@ import * as React from "react";
 import { handleSubmit } from "../hooks/handleSubmit";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Backdoor } from "./backdoor.jsx";
-import { sessionContext } from "../app.jsx";
+import { sessionContext, authContext } from "../app.jsx";
 import { DisplayText } from "../components/DisplayText.jsx";
 
 export function Email() {
@@ -10,6 +10,7 @@ export function Email() {
   const [email, setEmail] = React.useState("");
   const [session, setSession] = React.useContext(sessionContext);
   const [text, setText] = React.useState("");
+  const [auth, setAuth] = React.useContext(authContext);
   const submitButton = document.getElementById("submitButton");
 
   React.useEffect(() => {
@@ -29,6 +30,8 @@ export function Email() {
             session: session,
             setSession: setSession,
             setText: setText,
+            auth: auth,
+            setAuth: setAuth,
           });
         }}
       >
