@@ -3,20 +3,21 @@
 
 
 '''
+                             USB
                          +----------+                        
-                         |          |                        
+                         |    +Y    |                        
                          |          | Button: Start Recording
                          |          |                        
                          |          | Button: Stop Recording 
                          |          |                        
-                         |          |                        
+                         | -X    +X |                        
                          |          |                        
                          |          |                        
  LED: READY TO RECORD    |          | LED: Sequence Status   
                          |          |                        
       LED: RECORDING     |          |                        
                          |          |                        
-                         |          |                        
+                         |    -Y    |                        
                          +----------+     
 
 '''
@@ -112,21 +113,33 @@ def check_sequence(sequence):
     valid_moves = []
 
     # Check that the imu was flipped over at some point
-    for z in sequence:
+    for z in sequence["AZ"]:
         if z < 0:
-            valid_moves.append("Z-FLIP")
+            valid_moves.append("Z FLIP")
+            break
+
+
+    # Check for forward movement (at least 1 second)
+    # This would mean 10 occurances in a row of +Y acceleration (since 0.1s delay in main)
+    for y in sequence["AY"]:
+        if y > 15:
+            valid_moves.append("+Y TRAVEL")
+            break
 
     return valid_moves
 
 
-# Initial state
-ready_led.value = True
-recording_led.value = False
-is_recording = False
+
 
 
 # Sequence variable
-sequence = []
+sequence = {"AX" : [],
+            "AY" : [],
+            "AZ" : [],
+            "GX" : [],
+            "GY" : [],
+            "GZ" : [],
+            }
 
 while True:
     if not init:
@@ -134,6 +147,11 @@ while True:
         init_hardware()
         init_hardware()
         print("Started Program")
+
+        # Initial state
+        ready_led.value = True
+        recording_led.value = False
+        is_recording = False
 
     # Update states for stop/start buttons
     if start_btn.value and not is_recording:
@@ -148,20 +166,59 @@ while True:
         # Validate move
         valid_moves = check_sequence(sequence)
         for move in valid_moves:
-            if move == "Z-FLIP":
+            if move == "Z FLIP":
                 sequence_correct_led()
                 print(move)
+            if move == "+Y TRAVEL":
+                sequence_correct_led()
+                print(move)
+
+
+        print(sequence["AY"]) # for debugging check recording of AZ
         
         # Reset the sequence for next recording    
-        sequence = []
+        sequence = {"AX" : [],
+            "AY" : [],
+            "AZ" : [],
+            "GX" : [],
+            "GY" : [],
+            "GZ" : [],
+            }
          
 
     # Recording
     if (is_recording):
-        sequence.append(sensor.acceleration[2])
-
-
-    
+        sequence["AX"].append(round(sensor.acceleration[0], 1))
+        sequence["AY"].append(round(sensor.acceleration[1], 1))
+        sequence["AZ"].append(round(sensor.acceleration[2], 1))
+        sequence["GX"].append(round(sensor.gyro[0], 1))
+        sequence["GY"].append(round(sensor.gyro[1], 1))
+        sequence["GZ"].append(round(sensor.gyro[2], 1))
+        # print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2]))
+        print((sensor.acceleration[1], 15, -15))
 
     time.sleep(0.1)
 
+    # print as tuple for the plotter
+    # AX: Green
+    # AY: Blue
+    # AZ: Orange
+    # print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2]))
+    # print((sensor.gyro[0], sensor.gyro[1], sensor.gyro[2]))
+
+    # print_all_imu()
+
+
+
+
+
+    '''
+    Notes on IMU data
+
+    Fast movement is +/- 20    (m/s^2)
+
+    There is speed up and slow down
+    - Identify which came first
+    
+    
+    '''
