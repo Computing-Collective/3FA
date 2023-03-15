@@ -1,14 +1,15 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import { handleSubmit } from "../hooks/handleSubmit";
-import { useLocation, useNavigate } from "react-router-dom";
+import { authContext, sessionContext } from "../app.jsx";
 import { Backdoor } from "./backdoor.jsx";
-import { sessionContext } from "../app.jsx";
 import { DisplayText } from "../components/DisplayText.jsx";
 
-export function Email() {
+export function Password() {
+  const [password, setPassword] = React.useState("");
   const navigate = useNavigate();
-  const [email, setEmail] = React.useState("");
   const [session, setSession] = React.useContext(sessionContext);
+  const [auth, setAuth] = React.useContext(authContext);
   const [text, setText] = React.useState("");
   const submitButton = document.getElementById("submitButton");
 
@@ -18,21 +19,26 @@ export function Email() {
 
   return (
     <>
-      <h1>Enter your Email</h1>
+      <h1>Enter your password</h1>
       <DisplayText text={text} />
       <form
         onSubmit={(event) => {
           handleSubmit(event, {
-            endpoint: "email",
-            data: email,
+            endpoint: "password",
+            data: password,
             navigate: navigate,
             session: session,
-            setSession: setSession,
+            auth: auth,
+            setAuth: auth,
             setText: setText,
           });
         }}
       >
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <input id="submitButton" type="submit" value="Submit" />
       </form>
       <Backdoor />

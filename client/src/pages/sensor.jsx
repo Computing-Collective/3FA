@@ -1,13 +1,14 @@
 import * as React from "react";
 import { matchPath, useNavigate } from "react-router-dom";
 import { handleSubmit } from "../hooks/handleSubmit";
-import { sessionContext } from "../app.jsx";
+import { authContext, sessionContext } from "../app.jsx";
 import { Backdoor } from "./backdoor.jsx";
 import _, { map } from "underscore";
 import up from "../../public/icons/up.png";
 import down from "../../public/icons/down.png";
 import left from "../../public/icons/left.png";
 import right from "../../public/icons/right.png";
+import { getUniquePicoID } from "../hooks/auth";
 
 const moves = [
   "forward",
@@ -33,6 +34,11 @@ export function Sensor() {
   );
   const navigate = useNavigate();
   const [session, setSession] = React.useContext(sessionContext);
+  const [auth, setAuth] = React.useContext(authContext);
+  const [pico_id, setPico_id] = React.useState(getUniquePicoID(crypto.randomUUID()));
+  // generate random pico_id by paging API
+
+  // TODO send matt a pico_id
 
   return (
     <>
@@ -42,10 +48,11 @@ export function Sensor() {
       <form
         onSubmit={(event) => {
           handleSubmit(event, {
-            endpoint: "sensor",
+            endpoint: "motion_pattern/initialize",
             data: sensor,
             navigate: navigate,
             session: session,
+            pico_id: pico_id,
           });
         }}
       >

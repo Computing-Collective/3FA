@@ -2,6 +2,8 @@ import * as React from "react";
 import { useLocation, Navigate, useNavigate, useFetcher } from "react-router-dom";
 import { sessionContext, authContext } from "./auth";
 
+// import crypto library
+
 export async function handleSubmit(event, props) {
   event.preventDefault(); // remove form refresh
   // routing
@@ -11,44 +13,62 @@ export async function handleSubmit(event, props) {
   const data = props.data; // 'kelvinwong0519@gmail.com'
   const session = props.session;
   const setSession = props.setSession;
+  const auth = props.auth;
+  const setAuth = props.setAuth;
+
+  // for displaying error
+  const text = props.text;
+  const setText = props.setText;
+
+  const api_endpoint = process.env.API_ENDPOINT;
+  const url = `${api_endpoint}/api/login/${endpoint}/`;
 
   // send api request with password and return authed; get next loc
-  // const response = await fetch(url, {
-  //   method: "GET",
-  //   body: {
-  //     endpoint: `/api/${endpoint}`,
-  //     data: data,
-  //   },
-  // });
-  // const json = await response.json();
-  // // set session id
-  // if (session === null) {
-  //   setSession(json.session);
-  // }
-  // if id == None, login()
-  // navigate(`${json.next}`);
-}
-
-// long polling for sensor
-async function handleSensorSubmit() {
-  let response = await fetch("/api/sensor");
-
-  if (response.status == 502) {
-    // Status 502 is a connection timeout error,
-    // may happen when the connection was pending for too long,
-    // and the remote server or a proxy closed it
-    // let's reconnect
-    await handleSensorSubmit();
-  } else if (response.status != 200) {
-    // TODO figure out this behaviour
-    // An error - let's show it
-    showMessage(response.statusText);
-    // Reconnect in one second
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await handleSensorSubmit();
-  } else {
-    // Get and go to next page
-    const json = await response.json();
-    navigate(`${json.next}`);
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      data: data,
+      session_id: props.session,
+      pico_id: props.pico_id,
+    }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const json = await response.json();
+  const next = json.next;
+  const success = json.success;
+  // set session id
+  if (endpoint === "email") {
+    setSession(json.session_id);
   }
+  // retry api request
+  if (success === 0 && next === undefined) {
+    setText(json.msg);
+    return;
+  }
+
+  // go to vault
+  if (response.ok && next === undefined) {
+    setAuth(json.auth_session_id);
+    login();
+    return;
+  }
+  /* 
+  if (success = 0):
+    wrong auth stage:
+    login session timeout: 
+      go to 'next' (pass me email)
+  incorrect validation:
+    if next == dne (undef), retry
+  if (response.ok)
+    if next != null
+      correct: go to next
+    if next == null
+      look into auth_session_id and store, login()
+  */
+  switch (next) {
+    case "motion_pattern":
+      navigate("/sensor");
+      return;
+  }
+  navigate(`/${json.next}`);
 }

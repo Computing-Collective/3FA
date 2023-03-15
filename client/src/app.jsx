@@ -10,7 +10,7 @@ import {
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
-import { Lock } from "./pages/lock.jsx";
+import { Password } from "./pages/password.jsx";
 import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
 import { RequireAuth } from "./hooks/RequireAuth.js";
@@ -25,7 +25,7 @@ const router = createHashRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<Email />} />
-      <Route path="/lock" element={<Lock />} />
+      <Route path="/password" element={<Password />} />
       <Route path="/sensor" element={<Sensor />} />
       <Route path="/camera" element={<Camera />} />
       <Route
