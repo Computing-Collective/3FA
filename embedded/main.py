@@ -118,12 +118,32 @@ def check_sequence(sequence):
             valid_moves.append("Z FLIP")
             break
 
+    # X motion forward first
+    for x in sequence["AX"]:
+        # if see a negative acceleration motion first, not +X motion
+        if x < -15:
+            break
+        elif x > 15:
+            valid_moves.append("+X TRAVEL")
+            break
 
     # Check for forward movement (at least 1 second)
     # This would mean 10 occurances in a row of +Y acceleration (since 0.1s delay in main)
     for y in sequence["AY"]:
-        if y > 15:
+        # if see a negative acceleration motion first, not +Y motion
+        if y < -15:
+            break
+        elif y > 15:
             valid_moves.append("+Y TRAVEL")
+            break
+
+    # Z
+    for z in sequence["AZ"]:
+        # if see a negative acceleration motion first, not +Z motion
+        if z < -15:
+            break
+        elif z > 15:
+            valid_moves.append("+Z TRAVEL")
             break
 
     return valid_moves
@@ -169,12 +189,18 @@ while True:
             if move == "Z FLIP":
                 sequence_correct_led()
                 print(move)
+            if move == "+X TRAVEL":
+                sequence_correct_led()
+                print(move)
             if move == "+Y TRAVEL":
                 sequence_correct_led()
                 print(move)
+            if move == "+Z TRAVEL":
+                sequence_correct_led()
+                print(move)
 
-
-        print(sequence["AY"]) # for debugging check recording of AZ
+        # will flood serial print if too long of a sequence
+        # print(sequence["AY"]) # for debugging check recording of AZ
         
         # Reset the sequence for next recording    
         sequence = {"AX" : [],
@@ -194,8 +220,9 @@ while True:
         sequence["GX"].append(round(sensor.gyro[0], 1))
         sequence["GY"].append(round(sensor.gyro[1], 1))
         sequence["GZ"].append(round(sensor.gyro[2], 1))
-        # print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2]))
-        print((sensor.acceleration[1], 15, -15))
+        
+        print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2], 15, -15))
+        # print((sensor.acceleration[1], 15, -15))
 
     time.sleep(0.1)
 
