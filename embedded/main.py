@@ -112,18 +112,21 @@ def sequence_correct_led():
 def check_sequence(sequence):
     valid_moves = []
 
-    # Check that the imu was flipped over at some point
+    # Check that the imu was flipped over at some 
+    started_up = False
     for z in sequence["AZ"]:
-        if z < 0:
+        if z >= 0:
+            started_up = True
+        elif z < 0 and started_up:
             valid_moves.append("Z FLIP")
             break
 
     # X motion forward first
     for x in sequence["AX"]:
         # if see a negative acceleration motion first, not +X motion
-        if x < -15:
+        if x < -20:
             break
-        elif x > 15:
+        elif x > 20:
             valid_moves.append("+X TRAVEL")
             break
 
@@ -131,18 +134,18 @@ def check_sequence(sequence):
     # This would mean 10 occurances in a row of +Y acceleration (since 0.1s delay in main)
     for y in sequence["AY"]:
         # if see a negative acceleration motion first, not +Y motion
-        if y < -15:
+        if y < -20:
             break
-        elif y > 15:
+        elif y > 20:
             valid_moves.append("+Y TRAVEL")
             break
 
     # Z
     for z in sequence["AZ"]:
         # if see a negative acceleration motion first, not +Z motion
-        if z < -15:
+        if z < -20 + 9.8:
             break
-        elif z > 15:
+        elif z > 20 + 9.8:
             valid_moves.append("+Z TRAVEL")
             break
 
@@ -221,8 +224,8 @@ while True:
         sequence["GY"].append(round(sensor.gyro[1], 1))
         sequence["GZ"].append(round(sensor.gyro[2], 1))
         
-        print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2], 15, -15))
-        # print((sensor.acceleration[1], 15, -15))
+        print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2], 20, -20))
+        # print((sensor.acceleration[1], 20, -20))
 
     time.sleep(0.1)
 
