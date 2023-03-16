@@ -5,10 +5,8 @@ const api_endpoint = process.env.API_ENDPOINT;
 
 // returns true if authenticated via admin
 export function login(auth) {
-  // TODO send API req with auth, return true if ok.
   const endpoint = "validate";
   const url = `${api_endpoint}/api/client/${endpoint}/`;
-  console.log(auth);
   fetch(url, {
     method: "POST",
     body: JSON.stringify({

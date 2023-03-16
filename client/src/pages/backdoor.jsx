@@ -1,11 +1,13 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext, sessionContext } from "../app.jsx";
+import { login } from "../hooks/auth.js";
 
 export function Backdoor(props) {
   const navigate = useNavigate();
   const [session, setSession] = React.useContext(sessionContext);
   const [auth, setAuth] = React.useContext(authContext);
+
   return (
     <>
       <h1>Session: {session}</h1>
@@ -16,6 +18,15 @@ export function Backdoor(props) {
       <button onClick={() => navigate("/sensor")}>Sensor</button>
       <button onClick={() => navigate("/camera")}>Camera</button>
       <button onClick={() => navigate("/vault")}>Vault</button>
+      <button
+        onClick={() => {
+          setAuth("a");
+          console.log(auth);
+          navigate("/vault");
+        }}
+      >
+        set auth
+      </button>
     </>
   );
 }

@@ -54,9 +54,6 @@ export async function handleSubmit(event, props) {
     console.log(auth);
     setAuth(json.auth_session_id);
     console.log(auth);
-    // const authenticated = login(json.auth_session_id);
-    // console.log("3");
-    // authenticated ? navigate("/vault") : navigate("/");
     navigate("/vault");
     return;
   }
