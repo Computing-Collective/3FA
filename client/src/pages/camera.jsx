@@ -15,6 +15,13 @@ export function Camera() {
       <h1>Smile for the camera</h1>
       <form
         onSubmit={(event) => {
+          window.api.captureImage();
+        }}
+      >
+        <input type="submit" value="Capture" />
+      </form>
+      <form
+        onSubmit={(event) => {
           handleSubmit(event, {
             endpoint: "camera",
             data: email,
