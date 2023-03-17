@@ -4,11 +4,9 @@
 
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("api", {
-  // used to send a request to capture the image
-  startCamera: (arg) => ipcRenderer.send("startCamera", arg),
+contextBridge.exposeInMainWorld("internal", {
   // get video feed from camera
-  getVideoFeed: (callback) => ipcRenderer.on("getVideoFeed", callback),
+  getVideoFeed: (callback) => ipcRenderer.on("camera:live-feed", callback),
   getAPIEndpoint: (callback) =>
     ipcRenderer.on("API_ENDPOINT", (event, arg) => callback(arg)),
 });

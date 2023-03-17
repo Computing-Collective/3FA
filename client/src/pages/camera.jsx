@@ -3,23 +3,20 @@ import { handleSubmit } from "../hooks/handleSubmit";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Backdoor } from "./backdoor.jsx";
 import { sessionContext, authContext } from "../app.jsx";
+import { Stream } from "../components/Stream.jsx";
 
 export function Camera() {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [session, setSession] = React.useContext(sessionContext);
   const [auth, setAuth] = React.useContext(authContext);
+  const [stream, setStream] = React.useState(null);
 
   return (
     <>
       <h1>Smile for the camera</h1>
-      <form
-        onSubmit={(event) => {
-          window.api.captureImage();
-        }}
-      >
-        <input type="submit" value="Capture" />
-      </form>
+
+      <Stream />
       <form
         onSubmit={(event) => {
           handleSubmit(event, {
