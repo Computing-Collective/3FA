@@ -63,6 +63,13 @@ onboard_led.direction = Direction.OUTPUT
 i2c = busio.I2C(scl=board.GP1, sda=board.GP0)
 sensor = LSM6DS33(i2c)
 
+
+# Global parameters
+sensitivity = 16
+buffer_offset = 5 # there are typically 3 elements of feedback 
+                  # for example forward move is [20, -20, -18, -12, -4, 0, 0, 0]
+z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 to detect flips as the sign of the number)
+
 def print_all_imu():
     # \x1b[2J clear the screen
     # \x1b[0;0H move the cursor to the top left corner
@@ -89,7 +96,7 @@ def init_hardware():
     recording_led.value = True
     correct_led.value = True
     onboard_led.value = True
-    time.sleep(0.3)
+    time.sleep(0.1)
     ready_led.value = False
     recording_led.value = False
     correct_led.value = False
@@ -101,9 +108,9 @@ def init_hardware():
 def sequence_correct_led():
     for i in range(5):
         correct_led.value = True    
-        time.sleep(0.1)
+        time.sleep(0.05)
         correct_led.value = False
-        time.sleep(0.1)
+        time.sleep(0.05)
     
     # Reset the correct LED after blinking
     correct_led.value = False
@@ -111,33 +118,43 @@ def sequence_correct_led():
 # Return a list of all the valid moves that happened in the sequence
 # Note sequence is a dict of <string, list> where all lists are the same length
 def check_sequence(sequence):
+    buffer = 0
+
+
     # List of pairs (index, move)
     valid_moves_indexed = []
 
     # Check that the imu was flipped over at some 
     started_up = False
+
     for i, z in enumerate(sequence["AZ"]):
-        if z >= 0:
-            started_up = True
-        elif z < 0 and started_up:
-            # To avoid noise, check that neighbouring values are also negative (for sure flipped for a period of time)
-            if (i + 2) < len(sequence["AZ"]) and (i - 2) > 0:
-                flip = True
-                # If the IMU is rotated up in the neighbouring data, ignore the data
-                for j in range(i - 2, i + 2 + 1):
-                    if sequence["AZ"][j] > 0:
-                        flip = False
-                        break
-                if flip == True:
-                    valid_moves_indexed.append(("UP-DOWN-FLIP", i))
-                    break
+
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
+
+        if buffer == 0:
+            if z >= 0:
+                started_up = True
+            elif z < 0 and started_up:
+                # To avoid noise, check that neighbouring values are also negative (for sure flipped for a period of time)
+                if (i + 1) < (len(sequence["AZ"]) - 1) and (i - 1) > 0:
+                    flip = True
+                    # If the IMU is rotated up in the neighbouring data, ignore the data
+                    for j in range(i - 1, i + 1 + 1):
+                        if sequence["AZ"][j] > 0:
+                            flip = False
+                    if flip == True:
+                        valid_moves_indexed.append(("UP-DOWN-FLIP", i))
+                        buffer = buffer + buffer_offset
 
     # X: check move forward and ignore move backwards
     # To deal with inverse acceleration feedback, add a buffer whenever the IMU is moved backwards
-    # For example, moving backwards will spike -16m/s^2 back then 16m/s^2 forward withing a short period after
-    # We need to ignore that 16m/s^2 signal since it will detect as forward motion (when really we moved the IMU backwards)
+    # For example, moving backwards will spike -sensitivitym/s^2 back then sensitivitym/s^2 forward withing a short period after
+    # We need to ignore that sensitivitym/s^2 signal since it will detect as forward motion (when really we moved the IMU backwards)
     # We achieve this by ignoring the following elements after a negative motion
-    buffer = 0
     for i, x in enumerate(sequence["AX"]):
         # Update buffer
         if buffer < 0:
@@ -146,11 +163,16 @@ def check_sequence(sequence):
             buffer = buffer - 1
 
         if buffer == 0:
-            if x < -16:
-                # ignore the next 5 elements in list
-                buffer = buffer + 5
-            elif x > 16 :
+            # sensitivity of a false signal is lower than a correct signal
+            # this is because we want to ignore more noise even if that means missing some correct signals
+            # for debugging, it's easier to have a small amount of correct signals
+            # than having many all the correct signals and a lot of bad signals
+            if x < (-1 * sensitivity) / 2:
+                # ignore the next buffer_offset elements in list
+                buffer = buffer + buffer_offset
+            elif x > sensitivity :
                 valid_moves_indexed.append(("RIGHT-MOVE", i))
+                buffer = buffer + buffer_offset
 
     # Y
     for i, y in enumerate(sequence["AY"]):
@@ -161,11 +183,12 @@ def check_sequence(sequence):
             buffer = buffer - 1
         
         if buffer == 0:
-            if y < -16:
-                # ignore the next 5 elements in list
-                buffer = buffer + 5
-            elif y > 16:
+            if y < (-1 * sensitivity) / 2:
+                # ignore the next buffer_offset elements in list
+                buffer = buffer + buffer_offset
+            elif y > sensitivity:
                 valid_moves_indexed.append(("FORWARD-MOVE", i))
+                buffer = buffer + buffer_offset
 
     # Z
     for i, z in enumerate(sequence["AZ"]):
@@ -177,25 +200,124 @@ def check_sequence(sequence):
 
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if z < -16 + 9.8:
-                # ignore the next 5 elements in list
-                buffer = buffer + 5
-            elif z > 16 + 9.8:
+            if z - z_offset < (-1 * sensitivity) / 2:
+                # ignore the next buffer_offset elements in list
+                buffer = buffer + buffer_offset
+            elif z - z_offset > sensitivity:
                 valid_moves_indexed.append(("UP-MOVE", i))
+                buffer = buffer + buffer_offset
+
+    # -X
+    for i, x in enumerate(sequence["AX"]):
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
+
+        if buffer == 0:
+            if x > sensitivity / 2:
+                # ignore the next buffer_offset elements in list
+                buffer = buffer + buffer_offset
+            elif x < -1 * sensitivity :
+                valid_moves_indexed.append(("LEFT-MOVE", i))
+                buffer = buffer + buffer_offset
+
+    # -Y
+    for i, y in enumerate(sequence["AY"]):
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
+        
+        if buffer == 0:
+            if y > sensitivity / 2:
+                # ignore the next buffer_offset elements in list
+                buffer = buffer + buffer_offset
+            elif y < -1 * sensitivity:
+                valid_moves_indexed.append(("BACKWARDS-MOVE", i))
+                buffer = buffer + buffer_offset
+
+    # -Z
+    for i, z in enumerate(sequence["AZ"]):
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
+
+        if buffer == 0:
+            # if see a negative acceleration motion first, not +Z motion
+            if (z - z_offset) > (sensitivity / 2):
+                # ignore the next buffer_offset elements in list
+                buffer = buffer + buffer_offset
+            elif (z - z_offset) < (-1 * sensitivity):
+                valid_moves_indexed.append(("DOWN-MOVE", i))  
+                buffer = buffer + buffer_offset
 
 
-    # Sort the valid moves based on index (which is time in 0.1s)
-    print("unsorted")
-    print(valid_moves_indexed)
+
+    # Processing sequence
+    # Sort based on time -> filter moves caused by feedback -> put in list of moves
+
+    # Sort the valid moves based on index (which is time in 0.1s) ----------------------------------------------------------
+    print("unsorted:", valid_moves_indexed, "\n\n")
     valid_moves_indexed.sort(key = lambda x: x[1])
-    print("sorted")
-    print(valid_moves_indexed)
+    print("sorted", valid_moves_indexed, "\n\n")
+
+    # We now have to filter the overlapping moves that shouldn't exist
+    # This depends on a precedence
+    # For example, UP-DOWN-FLIP can also triggers other moves if the flip is aggressive
+    # We do this be removing any neighbouring moves that occured within +/-0.2ms of the flip
+    tolerance = 2
+
+    # Filter so that flip takes precedence over all moves ----------------------------------------------------------
+    flip_occurence_indices = []
+    for pair in valid_moves_indexed:
+        if pair[0] == "UP-DOWN-FLIP":
+            flip_occurence_indices.append(pair[1])
+
+    # print("flip indices", flip_occurence_indices)
+
+    # Remove moves from list based on filter
+    for index in flip_occurence_indices:
+        for move_index, pair in enumerate(valid_moves_indexed):
+            # first condition checks if move is within tolerance * 0.1ms of the flip
+            if abs(pair[1] - index) < tolerance  and pair[0] != "UP-DOWN-FLIP":
+                # print("try to remove", pair, "at move index", move_index)
+                print("removing", pair)
+                del valid_moves_indexed[move_index]
+
+    print("flip filtered:", valid_moves_indexed, "\n\n")
+
+
+    # Filter so that up down takes precedence over other moves ----------------------------------------------------------
+    # up_down_occurence_indices = []
+    # for pair in valid_moves_indexed:
+    #     if pair[0] == "UP-DOWN-FLIP":
+    #         up_down_occurence_indices.append(pair[1])
+
+    # # print("flip indices", flip_occurence_indices)
+
+    # # Remove moves from list based on filter
+    # for index in up_down_occurence_indices:
+    #     for move_index, pair in enumerate(valid_moves_indexed):
+    #         # first condition checks if move is within tolerance * 0.1ms of the flip
+    #         if abs(pair[1] - index) < tolerance  and (pair[0] != "UP-MOVE" or pair[0] != "DOWN-MOVE"):
+    #             # print("try to remove", pair, "at move index", move_index)
+    #             del valid_moves_indexed[move_index]
+
+    # print("up/down filtered:", valid_moves_indexed, "\n\n")
+
+
+
     sorted_moves = []
     for move in valid_moves_indexed:
         sorted_moves.append(move[0])
 
     print(sorted_moves)
-    time.sleep(1)  
+    print()
 
     return sorted_moves
 
@@ -249,6 +371,15 @@ while True:
             if move == "UP-MOVE":
                 sequence_correct_led()
                 print(move)
+            if move == "LEFT-MOVE":
+                sequence_correct_led()
+                print(move)
+            if move == "BACKWARDS-MOVE":
+                sequence_correct_led()
+                print(move)
+            if move == "DOWN-MOVE":
+                sequence_correct_led()
+                print(move)
 
         # will flood serial print if too long of a sequence
         # print(sequence["AY"]) # for debugging check recording of AZ
@@ -284,7 +415,7 @@ while True:
         sequence["GY"].append(round(sensor.gyro[1], 1))
         sequence["GZ"].append(round(sensor.gyro[2], 1))
         
-        print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2],1), 16, -16, 16 + 9.8, -16 + 9.8))
+        print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
         # print((sensor.acceleration[1], 16, -16))
 
     time.sleep(0.1)
