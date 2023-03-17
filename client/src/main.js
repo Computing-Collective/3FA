@@ -3,6 +3,9 @@ const path = require("path");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
+// TODO make elio pay microsoft
+app.commandLine.appendSwitch("ignore-certificate-errors");
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -17,9 +20,6 @@ const createWindow = () => {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   });
-
-  // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
-  mainWindow.webContents.send("API_ENDPOINT", process.env.API_ENDPOINT);
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);

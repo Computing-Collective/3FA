@@ -4,7 +4,7 @@ import { login } from "./auth";
 
 // import crypto library
 
-const api_endpoint = window.internal.getAPIEndpoint();
+const api_endpoint = window.internal.getAPIEndpoint;
 
 export async function handleSubmit(event, props) {
   event.preventDefault(); // remove form refresh

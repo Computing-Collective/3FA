@@ -8,19 +8,21 @@ import up from "../../public/icons/up.png";
 import down from "../../public/icons/down.png";
 import left from "../../public/icons/left.png";
 import right from "../../public/icons/right.png";
+// import forward from "../../public/icons/forward.png";
+// import backward from "../../public/icons/backward.png";
+// import flip from "../../public/icons/flip.png";
 import { getUniquePicoID } from "../hooks/auth";
 import { DisplayText } from "../components/DisplayText.jsx";
 
 // TODO do this
 const possMoves = [
   "forward",
-  // "back",
+  // "backward",
   // "left",
   // "right",
   // "up",
   // "down",
-  // "clockwise",
-  // "counter-clockwise",
+  // "flip"
 ];
 
 const picObj = {
@@ -28,6 +30,9 @@ const picObj = {
   down: down,
   left: left,
   right: right,
+  // forward: forward,
+  // backward: backward,
+  // flip: flip,
 };
 
 export function Sensor() {

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { authContext } from "../app.jsx";
 
-const api_endpoint = window.internal.getAPIEndpoint();
+const api_endpoint = window.internal.getAPIEndpoint;
 
 // returns true if authenticated via admin
 export function login(auth) {

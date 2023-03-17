@@ -3,7 +3,8 @@
 // In the preload script.
 const { ipcRenderer, contextBridge } = require("electron");
 
+// 'internal' channel is used for internal stuff
 contextBridge.exposeInMainWorld("internal", {
-  getAPIEndpoint: (callback) =>
-    ipcRenderer.on("API_ENDPOINT", (event, arg) => callback(arg)),
+  // exposes the getAPIEndpoint function to get the API endpoint from env
+  getAPIEndpoint: process.env.API_ENDPOINT,
 });
