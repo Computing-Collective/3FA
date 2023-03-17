@@ -109,47 +109,95 @@ def sequence_correct_led():
     correct_led.value = False
 
 # Return a list of all the valid moves that happened in the sequence
+# Note sequence is a dict of <string, list> where all lists are the same length
 def check_sequence(sequence):
-    valid_moves = []
+    # List of pairs (index, move)
+    valid_moves_indexed = []
 
     # Check that the imu was flipped over at some 
     started_up = False
-    for z in sequence["AZ"]:
+    for i, z in enumerate(sequence["AZ"]):
         if z >= 0:
             started_up = True
         elif z < 0 and started_up:
-            valid_moves.append("Z FLIP")
-            break
+            # To avoid noise, check that neighbouring values are also negative (for sure flipped for a period of time)
+            if (i + 2) < len(sequence["AZ"]) and (i - 2) > 0:
+                flip = True
+                # If the IMU is rotated up in the neighbouring data, ignore the data
+                for j in range(i - 2, i + 2 + 1):
+                    if sequence["AZ"][j] > 0:
+                        flip = False
+                        break
+                if flip == True:
+                    valid_moves_indexed.append(("UP-DOWN-FLIP", i))
+                    break
 
-    # X motion forward first
-    for x in sequence["AX"]:
-        # if see a negative acceleration motion first, not +X motion
-        if x < -20:
-            break
-        elif x > 20:
-            valid_moves.append("+X TRAVEL")
-            break
+    # X: check move forward and ignore move backwards
+    # To deal with inverse acceleration feedback, add a buffer whenever the IMU is moved backwards
+    # For example, moving backwards will spike -16m/s^2 back then 16m/s^2 forward withing a short period after
+    # We need to ignore that 16m/s^2 signal since it will detect as forward motion (when really we moved the IMU backwards)
+    # We achieve this by ignoring the following elements after a negative motion
+    buffer = 0
+    for i, x in enumerate(sequence["AX"]):
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
 
-    # Check for forward movement (at least 1 second)
-    # This would mean 10 occurances in a row of +Y acceleration (since 0.1s delay in main)
-    for y in sequence["AY"]:
-        # if see a negative acceleration motion first, not +Y motion
-        if y < -20:
-            break
-        elif y > 20:
-            valid_moves.append("+Y TRAVEL")
-            break
+        if buffer == 0:
+            if x < -16:
+                # ignore the next 5 elements in list
+                buffer = buffer + 5
+            elif x > 16 :
+                valid_moves_indexed.append(("RIGHT-MOVE", i))
+
+    # Y
+    for i, y in enumerate(sequence["AY"]):
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
+        
+        if buffer == 0:
+            if y < -16:
+                # ignore the next 5 elements in list
+                buffer = buffer + 5
+            elif y > 16:
+                valid_moves_indexed.append(("FORWARD-MOVE", i))
 
     # Z
-    for z in sequence["AZ"]:
-        # if see a negative acceleration motion first, not +Z motion
-        if z < -20 + 9.8:
-            break
-        elif z > 20 + 9.8:
-            valid_moves.append("+Z TRAVEL")
-            break
+    for i, z in enumerate(sequence["AZ"]):
+        # Update buffer
+        if buffer < 0:
+            buffer = 0
+        elif buffer > 0:
+            buffer = buffer - 1
 
-    return valid_moves
+        if buffer == 0:
+            # if see a negative acceleration motion first, not +Z motion
+            if z < -16 + 9.8:
+                # ignore the next 5 elements in list
+                buffer = buffer + 5
+            elif z > 16 + 9.8:
+                valid_moves_indexed.append(("UP-MOVE", i))
+
+
+    # Sort the valid moves based on index (which is time in 0.1s)
+    print("unsorted")
+    print(valid_moves_indexed)
+    valid_moves_indexed.sort(key = lambda x: x[1])
+    print("sorted")
+    print(valid_moves_indexed)
+    sorted_moves = []
+    for move in valid_moves_indexed:
+        sorted_moves.append(move[0])
+
+    print(sorted_moves)
+    time.sleep(1)  
+
+    return sorted_moves
 
 
 
@@ -189,16 +237,16 @@ while True:
         # Validate move
         valid_moves = check_sequence(sequence)
         for move in valid_moves:
-            if move == "Z FLIP":
+            if move == "UP-DOWN-FLIP":
                 sequence_correct_led()
                 print(move)
-            if move == "+X TRAVEL":
+            if move == "RIGHT-MOVE":
                 sequence_correct_led()
                 print(move)
-            if move == "+Y TRAVEL":
+            if move == "FORWARD-MOVE":
                 sequence_correct_led()
                 print(move)
-            if move == "+Z TRAVEL":
+            if move == "UP-MOVE":
                 sequence_correct_led()
                 print(move)
 
@@ -217,6 +265,18 @@ while True:
 
     # Recording
     if (is_recording):
+
+        # Prevent overflow (sequence terminates if trying to record for more than 10 seconds)    
+        if len(sequence["AX"]) > 1000:
+            print("\n\n\n\n\n\n\n\nRestarting, overflowed 10s")
+            sequence = {"AX" : [],
+                "AY" : [],
+                "AZ" : [],
+                "GX" : [],
+                "GY" : [],
+                "GZ" : [],
+                }
+
         sequence["AX"].append(round(sensor.acceleration[0], 1))
         sequence["AY"].append(round(sensor.acceleration[1], 1))
         sequence["AZ"].append(round(sensor.acceleration[2], 1))
@@ -224,8 +284,8 @@ while True:
         sequence["GY"].append(round(sensor.gyro[1], 1))
         sequence["GZ"].append(round(sensor.gyro[2], 1))
         
-        print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2], 20, -20))
-        # print((sensor.acceleration[1], 20, -20))
+        print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2],1), 16, -16, 16 + 9.8, -16 + 9.8))
+        # print((sensor.acceleration[1], 16, -16))
 
     time.sleep(0.1)
 
@@ -245,7 +305,7 @@ while True:
     '''
     Notes on IMU data
 
-    Fast movement is +/- 20    (m/s^2)
+    Fast movement is +/- 16    (m/s^2)
 
     There is speed up and slow down
     - Identify which came first
