@@ -1,8 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const { desktopCapturer } = require("electron");
-const startCamera = require("./functions/camera.js");
-const getVideoFeed = require("./functions/camera.js");
+const { startCamera, getVideoFeed } = require("./functions/camera.js");
 require("dotenv").config();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -17,11 +16,10 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegration: true, // TODO contextIsolation
-      contextIsolation: false,
     },
   });
-  const feed = getVideoFeed(mainWindow);
+  
+  mainWindow.webContents.send("camera:live-feed", getVideoFeed());
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
