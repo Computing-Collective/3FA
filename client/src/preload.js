@@ -9,4 +9,6 @@ contextBridge.exposeInMainWorld("api", {
   startCamera: (arg) => ipcRenderer.send("startCamera", arg),
   // get video feed from camera
   getVideoFeed: (callback) => ipcRenderer.on("getVideoFeed", callback),
+  getAPIEndpoint: (callback) =>
+    ipcRenderer.on("API_ENDPOINT", (event, arg) => callback(arg)),
 });

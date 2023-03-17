@@ -18,8 +18,11 @@ const createWindow = () => {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   });
-  
+
+  // send video feed to renderer on the "camera:live-feed" channel
   mainWindow.webContents.send("camera:live-feed", getVideoFeed());
+  // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
+  mainWindow.webContents.send("API_ENDPOINT", process.env.API_ENDPOINT);
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);

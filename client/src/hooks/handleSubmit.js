@@ -4,6 +4,8 @@ import { login } from "./auth";
 
 // import crypto library
 
+const api_endpoint = window.internal.getAPIEndpoint();
+
 export async function handleSubmit(event, props) {
   event.preventDefault(); // remove form refresh
   // routing
@@ -23,7 +25,6 @@ export async function handleSubmit(event, props) {
   // for sensor
   const pico_id = props.pico_id;
 
-  const api_endpoint = process.env.API_ENDPOINT;
   const url = `${api_endpoint}/api/login/${endpoint}/`;
 
   // send api request with password and return authed; get next loc
