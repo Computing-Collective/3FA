@@ -82,7 +82,9 @@ export function Sensor() {
   );
 }
 
+// component that displays the pictures
 function Pictures(props) {
+  // array of moves that were chosen ['forward', 'back', 'up']
   const sensor = props.sensor;
   let count = 0;
   return (

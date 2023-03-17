@@ -20,8 +20,7 @@ export function Backdoor(props) {
       <button onClick={() => navigate("/vault")}>Vault</button>
       <button
         onClick={() => {
-          setAuth("a");
-          console.log(auth);
+          setAuth(true);
           navigate("/vault");
         }}
       >

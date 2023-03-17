@@ -5,8 +5,16 @@ import { login } from "./auth.js";
 
 export function RequireAuth({ children }) {
   const [auth, setAuth] = React.useContext(authContext);
+
   console.log("requireAuth: " + auth);
-  const authed = login(auth);
+
+  const [authed, setAuthed] = React.useState(false);
+  React.useEffect(() => {
+    async function getAuthedStatus() {
+      setAuthed(await login(auth));
+    }
+    getAuthedStatus();
+  }, [auth]);
 
   console.log("authed: " + authed);
   return authed === true ? (

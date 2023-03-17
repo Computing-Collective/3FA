@@ -21,6 +21,7 @@ import { Camera } from "./pages/camera.jsx";
 export const authContext = React.createContext(null);
 export const sessionContext = React.createContext(null);
 
+// routes used in the app
 const router = createHashRouter(
   createRoutesFromElements(
     <>

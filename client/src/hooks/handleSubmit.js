@@ -25,6 +25,7 @@ export async function handleSubmit(event, props) {
   // for sensor
   const pico_id = props.pico_id;
 
+  // url to go to (defined in Postman)
   const url = `${api_endpoint}/api/login/${endpoint}/`;
 
   // send api request with password and return authed; get next loc
@@ -54,8 +55,10 @@ export async function handleSubmit(event, props) {
   if (response.ok && next === null) {
     setAuth(json.auth_session_id);
     let api_requests = 0;
+
+    // repeated asks admin to navigate to vault. workaround needed
     const interval_id = setInterval(() => {
-      if (api_requests++ > 10) {
+      if (api_requests++ > 5) {
         clearInterval(interval_id);
         navigate("/");
         return;
@@ -78,6 +81,7 @@ export async function handleSubmit(event, props) {
     if next == null
       look into auth_session_id and store, login()
   */
+  // name mangling between admin / client
   switch (next) {
     case "motion_pattern":
       navigate("/sensor");
@@ -86,5 +90,6 @@ export async function handleSubmit(event, props) {
       navigate("/camera");
       return;
   }
+  // generally, want to go to next place directed by admin
   navigate(`/${json.next}`);
 }
