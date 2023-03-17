@@ -17,6 +17,7 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
+      webSecurity: false, // TODO turn off
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   });

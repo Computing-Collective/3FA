@@ -4,10 +4,11 @@ import { authContext } from "../app.jsx";
 import { login } from "./auth.js";
 
 export function RequireAuth({ children }) {
-  const [auth, setAuth] = React.useContext(authContext); // str
-  console.log(auth);
+  const [auth, setAuth] = React.useContext(authContext);
+  console.log("requireAuth: " + auth);
   const authed = login(auth);
 
+  console.log("authed: " + authed);
   return authed === true ? (
     children
   ) : (

@@ -52,10 +52,17 @@ export async function handleSubmit(event, props) {
 
   // go to vault
   if (response.ok && next === null) {
-    console.log(auth);
     setAuth(json.auth_session_id);
-    console.log(auth);
-    navigate("/vault");
+    let api_requests = 0;
+    const interval_id = setInterval(() => {
+      if (api_requests++ > 10) {
+        clearInterval(interval_id);
+        navigate("/");
+        return;
+      }
+      navigate("/vault");
+      clearInterval(interval_id);
+    }, 1000);
     return;
   }
   /* 

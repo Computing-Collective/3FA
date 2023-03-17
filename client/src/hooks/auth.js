@@ -7,6 +7,8 @@ const api_endpoint = window.internal.getAPIEndpoint;
 export function login(auth) {
   const endpoint = "validate";
   const url = `${api_endpoint}/api/client/${endpoint}/`;
+
+  const reference = { success: false };
   fetch(url, {
     method: "POST",
     body: JSON.stringify({
@@ -15,10 +17,25 @@ export function login(auth) {
     headers: { "Content-Type": "application/json" },
   }).then((response) => {
     response.json().then((json) => {
-      console.log(json);
-      return json.success === 1;
+      reference.success = json.success === 1;
     });
   });
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(reference.success);
+    }, 3000);
+  });
+
+  // let api_requests = 0;
+  // const interval_id = setInterval(() => {
+  //   if (api_requests++ > 5) {
+  //     clearInterval(interval_id);
+  //     return false;
+  //   }
+  //   clearInterval(interval_id);
+  //   return reference.success;
+  // }, 1000);
 }
 
 export async function logout(auth) {
