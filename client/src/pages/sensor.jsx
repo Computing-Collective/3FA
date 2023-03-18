@@ -1,7 +1,4 @@
 import * as React from "react";
-import { matchPath, useNavigate } from "react-router-dom";
-import { handleSubmit } from "../hooks/handleSubmit";
-import { authContext, sessionContext } from "../app.jsx";
 import { Backdoor } from "./backdoor.jsx";
 import _, { map } from "underscore";
 import up from "../../public/icons/up.png";
@@ -13,6 +10,7 @@ import right from "../../public/icons/right.png";
 // import flip from "../../public/icons/flip.png";
 import { getUniquePicoID } from "../hooks/auth";
 import { DisplayText } from "../components/DisplayText.jsx";
+import { SubmitButton } from "../components/SubmitButton.jsx";
 
 // TODO do this
 const possMoves = [
@@ -39,20 +37,11 @@ export function Sensor() {
   const [moves, setMoves] = React.useState(
     _.sample(possMoves, 3) // initialize sensor with randomized moves
   );
-  const navigate = useNavigate();
-  const [session, setSession] = React.useContext(sessionContext);
-  const [auth, setAuth] = React.useContext(authContext);
   // generate random pico_id by paging API
   const uid = getUniquePicoID(crypto.randomUUID());
   const [pico_id, setPico_id] = React.useState(uid);
-  // text
+  // text for displaying errors
   const [text, setText] = React.useState("");
-  const submitButton = document.getElementById("submitButton");
-
-  React.useEffect(() => {
-    setText(""); // clear text on submit
-  }, [submitButton]);
-
   // TODO send matt a pico_id
 
   return (
@@ -61,22 +50,11 @@ export function Sensor() {
       <h3>Additionally, add these moves to the end of your sequence: {moves}</h3>
       <Pictures sensor={moves} />
       <DisplayText text={text} />
-      <form
-        onSubmit={(event) => {
-          handleSubmit(event, {
-            endpoint: "motion_pattern/initialize",
-            data: moves,
-            navigate: navigate,
-            session: session,
-            pico_id: pico_id,
-            setText: setText,
-            auth: auth,
-            setAuth: setAuth,
-          });
-        }}
-      >
-        <input id="submitButton" type="submit" value="Start" />
-      </form>
+      <SubmitButton
+        endpoint={"motion_pattern/initialize"}
+        setText={setText}
+        pico_id={pico_id}
+      />
       <Backdoor pico_id={pico_id} />
     </>
   );

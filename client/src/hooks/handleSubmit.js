@@ -7,7 +7,6 @@ import { login } from "./auth";
 const api_endpoint = window.internal.getAPIEndpoint;
 
 export async function handleSubmit(event, props) {
-  event.preventDefault(); // remove form refresh
   // routing
   const navigate = props.navigate;
   // define props
@@ -15,7 +14,6 @@ export async function handleSubmit(event, props) {
   const data = props.data; // 'kelvinwong0519@gmail.com'
   const session = props.session;
   const setSession = props.setSession;
-  const auth = props.auth;
   const setAuth = props.setAuth;
 
   // for displaying error
@@ -47,25 +45,14 @@ export async function handleSubmit(event, props) {
   }
   // retry api request
   if (success === 0 && next === undefined) {
-    setText(json.msg);
+    setText(json.msg); // change text for frontend
     return;
   }
 
   // go to vault
   if (response.ok && next === null) {
+    // auth occurs within component
     setAuth(json.auth_session_id);
-    let api_requests = 0;
-
-    // repeated asks admin to navigate to vault. workaround needed
-    const interval_id = setInterval(() => {
-      if (api_requests++ > 5) {
-        clearInterval(interval_id);
-        navigate("/");
-        return;
-      }
-      navigate("/vault");
-      clearInterval(interval_id);
-    }, 1000);
     return;
   }
   /* 

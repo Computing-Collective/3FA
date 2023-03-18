@@ -8,7 +8,6 @@ export async function login(auth) {
   const endpoint = "validate";
   const url = `${api_endpoint}/api/client/${endpoint}/`;
 
-  const reference = { success: false };
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify({
@@ -22,6 +21,7 @@ export async function login(auth) {
 
 export async function logout(auth) {
   return async () => {
+    // clears the auth
     setAuth(null);
     // TODO send to logout API and redirect user
   };
