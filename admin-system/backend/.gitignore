@@ -1,2 +1,6 @@
 TODO.md
 __pycache__/
+.pytest_cache
+.coverage
+instance/*
+!instance/database.db

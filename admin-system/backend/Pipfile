@@ -9,8 +9,12 @@ flask-bcrypt = "*"
 flask-sqlalchemy = "*"
 python-dotenv = "*"
 sqlalchemy = "*"
+flask-cors = "*"
+pyopenssl = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.11"

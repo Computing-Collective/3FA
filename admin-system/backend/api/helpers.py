@@ -1,42 +1,160 @@
-import json
-from datetime import datetime
 import uuid
+import json
+
+from datetime import datetime, timedelta
+import flask
+from flask import jsonify
 
 from api.app import db
 from api import models
+import constants
 
 
-def validate_id(self, key, identifier):
-    """Validate a user ID. If a matching ID is found, a new one is generated and returned."""
-    if not identifier:
-        raise AssertionError('No ID provided')
+###################################################################################
+#                               Request Validation                                #
+###################################################################################
+def json_validate(request: flask.Request) -> dict:
+    """
+    Validate that a request is JSON
 
-    is_uuid = isinstance(identifier, uuid.UUID)
+    :param request: The request object
+    :return: The request data if the request is JSON
+    :raises AssertionError: The request is not JSON
+    """
+    if request.is_json:
+        return request.get_json()
+    else:
+        raise AssertionError('Request is not JSON.')
 
-    if not is_uuid:
-        raise AssertionError('Provided ID is invalid')
 
-    return identifier
+def input_validate_login(request: flask.Request, param: str, curr_stage: str,
+                         request_type: str = "json",
+                         session_method: str = "session_id"
+                         ) -> tuple[models.User, models.LoginSession, dict] | tuple[flask.Response, int]:
+    """
+    Validate that a request has the correct parameters
+
+    This performs the following checks:
+
+    - The request is of the correct type (JSON or multipart/form-data)
+    - The session ID or pico ID is valid
+    - The session is not expired
+    - The user is in the correct stage of the login sequence
+
+    :param request: The request object
+    :param param: The name of the parameter containing the session ID (if ``session_method`` is not "pico_id")
+    :param curr_stage: The current stage of the login sequence to check against
+    :param request_type: The type of request to validate (JSON or multipart/form-data)
+    :param session_method: The method of session validation ("session_id" or "pico_id")
+    :return: A tuple containing the user, login session, and request data if the request is valid. Otherwise, a tuple
+             containing a response object and status code
+    """
+    if request_type == "multipart/form-data":
+        # Check that the request is multipart/form-data
+        if "multipart/form-data" not in request.content_type:
+            return jsonify(msg="Missing multipart form data in request.", success=0), 400
+        # Load the request data and get the login session
+        request_data: dict = json.loads(request.form.get('request', None))
+    else:
+        # Validate that the request is JSON
+        try:
+            request_data = json_validate(request)
+        except AssertionError as exception_message:
+            return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
+
+    # Validate the session ID
+    if session_method == "pico_id":
+        session: models.LoginSession = get_login_session_from_pico_id(request_data.get('pico_id', None))
+    else:
+        session: models.LoginSession = get_login_session_from_id(uuid.UUID(request_data.get(param, None)))
+
+    if session is None:
+        return jsonify(msg="Invalid {}, please try again.".format(session_method), success=0), 400
+    elif datetime.now() - timedelta(minutes=float(constants.LOGIN_SESSION_EXPIRY_MINUTES)) \
+            > session.date:
+        return jsonify(msg="Session expired, please start a new login session.", next="email", success=0), 401
+
+    # Validate that the user is in the correct stage of the login sequence
+    expected_next = get_next_auth_stage(session)
+    if expected_next is None:
+        return jsonify(msg="Login sequence already completed, please start a new login session.", success=0), 400
+    elif expected_next != curr_stage:
+        return jsonify(msg="Wrong stage of login sequence, please go to specified stage.",
+                       next=expected_next, success=0), 400
+
+    # Validate the user attached to the session
+    user: models.User = get_user_from_id(session.id)
+
+    if user is None:
+        return jsonify(msg="No affiliated user found, please try again.", success=0), 400
+
+    return user, session, request_data
 
 
-def get_user_from_email(email: str) -> models.User:
-    """Get a user from their email (if they exist)"""
+###################################################################################
+#                               Database Fetching                                 #
+###################################################################################
+
+########################################
+#                 Users                #
+########################################
+def get_user_from_email(email: str) -> models.User | None:
+    """Get a user from their email (if they exist)
+
+    :param email: The email of the user to get
+    :return: The user object
+    """
     return db.session.execute(db.select(models.User).filter(models.User.email == email)).scalars().first()
 
 
-def get_user_from_id(user_id: uuid.UUID) -> models.User:
-    """Get a user from their ID (if they exist)"""
+def get_user_from_id(user_id: uuid.UUID) -> models.User | None:
+    """
+    Get a user from their ID (if they exist)
+
+    :param user_id: The ID of the user to get
+    :return: The user object
+    """
     return db.session.execute(db.select(models.User).filter(models.User.id == user_id)).scalars().first()
 
 
-def create_user_from_dict(request_data) -> models.User:
-    """Create a user from a dictionary"""
+def create_user_from_dict(request_data: dict) -> models.User:
+    """
+    Create a user from a dictionary
+
+    Request data should be in the following format::
+
+        {
+            "email": "name@domain.com",
+            "password": "secure_password",
+            "motion_pattern": ["direction", "direction", "direction", ...],
+            "auth_methods": {
+                "password": boolean,
+                "motion_pattern": boolean,
+                "face_recognition": boolean,
+            },
+        }
+
+    Note that the password and motion pattern fields are only required if the corresponding auth method is enabled.
+
+    :param request_data: The dictionary containing the user's data
+    :return: The created user
+    :raises AssertionError: The request data doesn't contain ``auth_methods`` or no auth methods are enabled
+    """
+    # Validate that the request data contains auth methods and that at least one is enabled
+    auth_methods = request_data.get('auth_methods', None)
+    if auth_methods is None:
+        raise AssertionError("No auth methods provided")
+    elif not any(auth_methods.values()):
+        raise AssertionError("At least one auth method must be enabled")
+
     user: models.User = models.User(
         id=uuid.uuid4(),
-        email=request_data.get('email', None).lower())
+        email=str(request_data.get('email', None)).lower())
 
-    user.set_password(request_data.get('password', None))
-    user.set_motion_pattern(str(request_data.get('motion_pattern', None)))
+    if request_data.get('auth_methods', None).get('password', None):
+        user.set_password(request_data.get('password', None))
+    if request_data.get('auth_methods', None).get('motion_pattern', None):
+        user.set_motion_pattern(str(request_data.get('motion_pattern', None)))
 
     create_auth_methods_from_dict(request_data, user)
 
@@ -46,8 +164,25 @@ def create_user_from_dict(request_data) -> models.User:
     return user
 
 
-def create_auth_methods_from_dict(request_data, user: models.User) -> models.UserAuthMethods:
-    """Create a user auth method table entry from a dictionary"""
+########################################
+#             Auth Methods             #
+########################################
+def create_auth_methods_from_dict(request_data: dict, user: models.User) -> models.UserAuthMethods:
+    """
+    Create a user auth methods table entry from a dictionary
+
+    ``request_data`` needs to contain::
+
+        "auth_methods": {
+            "password": boolean,
+            "motion_pattern": boolean,
+            "face_recognition": boolean,
+        }
+
+    :param request_data: The dictionary containing the user's data
+    :param user: The user to create the auth methods for
+    :return: The created auth methods object
+    """
     auth_method: models.UserAuthMethods = models.UserAuthMethods(
         id=uuid.uuid4(),
         user_id=user.id,
@@ -66,6 +201,7 @@ def get_auth_methods_as_dict(user: models.User) -> dict:
     """
     Get a user's auth methods as a dictionary
 
+    :param user: The user to get the auth methods for
     :return: A dictionary with the keys of enabled auth methods and the values set to False
     """
     auth_method: models.UserAuthMethods = db.session.execute(db.select(models.UserAuthMethods).filter(
@@ -83,8 +219,16 @@ def get_auth_methods_as_dict(user: models.User) -> dict:
     return output
 
 
+########################################
+#            Login Session             #
+########################################
 def create_login_session(user: models.User) -> models.LoginSession:
-    """Create a login session for a user"""
+    """
+    Create a login session for a user
+    
+    :param user: The user to create the login session for
+    :return: The created login session
+    """
     session: models.LoginSession = models.LoginSession(
         session_id=uuid.uuid4(),
         id=user.id,
@@ -100,58 +244,110 @@ def create_login_session(user: models.User) -> models.LoginSession:
     return session
 
 
-def get_login_session_from_id(session_id: uuid.UUID) -> models.LoginSession:
-    """Get a login session from its ID (if it exists)"""
-    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.session_id == session_id))\
+def get_login_session_from_id(session_id: uuid.UUID) -> models.LoginSession | None:
+    """
+    Get a login session from its ID (if it exists)
+    
+    :param session_id: The ID of the login session to get
+    :return: The login session object
+    """
+    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.session_id == session_id)) \
         .scalars().first()
 
 
-def get_login_session_from_pico_id(pico_id: str) -> models.LoginSession:
-    """Get a login session from its pico ID (if it exists)"""
-    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id))\
+def get_login_session_from_pico_id(pico_id: str) -> models.LoginSession | None:
+    """
+    Get a login session from its pico ID (if it exists)
+    
+    :param pico_id: The pico ID of the login session to get
+    :return: The login session object
+    """
+    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id)) \
         .scalars().first()
 
 
-def add_pico_to_session(session: models.LoginSession, request_data) -> models.LoginSession:
-    """Add a pico ID and additional motions to a login session"""
+def add_pico_to_session(session: models.LoginSession, request_data: dict) -> models.LoginSession:
+    """
+    Add a pico ID and additional motions to a login session
+    
+    ``request_data`` needs to contain::
+    
+        "pico_id": "uuid",
+        "data": ["direction", "direction", "direction", ...],
+    
+    :param session: The login session to add the pico ID and motions to
+    :param request_data: The request data containing the pico ID and motions
+    :return: The updated login session
+    """
     session.pico_id = request_data.get('pico_id', None)
-    session.motion_added_sequence = json.dumps(request_data.get('motion_added_sequence', None))
+    session.motion_added_sequence = json.dumps(request_data.get('data', None))
 
     db.session.commit()
 
     return session
+
+
+def check_pico_id_unique(pico_id: str) -> bool:
+    """
+    Check if a Pico ID is unique
+
+    :param pico_id: The Pico ID to check
+    :return: True if the Pico ID is unique, False if it is not
+    """
+    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id)) \
+        .scalars().first() is None
 
 
 def clear_pico_from_session(session: models.LoginSession) -> models.LoginSession:
-    """Clear a pico ID from a login session by setting it to a new random UUID"""
-    session.pico_id = str(uuid.uuid4())
+    """
+    Clear a pico ID from a login session by setting it to a new random UUID
+
+    :param session: The login session to clear the pico ID from
+    :return: The updated login session
+    """
+    identifier = uuid.uuid4()
+
+    while models.LoginSession.query.filter(models.LoginSession.pico_id == identifier).first():
+        identifier = uuid.uuid4()
+
+    session.pico_id = str(identifier)
 
     db.session.commit()
 
     return session
 
 
-def split_motion_pattern(session: models.LoginSession, motion_pattern: str) -> list:
+def split_motion_pattern(session: models.LoginSession, motion_pattern: list) -> tuple[list[str], list[str]]:
     """
-    Split a motion pattern string into two lists.
-    One for the motion pattern and one for the additional motions.
+    Split a motion pattern string into two lists. One for the motion pattern and one for the additional motions.
+
+    :param session: The login session to get the additional motions from
+    :param motion_pattern: The motion pattern to split
+    :return: A tuple containing the motion pattern list and the additional motions list
     """
-    pattern_list = list(motion_pattern)
-    if session.motion_added_sequence is not None:
+    pattern_list = motion_pattern
+
+    if session.motion_added_sequence is not None and session.motion_added_sequence != 'null':
         num_additional_motions = len(session.motion_added_sequence.strip('][').replace('"', '').split(', '))
     else:
-        num_additional_motions = 0
+        num_additional_motions = -1
     additional_motions = []
 
     for i in range(num_additional_motions):
         if len(pattern_list) > 0:
             additional_motions.insert(0, pattern_list.pop())
 
-    return [pattern_list, additional_motions]
+    return pattern_list, additional_motions
 
 
 def retry_motion_pattern(session: models.LoginSession, val: bool) -> models.LoginSession:
-    """Set a login session to retry the motion pattern"""
+    """
+    Set a login session to retry the motion pattern
+
+    :param session: The login session to set the retry value for
+    :param val: The value to set the retry value to
+    :return: The updated login session
+    """
     session.motion_pattern_retry = val
 
     db.session.commit()
@@ -160,7 +356,13 @@ def retry_motion_pattern(session: models.LoginSession, val: bool) -> models.Logi
 
 
 def complete_motion_pattern(session: models.LoginSession, val: bool) -> models.LoginSession:
-    """Set a login session to complete the motion pattern"""
+    """
+    Set a login session to complete the motion pattern
+
+    :param session: The login session to set the complete value for
+    :param val: The value to set the complete value to
+    :return: The updated login session
+    """
     session.motion_pattern_completed = val
 
     db.session.commit()
@@ -168,11 +370,34 @@ def complete_motion_pattern(session: models.LoginSession, val: bool) -> models.L
     return session
 
 
+def save_face_recognition_photo(session: models.LoginSession, file) -> models.LoginSession:
+    """
+    Save a successful face recognition photo to a login session
+
+    :param session: The login session to save the photo to
+    :param file: The file to save
+    :return: The updated login session
+    """
+    session.login_photo = file.read()
+
+    db.session.commit()
+
+    return session
+
+
 def progress_to_next_auth_stage(session: models.LoginSession, current_stage: str) -> models.LoginSession:
-    """Progress a login session to the next auth stage"""
+    """
+    Progress a login session to the next auth stage
+
+    :param session: The login session to progress
+    :param current_stage: The current auth stage
+    :return: The updated login session
+    """
     auth_dict = json.loads(session.auth_stage)
+
+    # Set the current stage to True
     for key in auth_dict:
-        if not auth_dict[key] or key == current_stage:
+        if key == current_stage:
             auth_dict[key] = True
             break
 
@@ -183,8 +408,13 @@ def progress_to_next_auth_stage(session: models.LoginSession, current_stage: str
     return session
 
 
-def get_next_auth_stage(session: models.LoginSession) -> str:
-    """Get the next auth stage for a login session"""
+def get_next_auth_stage(session: models.LoginSession) -> str | None:
+    """
+    Get the next auth stage for a login session
+
+    :param session: The login session to get the next auth stage for
+    :return: The next auth stage or None if all auth stages are complete
+    """
     auth_dict = json.loads(session.auth_stage)
 
     for key in auth_dict:
@@ -192,8 +422,16 @@ def get_next_auth_stage(session: models.LoginSession) -> str:
             return key
 
 
+########################################
+#             Auth Session             #
+########################################
 def create_auth_session(user: models.User) -> models.AuthSession:
-    """Create an auth session for a user"""
+    """
+    Create an auth session for a user
+
+    :param user: The user to create the auth session for
+    :return: The auth session object
+    """
     auth_session: models.AuthSession = models.AuthSession(
         session_id=uuid.uuid4(),
         id=user.id,
@@ -206,12 +444,34 @@ def create_auth_session(user: models.User) -> models.AuthSession:
     return auth_session
 
 
-def create_fail_event(session: models.LoginSession,
-                      text: str = None,
-                      exception: Exception = None,
-                      photo=None) -> models.FailedEvent:
-    """Create a fail event for a login session"""
-    fail_event: models.FailedEvent = models.FailedEvent(
+def get_auth_session_from_id(session_id: uuid.UUID) -> models.AuthSession | None:
+    """
+    Get an auth session from its ID (if it exists)
+
+    :param session_id: The ID of the auth session to get
+    :return: The auth session object or None if it does not exist
+    """
+    return db.session.execute(db.select(models.AuthSession).filter(models.AuthSession.session_id == session_id)) \
+        .scalars().first()
+
+
+########################################
+#          Failed Login Event          #
+########################################
+def create_failed_login_event(session: models.LoginSession,
+                              text: str = None,
+                              exception: Exception = None,
+                              photo=None) -> models.FailedLoginEvent:
+    """
+    Create a fail event for a login session
+
+    :param session: The login session to create the fail event for
+    :param text: The description of the fail event
+    :param exception: The exception message of the fail event
+    :param photo: The photo of the fail event (for facial recognition)
+    :return: The failed login event object
+    """
+    fail_event: models.FailedLoginEvent = models.FailedLoginEvent(
         id=uuid.uuid4(),
         session_id=session.session_id,
         date=datetime.now(),
@@ -229,14 +489,18 @@ def create_fail_event(session: models.LoginSession,
     return fail_event
 
 
-def get_failed_events_as_dict(user: models.User, session: models.LoginSession) -> list[dict]:
+def get_failed_login_events_as_dict(user: models.User = None, session: models.LoginSession = None) -> list[dict]:
     """
     Get a list of failed events as a dictionary.
 
     If a user is provided, only get the failed events for that user.
     If a session is provided, only get the failed events for that session.
+
+    :param user: The user to get the failed events for
+    :param session: The session to get the failed events for
+    :return: A list of dictionaries containing the failed events
     """
-    failed_events = get_failed_events(user, session)
+    failed_events = get_failed_login_events(user, session)
 
     output = []
 
@@ -252,19 +516,25 @@ def get_failed_events_as_dict(user: models.User, session: models.LoginSession) -
     return output
 
 
-def get_failed_events(user: models.User, session: models.LoginSession) -> list[models.FailedEvent]:
+def get_failed_login_events(user: models.User = None,
+                            session: models.LoginSession = None) -> list[models.FailedLoginEvent]:
     """
     Get a list of failed events.
 
     If a user is provided, only get the failed events for that user.
     If a session is provided, only get the failed events for that session.
+
+    :param user: The user to get the failed events for
+    :param session: The session to get the failed events for
+    :return: A list of failed events
     """
     if user:
-        return db.session.execute(db.select(models.FailedEvent)
-                                  .filter(models.FailedEvent.session_id == models.LoginSession.session_id
-                                          and models.LoginSession.id == user.id)).scalars().all()
+        return db.session.execute(db.select(models.FailedLoginEvent)
+                                  .join(models.LoginSession)
+                                  .filter(models.FailedLoginEvent.session_id == models.LoginSession.session_id)
+                                  .filter(user.id == models.LoginSession.id)).scalars().all()
     elif session:
-        return db.session.execute(db.select(models.FailedEvent)
-                                  .filter(models.FailedEvent.session_id == session.session_id)).scalars().all()
+        return db.session.execute(db.select(models.FailedLoginEvent)
+                                  .filter(models.FailedLoginEvent.session_id == session.session_id)).scalars().all()
 
-    return db.session.execute(db.select(models.FailedEvent)).scalars().all()
+    return db.session.execute(db.select(models.FailedLoginEvent)).scalars().all()
