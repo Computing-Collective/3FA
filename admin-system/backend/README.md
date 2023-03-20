@@ -23,7 +23,7 @@ pipenv run flask -A api.app.py --debug run -h 192.168.137.1 --cert=adhoc
 
 Run tests with coverage:
 ```shell
-pipenv run pytest --cov=api
+pipenv run pytest --cov=api --cov-branch
 ```
 
 ## Documentation
