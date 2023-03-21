@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import { Backdoor } from "./backdoor.jsx";
 import _, { map } from "underscore";
 import up from "../../public/icons/up.png";
@@ -13,15 +14,7 @@ import { DisplayText } from "../components/DisplayText.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
 // TODO do this
-const possMoves = [
-  "forward",
-  // "backward",
-  // "left",
-  // "right",
-  // "up",
-  // "down",
-  // "flip"
-];
+const possMoves = ["forward", "backward", "left", "right", "up", "down", "flip"];
 
 const picObj = {
   up: up,
@@ -34,14 +27,14 @@ const picObj = {
 };
 
 export function Sensor() {
-  const [moves, setMoves] = React.useState(
-    _.sample(possMoves, 3) // initialize sensor with randomized moves
+  const [moves, setMoves] = useState(
+    _.sample(possMoves, 1) // initialize sensor with randomized moves
   );
   // generate random pico_id by paging API
   const uid = getUniquePicoID(crypto.randomUUID());
-  const [pico_id, setPico_id] = React.useState(uid);
+  const [pico_id, setPico_id] = useState(uid);
   // text for displaying errors
-  const [text, setText] = React.useState("");
+  const [text, setText] = useState("");
   // TODO send matt a pico_id
 
   return (
@@ -52,6 +45,7 @@ export function Sensor() {
       <DisplayText text={text} />
       <SubmitButton
         endpoint={"motion_pattern/initialize"}
+        data={moves}
         setText={setText}
         pico_id={pico_id}
       />
@@ -62,7 +56,6 @@ export function Sensor() {
 
 // component that displays the pictures
 function Pictures(props) {
-  // array of moves that were chosen ['forward', 'back', 'up']
   const sensor = props.sensor;
   let count = 0;
   return (

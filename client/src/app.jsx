@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState, createContext } from "react";
 import * as ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
@@ -18,8 +19,8 @@ import { Sensor } from "./pages/sensor.jsx";
 import { Camera } from "./pages/camera.jsx";
 
 // variables for authentication with admin
-export const authContext = React.createContext(null);
-export const sessionContext = React.createContext(null);
+export const authContext = createContext(null);
+export const sessionContext = createContext(null);
 
 // routes used in the app
 const router = createHashRouter(
@@ -43,8 +44,8 @@ const router = createHashRouter(
 
 const App = () => {
   // the states for the authentication (to modify context later)
-  const [session, setSession] = React.useState(null);
-  const [auth, setAuth] = React.useState(null);
+  const [session, setSession] = useState(null);
+  const [auth, setAuth] = useState(null);
   return (
     <authContext.Provider value={[auth, setAuth]}>
       <sessionContext.Provider value={[session, setSession]}>

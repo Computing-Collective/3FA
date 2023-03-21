@@ -1,5 +1,4 @@
 import * as React from "react";
-import { authContext } from "../app.jsx";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
@@ -19,6 +18,7 @@ export async function login(auth) {
   return json.success === 1;
 }
 
+// TODO - add logout for elio
 // returns true if admin successfully deactivated your admin_key
 export async function logout(auth) {
   setAuth(null);

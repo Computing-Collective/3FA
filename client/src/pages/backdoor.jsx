@@ -23,15 +23,13 @@ export function Backdoor(props) {
         onClick={() => {
           setAuth(true);
           navigate("/vault");
-        }}
-      >
+        }}>
         set auth
       </button>
       <button
         onClick={() => {
           setAuth(null);
-        }}
-      >
+        }}>
         unauth
       </button>
     </>

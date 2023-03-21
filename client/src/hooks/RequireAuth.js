@@ -1,26 +1,33 @@
 import * as React from "react";
+import { useContext, useRef, useState } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
 import { login } from "./auth.js";
 
 // wrapper around routes that require authentication (i.e. /vault)
 export function RequireAuth({ children }) {
-  const [auth, setAuth] = React.useContext(authContext);
+  const [auth, setAuth] = useContext(authContext);
+  // state that checks if the auth is checked (waiting for async function to finish)
+  const [authChecked, setAuthChecked] = useState(false);
 
-  console.log("requireAuth: " + auth);
-
-  const [authed, setAuthed] = React.useState(false);
+  const authed = useRef(false);
 
   // whenever auth modifies, check if the user is authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     async function getAuthedStatus() {
-      setAuthed(await login(auth));
+      authed.current = await login(auth);
+      setAuthChecked(true);
+      console.log(authed.current);
     }
     getAuthedStatus();
-  }, [auth]);
+  }, []);
 
-  console.log("authed: " + authed);
-  return authed === true ? (
+  //
+  if (!authChecked) {
+    return null;
+  }
+
+  return authed.current === true ? (
     children
   ) : (
     <Navigate to="/" replace state={{ path: location.pathname }} />

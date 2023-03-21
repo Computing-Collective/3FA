@@ -1,6 +1,4 @@
 import * as React from "react";
-import { sessionContext, authContext } from "./auth";
-import { login } from "./auth";
 
 // import crypto library
 
@@ -17,7 +15,6 @@ export async function handleSubmit(event, props) {
   const setAuth = props.setAuth;
 
   // for displaying error
-  const text = props.text;
   const setText = props.setText;
 
   // for sensor
