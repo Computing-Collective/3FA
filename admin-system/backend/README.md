@@ -20,6 +20,10 @@ Run the server (development mode):
 ```shell
 pipenv run flask -A api.app.py --debug run -h 192.168.137.1 --cert=adhoc
 ```
+With localhost:
+```shell
+pipenv run flask -A api.app.py --debug run -h 0.0.0.0 --cert=adhoc
+```
 
 Run tests with coverage:
 ```shell
