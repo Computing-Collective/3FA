@@ -1,10 +1,10 @@
 import datetime
-import uuid
-import pytest
-import os
 import io
-
+import os
+import uuid
 from unittest.mock import patch
+
+import pytest
 
 import api.helpers
 import constants
@@ -50,10 +50,10 @@ def test_not_json(test_client, endpoint):
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, password, motion_pattern, auth_methods, expected_result", [
-    ("a@ab.com", "password", ["direction"], [True, True, True], 400),             # Invalid password (no uppercase and number)
-    ("b@bc.ca", "Password1", ["up"], [True, True, False], 200),                   # Valid user
-    ("c@de.cl", "Password1", ["down"], [False, False, True], 200),                # Valid user
-    ("only@motion.com", "Password1", ["up"], [False, True, False], 200),          # Valid user
+    ("a@ab.com", "password", ["direction"], [True, True, True], 400),  # Invalid password (no uppercase and number)
+    ("b@bc.ca", "Password1", ["up"], [True, True, False], 200),  # Valid user
+    ("c@de.cl", "Password1", ["down"], [False, False, True], 200),  # Valid user
+    ("only@motion.com", "Password1", ["up"], [False, True, False], 200),  # Valid user
     ("slaj@slj.lka", "Sakjlkjd3", ["left", "right"], [True, False, False], 200),  # Valid user
 ])
 def test_user_create(test_client, email, password, motion_pattern, auth_methods, expected_result):
@@ -76,7 +76,7 @@ def test_user_create(test_client, email, password, motion_pattern, auth_methods,
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, password, date, expected_result", [
-    (None, "Password1", datetime.datetime.now(), 400),       # No session
+    (None, "Password1", datetime.datetime.now(), 400),  # No session
     ("c@de.cl", "Password1", datetime.datetime.now(), 400),  # Wrong stage
     ("b@bc.ca", "Password1", datetime.datetime.now(), 200),  # Valid user
     ("b@bc.ca", "Password1", datetime.datetime.now() - datetime.timedelta(minutes=6), 401),  # Expired session
@@ -104,10 +104,10 @@ def test_input_validation(test_client, email, password, date, expected_result):
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, expected_result", [
-    ("b@bc.ca", 200),            # Valid user
-    ("c@de.cl", 200),            # Valid user
+    ("b@bc.ca", 200),  # Valid user
+    ("c@de.cl", 200),  # Valid user
     ("notfound@user.com", 401),  # User not found
-    ("invalidemail", 401),       # Invalid email
+    ("invalidemail", 401),  # Invalid email
 ])
 def test_user_login_email(test_client, email, expected_result):
     """
@@ -122,9 +122,9 @@ def test_user_login_email(test_client, email, expected_result):
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, password, expected_result", [
-    ("b@bc.ca", "Password1", 200),       # Valid user
+    ("b@bc.ca", "Password1", 200),  # Valid user
     ("slaj@slj.lka", "Sakjlkjd3", 200),  # Valid user with no next stage
-    ("b@bc.ca", "NotPassword1", 401),    # Wrong password
+    ("b@bc.ca", "NotPassword1", 401),  # Wrong password
 ])
 def test_user_login_password(test_client, email, password, expected_result):
     """
@@ -167,9 +167,9 @@ def test_user_login_motion_pattern_unique(test_client):
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("seed, email, motion_added, pico_result, expected_result", [
-    ("seed1", "only@motion.com", ["down"], "complete", 200),   # Valid user
-    ("seed2", "only@motion.com", ["up"], "retry", 401),        # Wrong sequence
-    ("seed3", "only@motion.com", ["up"], "timeout", 401),      # Timeout
+    ("seed1", "only@motion.com", ["down"], "complete", 200),  # Valid user
+    ("seed2", "only@motion.com", ["up"], "retry", 401),  # Wrong sequence
+    ("seed3", "only@motion.com", ["up"], "timeout", 401),  # Timeout
 ])
 @patch("api.helpers.retry_motion_pattern")
 def test_user_login_motion_pattern(mock_retry, test_client, seed, email, motion_added, pico_result, expected_result):
@@ -203,9 +203,9 @@ def test_user_login_motion_pattern(mock_retry, test_client, seed, email, motion_
 @pytest.mark.post_request
 @pytest.mark.parametrize("seed, email, key, motion_pattern, motion_added, expected_result", [
     ("seed1", "only@motion.com", "data", ["up", "left", "right"], ["left", "right"], 200),  # Valid user
-    ("seed2", "only@motion.com", "data", ["down", "up"], ["up"], 401),                      # Wrong base sequence
-    ("seed3", "only@motion.com", "data", ["up", "down"], ["left"], 401),                    # Wrong added sequence
-    ("seed4", "only@motion.com", "notdata", ["up", "down"], ["down"], 400),                 # Invalid key
+    ("seed2", "only@motion.com", "data", ["down", "up"], ["up"], 401),  # Wrong base sequence
+    ("seed3", "only@motion.com", "data", ["up", "down"], ["left"], 401),  # Wrong added sequence
+    ("seed4", "only@motion.com", "notdata", ["up", "down"], ["down"], 400),  # Invalid key
 ])
 def test_user_login_motion_pattern_pico(test_client, seed, email, key, motion_pattern, motion_added, expected_result):
     """
@@ -230,9 +230,9 @@ def test_user_login_motion_pattern_pico(test_client, seed, email, key, motion_pa
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, image, model_output, expected_result", [
-    ("c@de.cl", "user1.png", True, 200),   # Valid user
+    ("c@de.cl", "user1.png", True, 200),  # Valid user
     ("c@de.cl", "user1.png", False, 401),  # Invalid user
-    ("c@de.cl", "no_photo", False, 400),   # No photo
+    ("c@de.cl", "no_photo", False, 400),  # No photo
 ])
 @patch("api.models.User.check_face_recognition")
 def test_user_login_face(mock_face, test_client, email, image, model_output, expected_result):
@@ -261,9 +261,10 @@ def test_user_login_face(mock_face, test_client, email, image, model_output, exp
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, key, auth_output, date, expected_result", [
     ("slaj@slj.lka", "auth_session_id", "valid", datetime.datetime.now(), 200),  # Valid user
-    ("slaj@slj.lka", "auth_session_id", None, datetime.datetime.now(), 401),     # No session
-    ("slaj@slj.lka", "no_key", "valid", datetime.datetime.now(), 400),           # No key
-    ("slaj@slj.lka", "auth_session_id", "valid", datetime.datetime.now() - datetime.timedelta(days=1), 401),  # Expired session
+    ("slaj@slj.lka", "auth_session_id", None, datetime.datetime.now(), 401),  # No session
+    ("slaj@slj.lka", "no_key", "valid", datetime.datetime.now(), 400),  # No key
+    ("slaj@slj.lka", "auth_session_id", "valid", datetime.datetime.now() - datetime.timedelta(days=1), 401),
+    # Expired session
 ])
 @patch("api.helpers.get_auth_session_from_id")
 def test_auth_verify(mock_auth, test_client, email, key, auth_output, date, expected_result):
@@ -288,8 +289,8 @@ def test_auth_verify(mock_auth, test_client, email, key, auth_output, date, expe
 @pytest.mark.database
 @pytest.mark.get_request
 @pytest.mark.parametrize("email, session_id, expected_result", [
-    (None, None, 200),                 # All events
-    ("only@motion.com", None, 200),    # Valid email
+    (None, None, 200),  # All events
+    ("only@motion.com", None, 200),  # Valid email
     ("noemail@email.com", None, 401),  # Invalid email
     (None, uuid.uuid5(namespace=uuid.uuid4(), name="no_session"), 401),  # Invalid session
 ])

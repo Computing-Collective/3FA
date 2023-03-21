@@ -1,13 +1,13 @@
 import datetime
 import time
 import uuid
-import flask
 
+import flask
 from flask import Response, jsonify, request, Blueprint
 
+import constants
 from api import helpers, models
 from api.app import db
-import constants
 
 api = Blueprint("api", __name__)
 
@@ -331,7 +331,7 @@ def client_validate():
     if not request_data.get('auth_session_id', None):
         return jsonify(msg="Missing auth_session_id in request.", success=0), 400
 
-    auth_session: models.AuthSession\
+    auth_session: models.AuthSession \
         = helpers.get_auth_session_from_id(uuid.UUID(request_data.get('auth_session_id', None)))
 
     if auth_session is None:

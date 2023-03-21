@@ -1,7 +1,7 @@
 import pytest
 
-from api.app import create_app, db
 import api.helpers
+from api.app import create_app, db
 
 
 @pytest.fixture(scope='session', autouse=True)
