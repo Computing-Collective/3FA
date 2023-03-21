@@ -6,14 +6,13 @@ import up from "../../public/icons/up.png";
 import down from "../../public/icons/down.png";
 import left from "../../public/icons/left.png";
 import right from "../../public/icons/right.png";
-// import forward from "../../public/icons/forward.png";
-// import backward from "../../public/icons/backward.png";
-// import flip from "../../public/icons/flip.png";
+import forward from "../../public/icons/forward.png";
+import backward from "../../public/icons/backward.png";
+import flip from "../../public/icons/flip.png";
 import { getUniquePicoID } from "../hooks/auth";
 import { DisplayText } from "../components/DisplayText.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
-// TODO do this
 const possMoves = ["forward", "backward", "left", "right", "up", "down", "flip"];
 
 const picObj = {
@@ -21,14 +20,14 @@ const picObj = {
   down: down,
   left: left,
   right: right,
-  // forward: forward,
-  // backward: backward,
-  // flip: flip,
+  forward: forward,
+  backward: backward,
+  flip: flip,
 };
 
 export function Sensor() {
   const [moves, setMoves] = useState(
-    _.sample(possMoves, 1) // initialize sensor with randomized moves
+    _.sample(possMoves, 3) // initialize sensor with randomized moves
   );
   // generate random pico_id by paging API
   const uid = getUniquePicoID(crypto.randomUUID());
