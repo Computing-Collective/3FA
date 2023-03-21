@@ -1,6 +1,7 @@
-import pytest
-import uuid
 import os
+import uuid
+
+import pytest
 
 import api.helpers
 import api.models
@@ -8,21 +9,25 @@ import api.models
 
 @pytest.mark.database
 @pytest.mark.parametrize("request_data, expected_result", [
-    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True], True),              # Valid
-    (["a@d.co", None, "[\"up\", \"down\"]", False, True, False], True),                            # Valid
-    (["lkjl@lkj.as", "lkjA2fsfsd", None, True, False, False], True),                               # Valid
-    (["lslkwu@x.lw", None, None, False, False, True], True),                                       # Valid
-    (["lxns@lc.ca", None, None, False, False, False], AssertionError),                             # Need at least one auth method
-    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),    # Duplicate user
+    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True], True),  # Valid
+    (["a@d.co", None, "[\"up\", \"down\"]", False, True, False], True),  # Valid
+    (["lkjl@lkj.as", "lkjA2fsfsd", None, True, False, False], True),  # Valid
+    (["lslkwu@x.lw", None, None, False, False, True], True),  # Valid
+    (["lxns@lc.ca", None, None, False, False, False], AssertionError),  # Need at least one auth method
+    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Duplicate user
     (["notarealemail@.co", "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email
-    ([1, "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),                    # Invalid Email (not a string)
-    (["lsdjalksjlksjdflaksjfaalslwoizjnlkdjvoiwenlknwelkjvoijlkajqlwkjlakjvoijwlkjadalkjdwoijvkdjfaslkdfjslkjf@llkjvowlklkjv.clajk",
-      "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),                       # Invalid Email (too long)
-    ([None, "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),                 # Invalid Email (not provided)
-    (["slkdj@ldkjs.cl", "lkjA2", "[\"direction\"]", True, True, True], AssertionError),            # Invalid password (too short)
-    (["eroiwu@oijle.lkj", "adlfkjsld", "[\"up\", \"down\"]", True, True, True], AssertionError),   # Invalid password (no captial or number)
-    (["lenvlksj@lsad.sklj", None, "[\"up\", \"down\"]", True, True, True], AssertionError),        # Invalid password (not provided)
-    (["lenvlksj@lsad.sklj", "lkjA2fsfsd", None, True, True, True], AssertionError),                # Invalid motion pattern (not provided)
+    ([1, "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email (not a string)
+    ([
+         "lsdjalksjlksjdflaksjfaalslwoizjnlkdjvoiwenlknwelkjvoijlkajqlwkjlakjvoijwlkjadalkjdwoijvkdjfaslkdfjslkjf@llkjvowlklkjv.clajk",
+         "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email (too long)
+    ([None, "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email (not provided)
+    (["slkdj@ldkjs.cl", "lkjA2", "[\"direction\"]", True, True, True], AssertionError),  # Invalid password (too short)
+    (["eroiwu@oijle.lkj", "adlfkjsld", "[\"up\", \"down\"]", True, True, True], AssertionError),
+    # Invalid password (no capital or number)
+    (["lenvlksj@lsad.sklj", None, "[\"up\", \"down\"]", True, True, True], AssertionError),
+    # Invalid password (not provided)
+    (["lenvlksj@lsad.sklj", "lkjA2fsfsd", None, True, True, True], AssertionError),
+    # Invalid motion pattern (not provided)
 ])
 def test_user_create_fetch(test_client, request_data, expected_result):
     """
@@ -95,15 +100,15 @@ def test_login_session_create_fetch(test_client, users, user, expected_result):
 @pytest.mark.database
 @pytest.mark.parametrize("user, expected_result", [
     ([0, uuid.uuid5(uuid.uuid4(), "&M8n;24h'=U,%<QS"), ["left", "right", "down"],
-     ["left", "right", "down"]], [api.models.LoginSession, True, [], ["left", "right", "down"]]),
+      ["left", "right", "down"]], [api.models.LoginSession, True, [], ["left", "right", "down"]]),
     ([1, uuid.uuid5(uuid.uuid4(), "9,S<vGs^`k`}D+q"), ["left", "right", "down"],
-     ["right", "down"]], [api.models.LoginSession, True, [], ["right", "down"]]),
+      ["right", "down"]], [api.models.LoginSession, True, [], ["right", "down"]]),
     ([2, uuid.uuid5(uuid.uuid4(), "Xg4$q=gLVf&S{PR["), ["left", "right", "down"],
-     ["left", "right", "down", "flip"]], [api.models.LoginSession, True,
-                                          ["left"], ["right", "down", "flip"]]),
+      ["left", "right", "down", "flip"]], [api.models.LoginSession, True,
+                                           ["left"], ["right", "down", "flip"]]),
     ([3, uuid.uuid5(uuid.uuid4(), "hX=tJ5a@@>Kmf(j`"), ["left", "right", "down"],
-     ["up", "down", "left", "right", "down"]], [api.models.LoginSession, True, ["up", "down"],
-                                                ["left", "right", "down"]]),
+      ["up", "down", "left", "right", "down"]], [api.models.LoginSession, True, ["up", "down"],
+                                                 ["left", "right", "down"]]),
     ([3, uuid.uuid5(uuid.uuid4(), "/2<$w3,LkE%Zm!Wc"), None, ["left", "right", "down"]],
      [api.models.LoginSession, True, ["left", "right", "down"], []]),
 ])

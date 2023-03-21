@@ -1,13 +1,13 @@
-import uuid
 import json
-
+import uuid
 from datetime import datetime, timedelta
+
 import flask
 from flask import jsonify
 
-from api.app import db
-from api import models
 import constants
+from api import models
+from api.app import db
 
 
 ###################################################################################

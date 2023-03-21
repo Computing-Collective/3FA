@@ -1,6 +1,6 @@
 import json
-import uuid
 import re
+import uuid
 
 from flask_bcrypt import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
