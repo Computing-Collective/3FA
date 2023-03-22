@@ -4,21 +4,28 @@
 
 ### Setup
 
-1. Visit the Sqlite [download page](https://www.sqlite.org/download.html) and download the latest version of the sqlite binary for your platform.
+1. Install `pipenv`. See the [documentation](https://pipenv.pypa.io/en/latest/) if you run into any issues with it.
+   ```shell
+   pip install --user pipenv
+   ```
 
 2. Install dependencies:
-   > **Note:**
-   > Expects that you have [pipenv](https://pipenv.pypa.io/en/latest/) installed and Python 3.11
+   > **Note**
+   > Expects that you have Python 3.11
     ```shell
-    pipenv install
+    pipenv sync --dev
     ```
 ### Usage
 
 Run the server (development mode):
-> **Note:**
+> **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
 ```shell
 pipenv run flask -A api.app.py --debug run -h 192.168.137.1 --cert=adhoc
+```
+With `localhost`:
+```shell
+pipenv run flask -A api.app.py --debug run -h 0.0.0.0 --cert=adhoc
 ```
 
 Run tests with coverage:

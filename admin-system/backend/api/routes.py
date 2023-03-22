@@ -1,13 +1,13 @@
 import datetime
 import time
 import uuid
-import flask
 
+import flask
 from flask import Response, jsonify, request, Blueprint
 
+import constants
 from api import helpers, models
 from api.app import db
-import constants
 
 api = Blueprint("api", __name__)
 
@@ -252,8 +252,8 @@ def login_motion_pattern_validate():
     split_pattern = helpers.split_motion_pattern(session, request_data.get('data', None))
 
     # Check if the base pattern and added sequence are correct
-    if not user.check_motion_pattern(str(split_pattern[0])) \
-            or not session.motion_added_sequence.strip('][').replace('"', '').split(', ') == split_pattern[1]:
+    if (not user.check_motion_pattern(str(split_pattern[0]))
+            or not session.motion_added_sequence.strip('][').replace('"', '').split(', ') == split_pattern[1]):
         helpers.retry_motion_pattern(session, True)
         if not user.check_motion_pattern(str(split_pattern[0])):
             helpers.create_failed_login_event(session, text="Incorrect base motion pattern entered.")
@@ -331,13 +331,13 @@ def client_validate():
     if not request_data.get('auth_session_id', None):
         return jsonify(msg="Missing auth_session_id in request.", success=0), 400
 
-    auth_session: models.AuthSession\
-        = helpers.get_auth_session_from_id(uuid.UUID(request_data.get('auth_session_id', None)))
+    auth_session: models.AuthSession = helpers.get_auth_session_from_id(
+        uuid.UUID(request_data.get('auth_session_id', None)))
 
     if auth_session is None:
         return jsonify(msg="Invalid auth_session_id, please try again.", success=0), 401
-    elif datetime.datetime.now() - datetime.timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES)) \
-            > auth_session.date:
+    elif (datetime.datetime.now() - datetime.timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES))
+          > auth_session.date):
         return jsonify(msg="Session expired, please start a new login session.", next="email", success=0), 401
 
     return jsonify(msg="Auth session ID is valid.", success=1), 200

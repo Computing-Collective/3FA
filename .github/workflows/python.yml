@@ -27,6 +27,6 @@ jobs:
     - name: Install pipenv
       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
     - name: Install dependencies
-      run: pipenv install --dev
+      run: pipenv sync --dev
     - name: Test with pytest
       run: pipenv run pytest --cov=api --cov-branch

@@ -1,13 +1,13 @@
-import uuid
 import json
-
+import uuid
 from datetime import datetime, timedelta
+
 import flask
 from flask import jsonify
 
-from api.app import db
-from api import models
 import constants
+from api import models
+from api.app import db
 
 
 ###################################################################################
@@ -70,8 +70,8 @@ def input_validate_login(request: flask.Request, param: str, curr_stage: str,
 
     if session is None:
         return jsonify(msg="Invalid {}, please try again.".format(session_method), success=0), 400
-    elif datetime.now() - timedelta(minutes=float(constants.LOGIN_SESSION_EXPIRY_MINUTES)) \
-            > session.date:
+    elif (datetime.now() - timedelta(minutes=float(constants.LOGIN_SESSION_EXPIRY_MINUTES))
+          > session.date):
         return jsonify(msg="Session expired, please start a new login session.", next="email", success=0), 401
 
     # Validate that the user is in the correct stage of the login sequence
@@ -251,8 +251,8 @@ def get_login_session_from_id(session_id: uuid.UUID) -> models.LoginSession | No
     :param session_id: The ID of the login session to get
     :return: The login session object
     """
-    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.session_id == session_id)) \
-        .scalars().first()
+    return (db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.session_id == session_id))
+            .scalars().first())
 
 
 def get_login_session_from_pico_id(pico_id: str) -> models.LoginSession | None:
@@ -262,8 +262,8 @@ def get_login_session_from_pico_id(pico_id: str) -> models.LoginSession | None:
     :param pico_id: The pico ID of the login session to get
     :return: The login session object
     """
-    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id)) \
-        .scalars().first()
+    return (db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id))
+            .scalars().first())
 
 
 def add_pico_to_session(session: models.LoginSession, request_data: dict) -> models.LoginSession:
@@ -294,8 +294,8 @@ def check_pico_id_unique(pico_id: str) -> bool:
     :param pico_id: The Pico ID to check
     :return: True if the Pico ID is unique, False if it is not
     """
-    return db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id)) \
-        .scalars().first() is None
+    return (db.session.execute(db.select(models.LoginSession).filter(models.LoginSession.pico_id == pico_id))
+            .scalars().first() is None)
 
 
 def clear_pico_from_session(session: models.LoginSession) -> models.LoginSession:
@@ -451,8 +451,8 @@ def get_auth_session_from_id(session_id: uuid.UUID) -> models.AuthSession | None
     :param session_id: The ID of the auth session to get
     :return: The auth session object or None if it does not exist
     """
-    return db.session.execute(db.select(models.AuthSession).filter(models.AuthSession.session_id == session_id)) \
-        .scalars().first()
+    return (db.session.execute(db.select(models.AuthSession).filter(models.AuthSession.session_id == session_id))
+            .scalars().first())
 
 
 ########################################
