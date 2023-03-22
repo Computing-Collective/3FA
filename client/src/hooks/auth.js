@@ -1,31 +1,39 @@
 import * as React from "react";
-import { authContext } from "../app.jsx";
 
-const api_endpoint = window.internal.getAPIEndpoint();
+const api_endpoint = window.internal.getAPIEndpoint;
 
 // returns true if authenticated via admin
-export function login(auth) {
+export async function login(auth) {
   const endpoint = "validate";
   const url = `${api_endpoint}/api/client/${endpoint}/`;
-  fetch(url, {
+
+  const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify({
       auth_session_id: auth,
     }),
     headers: { "Content-Type": "application/json" },
-  }).then((response) => {
-    response.json().then((json) => {
-      console.log(json);
-      return json.success === 1;
-    });
   });
+  const json = await response.json();
+  return json.success === 1;
 }
 
+// TODO - add logout for elio
+// returns true if admin successfully deactivated your admin_key
 export async function logout(auth) {
-  return async () => {
-    setAuth(null);
-    // TODO send to logout API and redirect user
-  };
+  setAuth(null);
+  const endpoint = "logout";
+  const url = `${api_endpoint}/api/client/${endpoint}/`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      auth_session_id: auth,
+    }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const json = await response.json();
+  return json.success === 1;
 }
 
 // pages api and returns a unique pico_id in ref to the admin

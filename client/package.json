@@ -11,11 +11,6 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
-  "eslintConfig": {
-    "extends": [
-      "plugin: react-hooks/recommended"
-    ]
-  },
   "keywords": [],
   "author": {
     "name": "im-calvin",

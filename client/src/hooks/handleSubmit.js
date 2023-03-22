@@ -1,13 +1,10 @@
 import * as React from "react";
-import { sessionContext, authContext } from "./auth";
-import { login } from "./auth";
 
 // import crypto library
 
-const api_endpoint = window.internal.getAPIEndpoint();
+const api_endpoint = window.internal.getAPIEndpoint;
 
 export async function handleSubmit(event, props) {
-  event.preventDefault(); // remove form refresh
   // routing
   const navigate = props.navigate;
   // define props
@@ -15,16 +12,15 @@ export async function handleSubmit(event, props) {
   const data = props.data; // 'kelvinwong0519@gmail.com'
   const session = props.session;
   const setSession = props.setSession;
-  const auth = props.auth;
   const setAuth = props.setAuth;
 
   // for displaying error
-  const text = props.text;
   const setText = props.setText;
 
   // for sensor
   const pico_id = props.pico_id;
 
+  // url to go to (defined in Postman)
   const url = `${api_endpoint}/api/login/${endpoint}/`;
 
   // send api request with password and return authed; get next loc
@@ -46,16 +42,14 @@ export async function handleSubmit(event, props) {
   }
   // retry api request
   if (success === 0 && next === undefined) {
-    setText(json.msg);
+    setText(json.msg); // change text for frontend
     return;
   }
 
   // go to vault
   if (response.ok && next === null) {
-    console.log(auth);
+    // auth occurs within component
     setAuth(json.auth_session_id);
-    console.log(auth);
-    navigate("/vault");
     return;
   }
   /* 
@@ -71,6 +65,7 @@ export async function handleSubmit(event, props) {
     if next == null
       look into auth_session_id and store, login()
   */
+  // name mangling between admin / client
   switch (next) {
     case "motion_pattern":
       navigate("/sensor");
@@ -79,5 +74,6 @@ export async function handleSubmit(event, props) {
       navigate("/camera");
       return;
   }
+  // generally, want to go to next place directed by admin
   navigate(`/${json.next}`);
 }

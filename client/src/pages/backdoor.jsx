@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { authContext, sessionContext } from "../app.jsx";
 import { login } from "../hooks/auth.js";
 
+// component used for backdoor routing :D
 export function Backdoor(props) {
   const navigate = useNavigate();
   const [session, setSession] = React.useContext(sessionContext);
@@ -20,12 +21,16 @@ export function Backdoor(props) {
       <button onClick={() => navigate("/vault")}>Vault</button>
       <button
         onClick={() => {
-          setAuth("a");
-          console.log(auth);
+          setAuth(true);
           navigate("/vault");
-        }}
-      >
+        }}>
         set auth
+      </button>
+      <button
+        onClick={() => {
+          setAuth(null);
+        }}>
+        unauth
       </button>
     </>
   );
