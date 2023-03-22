@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleSubmit } from "../hooks/handleSubmit";
+import { handleSubmit } from "../functions/handleSubmit";
 import { authContext, sessionContext } from "../app.jsx";
 import { Backdoor } from "./backdoor.jsx";
 import { DisplayText } from "../components/DisplayText.jsx";

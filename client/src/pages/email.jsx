@@ -1,5 +1,5 @@
 import * as React from "react";
-import { handleSubmit } from "../hooks/handleSubmit";
+import { handleSubmit } from "../functions/handleSubmit";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Backdoor } from "./backdoor.jsx";
 import { sessionContext, authContext } from "../app.jsx";

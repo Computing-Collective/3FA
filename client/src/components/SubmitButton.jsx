@@ -2,7 +2,7 @@ import * as React from "react";
 import { useContext, useEffect, useState, useRef } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
-import { handleSubmit } from "../hooks/handleSubmit.js";
+import { handleSubmit } from "../functions/handleSubmit.js";
 
 // props.type is 'password' | 'email' | none (for input field)
 // props.endpoint is 'email' | 'password' | 'camera' | 'motion_pattern/initialize' (for API endpoint)
@@ -39,7 +39,7 @@ export function SubmitButton(props) {
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          handleSubmit(event, {
+          handleSubmit({
             endpoint: props.endpoint,
             // if we want an input field, use the data from the input field else we take props.data (camera / motion)
             data: inputField ? data : props.data, // main data payload to api

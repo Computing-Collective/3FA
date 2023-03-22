@@ -1,7 +1,5 @@
 import * as React from "react";
 
-// import crypto library
-
 const api_endpoint = window.internal.getAPIEndpoint;
 
 export async function handleSubmit(event, props) {
@@ -9,7 +7,12 @@ export async function handleSubmit(event, props) {
   const navigate = props.navigate;
   // define props
   const endpoint = props.endpoint; // 'email'
-  const data = props.data; // 'kelvinwong0519@gmail.com'
+  // const data = props.data; // 'email@gmail.com'
+  let data;
+  endpoint === "motion_pattern/initialize"
+    ? (data = props.data.map((item) => item.upper())) // capitalize every elem in array // TODO check
+    : (data = props.data);
+  console.log(await data.arrayBuffer());
   const session = props.session;
   const setSession = props.setSession;
   const setAuth = props.setAuth;
@@ -34,12 +37,17 @@ export async function handleSubmit(event, props) {
     headers: { "Content-Type": "application/json" },
   });
   const json = await response.json();
-  const next = json.next;
-  const success = json.success;
   // set session id
   if (endpoint === "email") {
     setSession(json.session_id);
   }
+
+  handleNextNavigation(json, navigate);
+}
+
+export function handleNextNavigation(json, navigate) {
+  const next = json.next;
+  const success = json.success;
   // retry api request
   if (success === 0 && next === undefined) {
     setText(json.msg); // change text for frontend
@@ -52,19 +60,6 @@ export async function handleSubmit(event, props) {
     setAuth(json.auth_session_id);
     return;
   }
-  /* 
-  if (success = 0):
-    wrong auth stage:
-    login session timeout: 
-      go to 'next' (pass me email)
-  incorrect validation:
-    if next == dne (undef), retry
-  if (response.ok)
-    if next != null
-      correct: go to next
-    if next == null
-      look into auth_session_id and store, login()
-  */
   // name mangling between admin / client
   switch (next) {
     case "motion_pattern":
