@@ -133,11 +133,6 @@ def sequence_correct_led():
     # Reset the correct LED after blinking
     correct_led.value = False
 
-def sign(num):
-    if num == 0: 
-        return 1 
-    return num / abs(num)
-
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # IMU DATA PARSING -> SEQUENCE
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -176,7 +171,6 @@ def check_sequence(sequence):
                     if flip == True:
                         valid_moves_indexed.append(("FLIP", i))
                         buffer = buffer + buffer_offset
-                        started_up = False
 
     # X: check move forward and ignore move backward
     # To deal with inverse acceleration feedback, add a buffer whenever the IMU is moved backward
@@ -201,7 +195,6 @@ def check_sequence(sequence):
             elif x > sensitivity :
                 valid_moves_indexed.append(("RIGHT", i))
                 buffer = buffer + buffer_offset
-                started_up = False
 
     # Y
     for i, y in enumerate(sequence["AY"]):
@@ -227,15 +220,12 @@ def check_sequence(sequence):
         elif buffer > 0:
             buffer = buffer - 1
 
-        # Note: z axis offsetting requires 2 cases
-        # if z > 0 then SUBTRACT 9.8m/s^s
-        # if z < 0 then ADD 9.8m/s^s
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if z - sign(z) * z_offset < (-1 * sensitivity) / 2:
+            if z - z_offset < (-1 * sensitivity) / 2:
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
-            elif z - sign(z) * z_offset > sensitivity:
+            elif z - z_offset > sensitivity:
                 valid_moves_indexed.append(("UP", i))
                 buffer = buffer + buffer_offset
 
@@ -281,10 +271,10 @@ def check_sequence(sequence):
 
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if (z - sign(z) * z_offset) > (sensitivity / 2):
+            if (z - z_offset) > (sensitivity / 2):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
-            elif (z - sign(z) * z_offset) < (-1 * sensitivity):
+            elif (z - z_offset) < (-1 * sensitivity):
                 valid_moves_indexed.append(("DOWN", i))  
                 buffer = buffer + buffer_offset
 
@@ -296,7 +286,7 @@ def check_sequence(sequence):
     # Sort based on time -> filter moves caused by feedback -> put in list of moves
 
     # Sort the valid moves based on index (which is time in 0.1s) ----------------------------------------------------------
-    print("\n\nunsorted:", valid_moves_indexed, "\n\n")
+    print("unsorted:", valid_moves_indexed, "\n\n")
     valid_moves_indexed.sort(key = lambda x: x[1])
     print("sorted", valid_moves_indexed, "\n\n")
 
@@ -316,21 +306,27 @@ def check_sequence(sequence):
         if pair[0] == "FLIP":
             flip_occurence_indices.append(pair[1])
 
+    # print("flip indices", flip_occurence_indices)
+
     # Remove moves from list based on filter
-    moves_to_remove = []
+    # Can't have concurrent list modification, so store the indices to remove
+    remove_elements = []
     for index in flip_occurence_indices:
         for move_index, pair in enumerate(valid_moves_indexed):
             # first condition checks if move is within tolerance * 0.1ms of the flip
-            if abs(pair[1] - index) < tolerance  and pair[0] != "FLIP":
+            if abs(pair[1] - index) < tolerance and pair[0] != "FLIP":
                 # print("try to remove", pair, "at move index", move_index)
-                # print("removing", pair)
-                moves_to_remove.append(move_index)
+                print("removing", pair)
+                remove_elements.append(move_index)
 
-    moves_to_remove.sort(reverse=True)  # Remove elements from end of list to prevent index errors
-    for index in moves_to_remove:
-        print("\tremoving", valid_moves_indexed[index])
-        del valid_moves_indexed[index]
-
+    # Copy over valid moves without the ones to remove
+    print(remove_elements)
+    temp = []
+    for i in range(len(valid_moves_indexed)):
+        if i not in remove_elements:
+            temp.append(valid_moves_indexed[i])
+    valid_moves_indexed = temp
+        
     print("flip filtered:", valid_moves_indexed, "\n\n")
 
 
@@ -344,20 +340,13 @@ def check_sequence(sequence):
     # print("flip indices", flip_occurence_indices)
 
     # Remove moves from list based on filter
-    moves_to_remove = []
     for index in up_down_occurence_indices:
         for move_index, pair in enumerate(valid_moves_indexed):
             # first condition checks if move is within tolerance * 0.1ms of the flip
             if abs(pair[1] - index) < tolerance  and pair[0] != "UP" and pair[0] != "DOWN":
                 # print("try to remove", pair, "at move index", move_index)
-                # print("removing", pair)
-                moves_to_remove.append(move_index)
-
-
-    moves_to_remove.sort(reverse=True)  # Remove elements from end of list to prevent index errors
-    for index in moves_to_remove:
-        print("\tremoving", valid_moves_indexed[index])
-        del valid_moves_indexed[index]
+                print("removing", pair)
+                del valid_moves_indexed[move_index]
 
     print("up/down filtered:", valid_moves_indexed, "\n\n")
 
@@ -371,19 +360,13 @@ def check_sequence(sequence):
     # print("flip indices", flip_occurence_indices)
 
     # Remove moves from list based on filter
-    moves_to_remove = []
     for index in left_right_occurence_indices:
         for move_index, pair in enumerate(valid_moves_indexed):
             # first condition checks if move is within tolerance * 0.1ms of the flip
             if abs(pair[1] - index) < tolerance  and pair[0] != "LEFT" and pair[0] != "RIGHT":
                 # print("try to remove", pair, "at move index", move_index)
                 print("removing", pair)
-                moves_to_remove.append(move_index)
-
-    moves_to_remove.sort(reverse=True)  # Remove elements from end of list to prevent index errors
-    for index in moves_to_remove:
-        print("\tremoving", valid_moves_indexed[index])
-        del valid_moves_indexed[index]
+                del valid_moves_indexed[move_index]
 
     print("left/right filtered:", valid_moves_indexed, "\n\n")
 
@@ -525,12 +508,7 @@ while True:
         sequence["GY"].append(round(sensor.gyro[1], 1))
         sequence["GZ"].append(round(sensor.gyro[2], 1))
         
-        if sensor.acceleration[2] > 0:
-            print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
-        else:
-            print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] + z_offset, 1), sensitivity, -1 * sensitivity))
-
-            
+        print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
         # print((sensor.acceleration[1], 16, -16))
 
     time.sleep(0.1)
