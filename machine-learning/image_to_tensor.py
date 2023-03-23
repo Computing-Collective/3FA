@@ -1,11 +1,32 @@
 import os
 
 import torch
+from PIL import Image
 from torch import nn
 from torchvision import transforms
 from torchvision.transforms import ToTensor, Compose, Resize
 
-from PIL import Image
+"""
+ _______  _______  _______          _________ _        _______
+(       )(  ___  )(  ____ \|\     /|\__   __/( (    /|(  ____ \
+| () () || (   ) || (    \/| )   ( |   ) (   |  \  ( || (    \/
+| || || || (___) || |      | (___) |   | |   |   \ | || (__
+| |(_)| ||  ___  || |      |  ___  |   | |   | (\ \) ||  __)
+| |   | || (   ) || |      | (   ) |   | |   | | \   || (
+| )   ( || )   ( || (____/\| )   ( |___) (___| )  \  || (____/\
+|/     \||/     \|(_______/|/     \|\_______/|/    )_)(_______/
+
+ _        _______  _______  _______  _       _________ _        _______ 
+( \      (  ____ \(  ___  )(  ____ )( (    /|\__   __/( (    /|(  ____ \
+| (      | (    \/| (   ) || (    )||  \  ( |   ) (   |  \  ( || (    \/
+| |      | (__    | (___) || (____)||   \ | |   | |   |   \ | || |      
+| |      |  __)   |  ___  ||     __)| (\ \) |   | |   | (\ \) || | ____ 
+| |      | (      | (   ) || (\ (   | | \   |   | |   | | \   || | \_  )
+| (____/\| (____/\| )   ( || ) \ \__| )  \  |___) (___| )  \  || (___) |
+(_______/(_______/|/     \||/   \__/|/    )_)\_______/|/    )_)(_______)
+"""
+
+### ----------- SKIP TO LINE 100 -------------- ###
 
 class EmbeddingNetwork(nn.Module):
     def __init__(self):
@@ -94,6 +115,12 @@ class SiameseNetwork(nn.Module):
         
         return x
 
+#####################################################################
+#########                                                   #########
+#####                    RELEVANT PARTS BELOW                   #####
+#########                                                   #########
+#####################################################################
+
 """ --------------- MODEL LOADING --------------- """
 
 model = SiameseNetwork()
@@ -102,31 +129,34 @@ model.load_state_dict(torch.load("machine-learning/model.pth", map_location=torc
 model.eval()
 
 """ --------------- IMAGE LOADING --------------- """
-pos_image = Image.open(os.path.join("machine-learning", "data", "positive", "0adb6779-c43b-11ed-ba19-40ec9985096b.jpg"))
-neg_image = Image.open(os.path.join("machine-learning", "data", "negative", "Aaron_Eckhart_0001.jpg"))
+# example paths, replace with your own
+eval_image = Image.open(os.path.join("machine-learning", "data", "positive", "0adb6779-c43b-11ed-ba19-40ec9985096b.jpg"))
 anchor_image = Image.open(os.path.join("machine-learning", "data", "anchor", "0a2aae88-c43b-11ed-96ee-40ec9985096b.jpg"))
 
+# resize img to 105x105 and convert to tensor
 img_transforms = Compose([
     ToTensor(),
     Resize((105, 105)),
 ])
 
-pos_tensor = img_transforms(pos_image)
-neg_tensor = img_transforms(neg_image)
+eval_image = img_transforms(eval_image)
 anchor_tensor = img_transforms(anchor_image)
 
 # add a dummy dimension to the tensors
-pos_tensor = pos_tensor.unsqueeze(0)
-neg_tensor = neg_tensor.unsqueeze(0)
+eval_tensor = eval_image.unsqueeze(0)
 anchor_tensor = anchor_tensor.unsqueeze(0)
 
 """ --------------- IMAGE EVALUATION --------------- """
+
+# Map for model output -> result
+# so output = 0 means negative, meaning the images are not a match
 classes = [
     'negative',
     'positive'
 ]
 
+# get prediction from model
 with torch.no_grad():
-    pred = model(anchor_tensor, neg_tensor)
+    pred = model(anchor_tensor, eval_tensor)
     predicted = classes[pred[0].argmax(0)]
     print(f'Predicted: "{predicted}"')
