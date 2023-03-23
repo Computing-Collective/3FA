@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
 import { login } from "./auth.js";
@@ -17,7 +17,6 @@ export function RequireAuth({ children }) {
     async function getAuthedStatus() {
       authed.current = await login(auth);
       setAuthChecked(true);
-      console.log(authed.current);
     }
     getAuthedStatus();
   }, []);

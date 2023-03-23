@@ -11,7 +11,7 @@ export function Vault() {
   return (
     <>
       <h1>Vault</h1>
-      <button onClick={logout}>Logout</button>
+      <button onClick={() => logout(auth, setAuth, navigate)}>Logout</button>
       <Backdoor />
     </>
   );

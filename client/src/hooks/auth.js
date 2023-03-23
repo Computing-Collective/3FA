@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
@@ -18,9 +19,13 @@ export async function login(auth) {
   return json.success === 1;
 }
 
-// TODO - add logout for elio
-// returns true if admin successfully deactivated your admin_key
-export async function logout(auth) {
+// TODO deactivate '/vault' endpoint (redirect if refresh on page)
+/**
+ * deactivates your auth key and navigates you to '/' (home)
+ * @param {} auth auth key to deactivate
+ * @param {*} setAuth function required to rm
+ */
+export async function logout(auth, setAuth, navigate) {
   setAuth(null);
   const endpoint = "logout";
   const url = `${api_endpoint}/api/client/${endpoint}/`;
@@ -33,7 +38,10 @@ export async function logout(auth) {
     headers: { "Content-Type": "application/json" },
   });
   const json = await response.json();
-  return json.success === 1;
+  console.log(json);
+  if (json.success === 1) {
+    navigate("/");
+  }
 }
 
 // pages api and returns a unique pico_id in ref to the admin

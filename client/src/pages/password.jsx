@@ -4,22 +4,28 @@ import { useNavigate } from "react-router-dom";
 import { handleSubmit } from "../functions/handleSubmit";
 import { authContext, sessionContext } from "../app.jsx";
 import { Backdoor } from "./backdoor.jsx";
-import { DisplayText } from "../components/DisplayText.jsx";
+import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
 export function Password() {
   const [text, setText] = useState("");
+  const [error, setError] = useState("");
   const submitButton = document.getElementById("submitButton");
 
   useEffect(() => {
-    setText(""); // clear text on submit
+    setText(""); // clear text on input on submit
   }, [submitButton]);
 
   return (
     <>
       <h1>Enter your password</h1>
-      <DisplayText text={text} />
-      <SubmitButton endpoint={"password"} setText={setText} type={"password"} />
+      {error !== "" && <DisplayError text={error} />}
+      <SubmitButton
+        endpoint={"password"}
+        setText={setText}
+        type={"password"}
+        setError={setError}
+      />
       <Backdoor />
     </>
   );

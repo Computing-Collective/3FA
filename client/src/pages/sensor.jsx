@@ -10,7 +10,7 @@ import forward from "../../public/icons/forward.png";
 import backward from "../../public/icons/backward.png";
 import flip from "../../public/icons/flip.png";
 import { getUniquePicoID } from "../hooks/auth";
-import { DisplayText } from "../components/DisplayText.jsx";
+import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
 const possMoves = ["forward", "backward", "left", "right", "up", "down", "flip"];
@@ -30,22 +30,21 @@ export function Sensor() {
     _.sample(possMoves, 3) // initialize sensor with randomized moves
   );
   // generate random pico_id by paging API
-  const uid = getUniquePicoID(crypto.randomUUID());
-  const [pico_id, setPico_id] = useState(uid);
+  const [pico_id, setPico_id] = useState(getUniquePicoID(crypto.randomUUID()));
   // text for displaying errors
-  const [text, setText] = useState("");
+  const [error, setError] = useState("");
   // TODO send matt a pico_id
 
   return (
     <>
       <h1>Move your sensor!</h1>
       <h3>Additionally, add these moves to the end of your sequence: {moves}</h3>
-      <Pictures sensor={moves} />
-      <DisplayText text={text} />
+      {/* <Pictures sensor={moves} /> */}
+      {error !== "" && <DisplayError text={error} refreshButton={true} />}
       <SubmitButton
         endpoint={"motion_pattern/initialize"}
         data={moves}
-        setText={setText}
+        setError={setError}
         pico_id={pico_id}
       />
       <Backdoor pico_id={pico_id} />

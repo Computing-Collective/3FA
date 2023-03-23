@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext, sessionContext } from "../app.jsx";
 import { login } from "../hooks/auth.js";
@@ -6,8 +6,8 @@ import { login } from "../hooks/auth.js";
 // component used for backdoor routing :D
 export function Backdoor(props) {
   const navigate = useNavigate();
-  const [session, setSession] = React.useContext(sessionContext);
-  const [auth, setAuth] = React.useContext(authContext);
+  const [session, setSession] = useContext(sessionContext);
+  const [auth, setAuth] = useContext(authContext);
 
   return (
     <>

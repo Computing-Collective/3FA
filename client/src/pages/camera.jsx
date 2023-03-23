@@ -1,43 +1,69 @@
 import React, { useContext, useState } from "react";
 import styled from "styled-components";
-import { handleSubmit } from "../functions/handleSubmit";
+import { handleNextNavigation, handleSubmit } from "../functions/handleSubmit";
 import { useLocation, useNavigate, useNavigation } from "react-router-dom";
 import { Backdoor } from "./backdoor.jsx";
 import { sessionContext, authContext } from "../app.jsx";
-import { DisplayText } from "../components/DisplayText.jsx";
+import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 import { Video } from "../components/Video.jsx";
+import { Button } from "@mui/material";
+import { useNavToVault } from "../hooks/useNavToVault";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
 export function Camera() {
-  const [text, setText] = useState("");
+  const [error, setError] = useState(""); // error msg
   const [data, setData] = useState(""); // camera input (base64?)
+  const [auth, setAuth] = useContext(authContext);
   const [session, setSession] = useContext(sessionContext);
   const navigation = useNavigation();
   const navigate = useNavigate();
 
+  const { initNav } = useNavToVault();
+
+  useEffect(() => {
+    initNav();
+  }, [auth]);
+
   return (
     <>
       <h1>Smile for the camera</h1>
-      <DisplayText text={text} />
+      {error !== "" && <DisplayError text={error} />}
       <Video
-        setText={setText}
+        setText={setError}
         onCapture={async (blob) => {
           setData(blob);
         }}
         onClear={(event) => {
           event.preventDefault();
-          handleCameraSubmit(blob, session);
+          setData(null);
         }}
       />
-      <SubmitButton data={data} endpoint={"camera"} setText={setText} />
+      {/* // TODO fix the console errors */}
+      <CameraSubmitButton
+        data={data}
+        endpoint={"camera"}
+        setError={setError}
+        onClick={(event) => {
+          event.preventDefault();
+          handleCameraSubmit(blob, session, navigate, setError, setAuth);
+        }}
+      />
       <Backdoor />
     </>
   );
 }
 
-async function handleCameraSubmit(blob, session, navigate) {
+/**
+ * handler for submit button on camera page, sends API request to admin
+ * @param {*} blob the image to send to backend
+ * @param {*} session the session ID
+ * @param {*} navigate used for navigating to other routes
+ * @param {*} setText used for displaying error messages
+ * @param {*} setAuth sets Auth if on last stage
+ */
+async function handleCameraSubmit(blob, session, navigate, setText, setAuth) {
   // the endpoint for face
   const endpoint = "face_recognition";
   // form because need to include img
@@ -55,5 +81,9 @@ async function handleCameraSubmit(blob, session, navigate) {
     body: formData,
   });
   const json = await response.json();
-  navigate(`/${json.next}`);
+  handleNextNavigation(json, navigate, setText, setAuth, response);
+}
+
+function CameraSubmitButton(props) {
+  return <Button onClick={props.onClick}>Submit</Button>;
 }

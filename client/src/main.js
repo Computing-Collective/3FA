@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const { desktopCapturer } = require("electron");
-const { startCamera, getVideoFeed } = require("./functions/camera.js");
 require("dotenv").config();
 
 // TODO make elio pay microsoft
@@ -22,8 +21,6 @@ const createWindow = () => {
     },
   });
 
-  // send video feed to renderer on the "camera:live-feed" channel
-  mainWindow.webContents.send("camera:live-feed", getVideoFeed());
   // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
   mainWindow.webContents.send("API_ENDPOINT", process.env.API_ENDPOINT);
 

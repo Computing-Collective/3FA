@@ -2,7 +2,7 @@ import * as React from "react";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
-export async function handleSubmit(event, props) {
+export async function handleSubmit(props) {
   // routing
   const navigate = props.navigate;
   // define props
@@ -10,15 +10,16 @@ export async function handleSubmit(event, props) {
   // const data = props.data; // 'email@gmail.com'
   let data;
   endpoint === "motion_pattern/initialize"
-    ? (data = props.data.map((item) => item.upper())) // capitalize every elem in array // TODO check
+    ? (data = props.data.map((item) => {
+        return item.toUpperCase();
+      })) // capitalize every elem in array // TODO check
     : (data = props.data);
-  console.log(await data.arrayBuffer());
   const session = props.session;
   const setSession = props.setSession;
   const setAuth = props.setAuth;
 
   // for displaying error
-  const setText = props.setText;
+  const setError = props.setError;
 
   // for sensor
   const pico_id = props.pico_id;
@@ -42,15 +43,15 @@ export async function handleSubmit(event, props) {
     setSession(json.session_id);
   }
 
-  handleNextNavigation(json, navigate);
+  handleNextNavigation(json, response, { navigate, setError, setAuth });
 }
 
-export function handleNextNavigation(json, navigate) {
+export function handleNextNavigation(json, response, { navigate, setError, setAuth }) {
   const next = json.next;
   const success = json.success;
   // retry api request
   if (success === 0 && next === undefined) {
-    setText(json.msg); // change text for frontend
+    setError(json.msg); // change text for frontend
     return;
   }
 

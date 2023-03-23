@@ -3,10 +3,11 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { handleSubmit } from "../functions/handleSubmit.js";
+import { useNavToVault } from "../hooks/useNavToVault.js";
 
 // props.type is 'password' | 'email' | none (for input field)
 // props.endpoint is 'email' | 'password' | 'camera' | 'motion_pattern/initialize' (for API endpoint)
-// props.setText used to display err messages
+// props.setError used to display err messages
 // props.pico_id is used in 'sensor' page for admin
 export function SubmitButton(props) {
   const navigate = useNavigate(); // TODO change to useNavigation() to provide loading screens (primarily sensor?)
@@ -14,24 +15,15 @@ export function SubmitButton(props) {
   const [session, setSession] = useContext(sessionContext); // session_id for admin
   const [auth, setAuth] = useContext(authContext); // auth for access to vault
   const [data, setData] = useState(""); // data sent to API
-  const submitButton = document.getElementById("submitButton");
 
   // if we want an input field (email or password)
   const inputField = props.endpoint === "email" || props.endpoint === "password";
 
-  useEffect(() => {
-    props.setText(""); // clear text on submit
-  }, [submitButton]);
-
+  const { initNav } = useNavToVault(auth);
   // navigate to vault if auth is modified within handleSubmit()
   // but only do that when component is mounted (so it doesn't infinite loop)
-  const isMounted = useRef(false);
   useEffect(() => {
-    if (auth !== null && isMounted.current) {
-      navigate("/vault");
-    } else {
-      isMounted.current = true;
-    }
+    initNav();
   }, [auth]);
 
   return (
@@ -46,7 +38,7 @@ export function SubmitButton(props) {
             navigate: navigate, // used for rerouting within the handleSubmit()
             session: session,
             setSession: setSession,
-            setText: props.setText, // used for displaying err messages
+            setError: props.setError, // used for displaying err messages
             setAuth: setAuth, // used for going to vault
             pico_id: props.pico_id, // send pico_id if on 'sensor'
           });
