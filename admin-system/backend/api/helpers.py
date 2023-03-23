@@ -24,7 +24,7 @@ def json_validate(request: flask.Request) -> dict:
     if request.is_json:
         return request.get_json()
     else:
-        raise AssertionError('Request is not JSON.')
+        raise AssertionError('Request is not JSON')
 
 
 def input_validate_login(request: flask.Request, param: str, curr_stage: str,
@@ -117,7 +117,7 @@ def get_user_from_id(user_id: uuid.UUID) -> models.User | None:
     return db.session.execute(db.select(models.User).filter(models.User.id == user_id)).scalars().first()
 
 
-def create_user_from_dict(request_data: dict) -> models.User:
+def create_user_from_dict(request_data: dict, file) -> models.User:
     """
     Create a user from a dictionary
 
@@ -137,6 +137,7 @@ def create_user_from_dict(request_data: dict) -> models.User:
     Note that the password and motion pattern fields are only required if the corresponding auth method is enabled.
 
     :param request_data: The dictionary containing the user's data
+    :param file: The file containing the user's face image
     :return: The created user
     :raises AssertionError: The request data doesn't contain ``auth_methods`` or no auth methods are enabled
     """
@@ -155,6 +156,8 @@ def create_user_from_dict(request_data: dict) -> models.User:
         user.set_password(request_data.get('password', None))
     if request_data.get('auth_methods', None).get('motion_pattern', None):
         user.set_motion_pattern(str(request_data.get('motion_pattern', None)))
+    if request_data.get('auth_methods', None).get('face_recognition', None):
+        user.set_face_recognition(file)
 
     create_auth_methods_from_dict(request_data, user)
 
@@ -436,6 +439,7 @@ def create_auth_session(user: models.User) -> models.AuthSession:
         session_id=uuid.uuid4(),
         id=user.id,
         date=datetime.now(),
+        enabled=True,
     )
 
     db.session.add(auth_session)
@@ -453,6 +457,20 @@ def get_auth_session_from_id(session_id: uuid.UUID) -> models.AuthSession | None
     """
     return (db.session.execute(db.select(models.AuthSession).filter(models.AuthSession.session_id == session_id))
             .scalars().first())
+
+
+def disable_auth_session(session: models.AuthSession) -> models.AuthSession:
+    """
+    Disable an auth session (logging out)
+
+    :param session: The auth session to disable
+    :return: The updated auth session
+    """
+    session.enabled = False
+
+    db.session.commit()
+
+    return session
 
 
 ########################################
