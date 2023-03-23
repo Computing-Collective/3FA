@@ -26,6 +26,68 @@ export function Camera() {
     initNav();
   }, [auth]);
 
+  /**
+   * handler for submit button on camera page, sends API request to admin
+   * @param {*} blob the image to send to backend
+   * @param {*} session the session ID
+   * @param {*} navigate used for navigating to other routes
+   * @param {*} setText used for displaying error messages
+   * @param {*} setAuth sets Auth if on last stage
+   */
+  async function handleCameraSubmit() {
+    // the endpoint for face
+    const endpoint = "face_recognition";
+    // form because need to include img
+    let formData = new FormData();
+    formData.append("photo", data);
+    formData.append(
+      "request",
+      JSON.stringify({
+        session_id: session,
+      })
+    );
+    // send api request with blob
+    const response = await fetch(`${api_endpoint}/api/login/${endpoint}/`, {
+      method: "POST",
+      body: formData,
+    });
+    const json = await response.json();
+    handleNextNavigation(json, response);
+  }
+
+  // duplicated code with submitButton.jsx
+  function handleNextNavigation(json, response) {
+    const next = json.next;
+    const success = json.success;
+    // retry api request
+    if (success === 0 && next === undefined) {
+      setError(json.msg); // change text for frontend
+      return;
+    }
+
+    // go to vault
+    if (response.ok && next === null) {
+      // auth occurs within component
+      setAuth(json.auth_session_id);
+      return;
+    }
+    // name mangling between admin / client
+    switch (next) {
+      case "motion_pattern":
+        navigate("/sensor");
+        return;
+      case "face_recognition":
+        navigate("/camera");
+        return;
+    }
+    // generally, want to go to next place directed by admin
+    navigate(`/${json.next}`);
+  }
+
+  function CameraSubmitButton(props) {
+    return <Button onClick={props.onClick}>Submit</Button>;
+  }
+
   return (
     <>
       <h1>Smile for the camera</h1>
@@ -46,43 +108,10 @@ export function Camera() {
         endpoint={"camera"}
         onClick={(event) => {
           event.preventDefault();
-          handleCameraSubmit(data, session, navigate, setError, setAuth);
+          handleCameraSubmit();
         }}
       />
       <Backdoor />
     </>
   );
-}
-
-/**
- * handler for submit button on camera page, sends API request to admin
- * @param {*} blob the image to send to backend
- * @param {*} session the session ID
- * @param {*} navigate used for navigating to other routes
- * @param {*} setText used for displaying error messages
- * @param {*} setAuth sets Auth if on last stage
- */
-async function handleCameraSubmit(blob, session, navigate, setError, setAuth) {
-  // the endpoint for face
-  const endpoint = "face_recognition";
-  // form because need to include img
-  let formData = new FormData();
-  formData.append("photo", blob);
-  formData.append(
-    "request",
-    JSON.stringify({
-      session_id: session,
-    })
-  );
-  // send api request with blob
-  const response = await fetch(`${api_endpoint}/api/login/${endpoint}/`, {
-    method: "POST",
-    body: formData,
-  });
-  const json = await response.json();
-  handleNextNavigation(json, response, { navigate, setError, setAuth });
-}
-
-function CameraSubmitButton(props) {
-  return <Button onClick={props.onClick}>Submit</Button>;
 }

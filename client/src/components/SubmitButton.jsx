@@ -2,7 +2,6 @@ import * as React from "react";
 import { useContext, useEffect, useState, useRef } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
-import { handleSubmit } from "../functions/handleSubmit.js";
 import { useNavToVault } from "../hooks/useNavToVault.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
@@ -34,12 +33,12 @@ export function SubmitButton(props) {
   }, [auth]);
 
   async function handleSubmit(props) {
-    let data;
+    let apiPayload;
     endpoint === "motion_pattern/initialize"
-      ? (data = props.data.map((item) => {
+      ? (apiPayload = props.data.map((item) => {
           return item.toUpperCase();
-        })) // capitalize every elem in array // TODO check
-      : (data = props.data);
+        })) // capitalize every elem in array
+      : (apiPayload = props.data);
 
     // url to go to (defined in Postman)
     const url = `${api_endpoint}/api/login/${endpoint}/`;
@@ -48,7 +47,7 @@ export function SubmitButton(props) {
     const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify({
-        data: data,
+        data: apiPayload,
         session_id: session,
         pico_id: pico_id,
       }),
