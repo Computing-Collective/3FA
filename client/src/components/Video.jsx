@@ -1,12 +1,40 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import Measure from "react-measure";
 import { useUserMedia } from "../functions/useUserMedia";
 import styled, { css, keyframes } from "styled-components";
-import { useCardRatio } from "../functions/useCardRatio";
 import { useOffsets } from "../hooks/useOffsets";
+import WebCam from "react-webcam";
+import { useCardRatio } from "../functions/useCardRatio";
 
+// constrain the size of screenshot / video
+const width = 600;
+const height = width;
+
+// component that renders the video feed
+const WebCamCapture = () => {
+  const webcamRef = useRef(null);
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    // TODO imageSrc is a blob
+  }, [webcamRef]);
+  return (
+    <>
+      <WebCam
+        audio={false}
+        width={width}
+        height={height}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        videoConstraints={CAPTURE_OPTIONS}
+      />
+      <button onClick={capture}>Capture photo</button>
+    </>
+  );
+};
 const CAPTURE_OPTIONS = {
   audio: false,
+  width: width,
+  height: height,
   video: { facingMode: "environment" },
 };
 
@@ -17,7 +45,6 @@ export function Video({ setText, onCapture, onClear }) {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
   const [isFlashing, setIsFlashing] = useState(false);
-  const [aspectRatio, calculateRatio] = useCardRatio(1);
 
   const mediaStream = useUserMedia(CAPTURE_OPTIONS, setText);
   const offsets = useOffsets(
@@ -34,7 +61,7 @@ export function Video({ setText, onCapture, onClear }) {
   function handleResize(contentRect) {
     setContainer({
       width: contentRect.bounds.width,
-      height: Math.round(contentRect.bounds.width / aspectRatio),
+      height: Math.round(contentRect.bounds.width / 1),
     });
   }
 
@@ -66,13 +93,13 @@ export function Video({ setText, onCapture, onClear }) {
   }
 
   function handleCanPlay() {
-    // calculateRatio(videoRef.current.videoHeight, videoRef.current.videoWidth);
     setIsVideoPlaying(true);
     videoRef.current.play();
   }
 
   return (
     <>
+      {/* <WebCamCapture /> */}
       <Measure bounds onResize={handleResize}>
         {({ measureRef }) => (
           <>
