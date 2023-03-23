@@ -102,7 +102,6 @@ export function Camera() {
           setData(null);
         }}
       />
-      {/* // TODO fix the console errors */}
       <CameraSubmitButton
         data={data}
         endpoint={"camera"}
