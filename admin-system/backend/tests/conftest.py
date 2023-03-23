@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 import api.helpers
@@ -27,11 +29,12 @@ def list_of_users() -> list[list]:
     Returns a list of lists with valid user data
     """
     return [
-        ["nevlezayubyet@emaill.app", "x*8#5YLSG9%E", "[\"left\", \"right\"]", True, True, True],
-        ["rajuhka@ogvoice.com", None, "[\"up\", \"down\", \"clockwise\"]", False, True, False],
-        ["ad1723@xgod.cf", "2q5#KO2d*ym5", "[\"left\"]", True, True, False],
+        ["nevlezayubyet@emaill.app", "x*8#5YLSG9%E", "[\"left\", \"right\"]", True, True, True, "user1.png"],
+        ["rajuhka@ogvoice.com", None, "[\"up\", \"down\", \"clockwise\"]", False, True, False, "user1.png"],
+        ["ad1723@xgod.cf", "2q5#KO2d*ym5", "[\"left\"]", True, True, False, "user1.png"],
         ["doubleupmike21@rjostre.com", None,
-         "[\"up\", \"down\", \"clockwise\", \"left\", \"right\", \"counter-clockwise\"]", False, True, True],
+         "[\"up\", \"down\", \"clockwise\", \"left\", \"right\", \"counter-clockwise\"]", False, True, True,
+         "user1.png"],
     ]
 
 
@@ -56,6 +59,8 @@ def users(list_of_users):
                 "face_recognition": request_data[5],
             }
         }
-        out.append(api.helpers.create_user_from_dict(data))
+        path = os.path.abspath(os.path.join(os.curdir, "tests", "images", request_data[6]))
+        with open(path, 'rb') as photo:
+            out.append(api.helpers.create_user_from_dict(data, photo))
 
     return out
