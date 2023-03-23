@@ -6,6 +6,7 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 
 from api.app import db
+from constants import ValidMoves
 
 
 def validate_id(identifier) -> uuid.UUID:
@@ -25,6 +26,23 @@ def validate_id(identifier) -> uuid.UUID:
         raise AssertionError('Provided ID is invalid')
 
     return identifier
+
+
+def check_valid_moves(motion_pattern: list[str]):
+    """
+    Check that every element in the motion pattern is a valid move.
+
+    :param motion_pattern: The motion pattern to check
+    :raises AssertionError: The motion pattern is invalid
+    """
+    valid_moves = set(item.value for item in ValidMoves)
+
+    if not motion_pattern:
+        raise AssertionError("No motion pattern provided")
+
+    for move in motion_pattern:
+        if move not in valid_moves:
+            raise AssertionError("Invalid motion pattern")
 
 
 class User(db.Model):
@@ -101,11 +119,14 @@ class User(db.Model):
         return check_password_hash(self.pwd, password)
 
     # Ensures that the motion pattern is not null
-    def set_motion_pattern(self, motion_pattern):
-        if motion_pattern == "None":
+    def set_motion_pattern(self, motion_pattern: list[str]):
+        if motion_pattern == "None" or motion_pattern is None:
             raise AssertionError('Motion pattern not provided')
 
-        self.motion_pattern = generate_password_hash(motion_pattern)
+        # Check that every element in the motion pattern is a valid move
+        check_valid_moves(motion_pattern)
+
+        self.motion_pattern = generate_password_hash(str(motion_pattern))
 
     # Checks the provided motion pattern against the stored motion pattern hash
     def check_motion_pattern(self, motion_pattern):

@@ -181,7 +181,7 @@ def login_motion_pattern():
         }
 
     - ``pico_id``: The ID of the pico to use for the motion pattern
-    - ``data``: The added moves to the motion pattern
+    - ``data``: The added moves to the motion pattern (must be valid as defined in ``constants.py``)
 
     :return: The next stage of the login sequence or an error message
     """
@@ -195,7 +195,11 @@ def login_motion_pattern():
         request_data: dict = validate_out[2]
 
     # Add the pico_id and added sequence to the session
-    helpers.add_pico_to_session(session, request_data)
+    try:
+        helpers.add_pico_to_session(session, request_data)
+    except AssertionError as exception_message:
+        # If any of the moves are invalid, return an error
+        return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
     session = helpers.retry_motion_pattern(session, False)
 
     # Repeatedly check the session for completion of the motion pattern or a retry
@@ -255,6 +259,12 @@ def login_motion_pattern_validate():
         helpers.retry_motion_pattern(session, True)
         helpers.create_failed_login_event(session, text="No motion pattern field entered.")
         return jsonify(msg="No motion pattern field entered, please try again.", success=0), 400
+
+    try:
+        models.check_valid_moves(request_data.get('data', None))
+    except AssertionError as exception_message:
+        # If any of the moves are invalid, return an error
+        return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
 
     # Split the motion pattern into the base pattern and the added sequence
     split_pattern = helpers.split_motion_pattern(session, request_data.get('data', None))
