@@ -17,7 +17,7 @@ export function Video({ setText, onCapture, onClear }) {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
   const [isFlashing, setIsFlashing] = useState(false);
-  const [aspectRatio, calculateRatio] = useCardRatio(1.586);
+  const [aspectRatio, calculateRatio] = useCardRatio(1);
 
   const mediaStream = useUserMedia(CAPTURE_OPTIONS, setText);
   const offsets = useOffsets(
