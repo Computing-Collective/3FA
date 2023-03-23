@@ -1,4 +1,5 @@
 import datetime
+import json
 import time
 import uuid
 
@@ -26,7 +27,9 @@ def signup():
     """
     Route for signing up a new user
 
-    JSON body::
+    Form body:
+
+    - ``request``::
 
         {
             "email": "name@domain.com",
@@ -39,21 +42,26 @@ def signup():
             },
         }
 
-    - ``auth_methods``: is a dictionary of the authentication methods the user wants to use.
+    - ``photo``: A photo of the user's face
 
-    Note that the password and motion pattern fields are only required if the corresponding auth method is enabled.
+    Notes:
+
+    - ``auth_methods``: is a dictionary of the authentication methods the user wants to use.
+    - The password and motion pattern fields are only required if the corresponding auth method is enabled.
 
     :return: A success message or an error message
     """
-    # Validate that the request is JSON
-    try:
-        request_data = helpers.json_validate(request)
-    except AssertionError as exception_message:
-        return jsonify(msg='Error: {}. User not created.'.format(exception_message), success=0), 400
+    # Validate that the request is "multipart/form-data"
+    if "multipart/form-data" not in request.content_type:
+        return jsonify(msg="Error: The request is not \"multipart/form-data\". User not created.", success=0), 400
+    request_data: dict = json.loads(request.form.get('request', None))
+
+    # Check if a photo was submitted
+    file = request.files.get('photo', None)
 
     # Create the user and return an error message if it fails
     try:
-        helpers.create_user_from_dict(request_data)
+        helpers.create_user_from_dict(request_data, file)
         return jsonify(msg='User successfully created.', success=1), 200
     except AssertionError as exception_message:
         return jsonify(msg='Error: {}. User not created.'.format(exception_message), success=0), 400
@@ -273,7 +281,12 @@ def login_face_recognition():
 
     Form body:
 
-    - ``session_id``: The session ID of the login session
+    - ``request``::
+
+        {
+            "session_id": The session ID of the login session
+        }
+
     - ``photo``: The photo to use for face recognition
 
     :return: The next stage of the login sequence or an error message
@@ -337,10 +350,43 @@ def client_validate():
     if auth_session is None:
         return jsonify(msg="Invalid auth_session_id, please try again.", success=0), 401
     elif (datetime.datetime.now() - datetime.timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES))
-          > auth_session.date):
+          > auth_session.date) or not auth_session.enabled:
         return jsonify(msg="Session expired, please start a new login session.", next="email", success=0), 401
 
     return jsonify(msg="Auth session ID is valid.", success=1), 200
+
+
+@api.route("/api/client/logout", methods=["POST"], strict_slashes=False)
+def client_logout():
+    """
+    Route for a client to log out
+
+    JSON body::
+
+        {
+            "auth_session_id": "uuid"
+        }
+
+    :return: Whether the logout was successful or not
+    """
+    # Validate that the request is JSON
+    try:
+        request_data = helpers.json_validate(request)
+    except AssertionError as exception_message:
+        return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
+
+    if not request_data.get('auth_session_id', None):
+        return jsonify(msg="Missing auth_session_id in request.", success=0), 400
+
+    auth_session: models.AuthSession = helpers.get_auth_session_from_id(
+        uuid.UUID(request_data.get('auth_session_id', None)))
+
+    if auth_session is None:
+        return jsonify(msg="Invalid auth_session_id, please try again.", success=0), 401
+
+    helpers.disable_auth_session(auth_session)
+
+    return jsonify(msg="Logout successful.", success=1), 200
 
 
 ###################################################################################

@@ -38,6 +38,7 @@ class User(db.Model):
     :param email: The user's email address
     :param pwd: The user's password (hashed)
     :param motion_pattern: The user's motion pattern (hashed)
+    :param photo: The user's facial recognition reference photo
     """
     __tablename__ = "user"
 
@@ -49,6 +50,8 @@ class User(db.Model):
     pwd = db.Column(db.String(300), nullable=True)
     # User's motion pattern (hashed) - only used if the user has enabled pico authentication
     motion_pattern = db.Column(db.String, nullable=True)
+    # User's facial recognition reference photo - only used if the user has enabled facial recognition authentication
+    photo = db.Column(db.LargeBinary, nullable=True)
 
     # Ensures that the ID is a unique UUID and is not null
     @validates('id')
@@ -107,6 +110,13 @@ class User(db.Model):
     # Checks the provided motion pattern against the stored motion pattern hash
     def check_motion_pattern(self, motion_pattern):
         return check_password_hash(self.motion_pattern, motion_pattern)
+
+    # Saves the provided photo as the facial recognition reference photo
+    def set_face_recognition(self, file):
+        if file is None:
+            raise AssertionError("No photo submitted")
+
+        self.photo = file.read()
 
     # Checks the provided photo against the stored facial recognition model
     def check_face_recognition(self, file):
@@ -312,6 +322,7 @@ class AuthSession(db.Model):
     session_id = db.Column(db.Uuid, unique=True, nullable=False, primary_key=True)
     id = db.Column(db.Uuid, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
+    enabled = db.Column(db.Boolean, nullable=False)
 
     # Ensures that the session ID is a unique UUID and is not null
     @validates('id')
