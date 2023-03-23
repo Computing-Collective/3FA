@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import styled from "styled-components";
 import { handleNextNavigation, handleSubmit } from "../functions/handleSubmit";
 import { useLocation, useNavigate, useNavigation } from "react-router-dom";
@@ -44,10 +44,9 @@ export function Camera() {
       <CameraSubmitButton
         data={data}
         endpoint={"camera"}
-        setError={setError}
         onClick={(event) => {
           event.preventDefault();
-          handleCameraSubmit(blob, session, navigate, setError, setAuth);
+          handleCameraSubmit(data, session, navigate, setError, setAuth);
         }}
       />
       <Backdoor />
@@ -63,7 +62,7 @@ export function Camera() {
  * @param {*} setText used for displaying error messages
  * @param {*} setAuth sets Auth if on last stage
  */
-async function handleCameraSubmit(blob, session, navigate, setText, setAuth) {
+async function handleCameraSubmit(blob, session, navigate, setError, setAuth) {
   // the endpoint for face
   const endpoint = "face_recognition";
   // form because need to include img
@@ -81,7 +80,7 @@ async function handleCameraSubmit(blob, session, navigate, setText, setAuth) {
     body: formData,
   });
   const json = await response.json();
-  handleNextNavigation(json, navigate, setText, setAuth, response);
+  handleNextNavigation(json, response, { navigate, setError, setAuth });
 }
 
 function CameraSubmitButton(props) {
