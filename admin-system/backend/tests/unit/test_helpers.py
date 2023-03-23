@@ -9,24 +9,29 @@ import api.models
 
 @pytest.mark.database
 @pytest.mark.parametrize("request_data, expected_result", [
-    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True], True),  # Valid
-    (["a@d.co", None, "[\"up\", \"down\"]", False, True, False], True),  # Valid
-    (["lkjl@lkj.as", "lkjA2fsfsd", None, True, False, False], True),  # Valid
-    (["lslkwu@x.lw", None, None, False, False, True], True),  # Valid
-    (["lxns@lc.ca", None, None, False, False, False], AssertionError),  # Need at least one auth method
-    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Duplicate user
-    (["notarealemail@.co", "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email
-    ([1, "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email (not a string)
+    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], True),  # Valid
+    (["a@d.co", None, "[\"up\", \"down\"]", False, True, False, "user1.png"], True),  # Valid
+    (["lkjl@lkj.as", "lkjA2fsfsd", None, True, False, False, "user1.png"], True),  # Valid
+    (["lslkwu@x.lw", None, None, False, False, True, "user1.png"], True),  # Valid
+    (["lxns@lc.ca", None, None, False, False, False, "user1.png"], AssertionError),  # Need at least one auth method
+    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),  #
+    # Duplicate user
+    (["notarealemail@.co", "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    # Invalid Email
+    ([1, "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    # Invalid Email (not a string)
     ([
          "lsdjalksjlksjdflaksjfaalslwoizjnlkdjvoiwenlknwelkjvoijlkajqlwkjlakjvoijwlkjadalkjdwoijvkdjfaslkdfjslkjf@llkjvowlklkjv.clajk",
-         "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email (too long)
-    ([None, "Valid53flksj", "[\"direction\"]", True, True, True], AssertionError),  # Invalid Email (not provided)
-    (["slkdj@ldkjs.cl", "lkjA2", "[\"direction\"]", True, True, True], AssertionError),  # Invalid password (too short)
-    (["eroiwu@oijle.lkj", "adlfkjsld", "[\"up\", \"down\"]", True, True, True], AssertionError),
+         "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),  # Invalid Email (too long)
+    ([None, "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    # Invalid Email (not provided)
+    (["slkdj@ldkjs.cl", "lkjA2", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    # Invalid password (too short)
+    (["eroiwu@oijle.lkj", "adlfkjsld", "[\"up\", \"down\"]", True, True, True, "user1.png"], AssertionError),
     # Invalid password (no capital or number)
-    (["lenvlksj@lsad.sklj", None, "[\"up\", \"down\"]", True, True, True], AssertionError),
+    (["lenvlksj@lsad.sklj", None, "[\"up\", \"down\"]", True, True, True, "user1.png"], AssertionError),
     # Invalid password (not provided)
-    (["lenvlksj@lsad.sklj", "lkjA2fsfsd", None, True, True, True], AssertionError),
+    (["lenvlksj@lsad.sklj", "lkjA2fsfsd", None, True, True, True, "user1.png"], AssertionError),
     # Invalid motion pattern (not provided)
 ])
 def test_user_create_fetch(test_client, request_data, expected_result):
@@ -45,13 +50,19 @@ def test_user_create_fetch(test_client, request_data, expected_result):
             "face_recognition": request_data[5],
         }
     }
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", request_data[6]))
+
     if expected_result is True:
-        user = api.helpers.create_user_from_dict(data)
+        with open(path, 'rb') as photo:
+            user = api.helpers.create_user_from_dict(data, photo)
         assert user.email == data.get("email", None)
         if user.pwd is not None:
             assert user.check_password(data.get("password", None))
         if user.motion_pattern is not None:
             assert user.check_motion_pattern(str(data.get("motion_pattern", None)))
+        if user.photo is not None:
+            with open(path, 'rb') as photo:
+                assert user.check_face_recognition(photo)
 
         # Check that the user was added to the database and test fetching
         assert api.helpers.get_user_from_email(data.get("email", None)) == user
@@ -59,7 +70,22 @@ def test_user_create_fetch(test_client, request_data, expected_result):
 
     else:
         with pytest.raises(expected_result):
-            api.helpers.create_user_from_dict(data)
+            with open(path, 'rb') as photo:
+                api.helpers.create_user_from_dict(data, photo)
+
+
+@pytest.mark.database
+def test_user_create_no_auth(test_client):
+    """
+    Tests creating a user with no authentication methods
+    """
+    data = {
+        "email": "emailsldkj@slkdj.cal",
+        "password": "AveryVal1dPassw0rd",
+        "motion_pattern": ["UP", "DOWN"],
+    }
+    with pytest.raises(AssertionError):
+        api.helpers.create_user_from_dict(data, None)
 
 
 @pytest.mark.database
@@ -210,6 +236,10 @@ def test_auth_session_create_fetch(test_client, users, user, expected_result):
     """
     session = api.helpers.create_auth_session(users[user])
     assert isinstance(session, expected_result)
+    assert api.helpers.get_auth_session_from_id(session.session_id) == session
+
+    session = api.helpers.disable_auth_session(session)
+    assert session.enabled is False
     assert api.helpers.get_auth_session_from_id(session.session_id) == session
 
 

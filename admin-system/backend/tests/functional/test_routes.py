@@ -1,5 +1,6 @@
 import datetime
 import io
+import json
 import os
 import uuid
 from unittest.mock import patch
@@ -38,6 +39,7 @@ def test_server_error(test_client):
     "/api/login/motion_pattern/validate",
     "/api/login/face_recognition",
     "/api/client/validate",
+    "/api/client/logout",
 ])
 def test_not_json(test_client, endpoint):
     """
@@ -49,27 +51,38 @@ def test_not_json(test_client, endpoint):
 
 @pytest.mark.database
 @pytest.mark.post_request
-@pytest.mark.parametrize("email, password, motion_pattern, auth_methods, expected_result", [
-    ("a@ab.com", "password", ["direction"], [True, True, True], 400),  # Invalid password (no uppercase and number)
-    ("b@bc.ca", "Password1", ["up"], [True, True, False], 200),  # Valid user
-    ("c@de.cl", "Password1", ["down"], [False, False, True], 200),  # Valid user
-    ("only@motion.com", "Password1", ["up"], [False, True, False], 200),  # Valid user
-    ("slaj@slj.lka", "Sakjlkjd3", ["left", "right"], [True, False, False], 200),  # Valid user
+@pytest.mark.parametrize("email, password, motion_pattern, auth_methods, image, expected_result", [
+    ("a@ab.com", "password", ["direction"], [True, True, True], "user1.png", 400),
+    # Invalid password (no uppercase and number)
+    ("b@bc.ca", "Password1", ["up"], [True, True, False], "no_photo", 200),  # Valid user
+    ("c@de.cl", "Password1", ["down"], [False, False, True], "user1.png", 200),  # Valid user
+    ("only@motion.com", "Password1", ["up"], [False, True, False], "user1.png", 200),  # Valid user
+    ("slaj@slj.lka", "Sakjlkjd3", ["left", "right"], [True, False, False], "no_photo", 200),  # Valid user
+    ("ewou@xnc.skd", "Password1", ["up", "down"], [True, True, True], "no_photo", 400),  # No photo provided
 ])
-def test_user_create(test_client, email, password, motion_pattern, auth_methods, expected_result):
+def test_user_create(test_client, email, password, motion_pattern, auth_methods, image, expected_result):
     """
     Tests the user creation endpoint
     """
-    response = test_client.post("/api/signup", json={
+    data = {}
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", image))
+    if image != "no_photo":
+        with open(path, 'rb') as photo:
+            input_file_stream = io.BytesIO(photo.read())
+
+        data['photo'] = (input_file_stream, image)
+    data['request'] = json.dumps({
         "email": email,
         "password": password,
         "motion_pattern": motion_pattern,
         "auth_methods": {
             "password": auth_methods[0],
             "motion_pattern": auth_methods[1],
-            "face_recognition": auth_methods[2]
+            "face_recognition": auth_methods[2],
         }
     })
+
+    response = test_client.post("/api/signup", content_type='multipart/form-data', data=data)
     assert response.status_code == expected_result
 
 
@@ -328,3 +341,27 @@ def test_complete_login(test_client):
     })
 
     assert response.status_code == 400
+
+
+@pytest.mark.database
+@pytest.mark.post_request
+@pytest.mark.parametrize("key, session_id, expected_result", [
+    ("auth_session_id", uuid.uuid5(namespace=uuid.uuid4(), name="no_session"), 401),  # Invalid session
+    ("no_key", uuid.uuid5(namespace=uuid.uuid4(), name="no_session"), 400),  # No auth_session_id provided
+    ("auth_session_id", None, 400),  # Empty auth_session_id provided
+    ("auth_session_id", "valid", 200),  # Valid
+])
+def test_logout(test_client, users, key, session_id, expected_result):
+    """
+    Tests a user logging out
+    """
+    session = api.helpers.create_auth_session(users[0])
+    if session_id == "valid":
+        sess_id = session.session_id
+    else:
+        sess_id = session_id
+
+    response = test_client.post("/api/client/logout", json={
+        key: sess_id,
+    })
+    assert response.status_code == expected_result
