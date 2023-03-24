@@ -36,8 +36,18 @@ from digitalio import DigitalInOut, Direction, Pull
 import busio
 from adafruit_lsm6ds.lsm6ds33 import LSM6DS33
 
-
+import os
+import ssl
+import wifi
+import socketpool
+import ipaddress
+import microcontroller
 import adafruit_requests
+from adafruit_httpserver.server import HTTPServer
+from adafruit_httpserver.request import HTTPRequest
+from adafruit_httpserver.response import HTTPResponse
+from adafruit_httpserver.methods import HTTPMethod
+from adafruit_httpserver.mime_type import MIMEType
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +88,38 @@ buffer_offset = 4 # there are typically 3 elements of feedback
                   # for example forward move is [20, -20, -18, -12, -4, 0, 0, 0]
 z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 to detect flips as the sign of the number)
 
-MOVE_URL = "http://192.168.137.1:5000/move" # URL to receive move requests from
+# The URL to send the sequence to for validation
+VALIDATE_URL = "http://192.168.137.1:5000/api/login/motion_pattern/validate/"
+
+# The pico ID (empty between each request to the server)
+pico_id = None
+
+# Wifi and server setup
+ipv4 = ipaddress.IPv4Address(os.getenv('PICO_W_HOTSPOT_IPV4_ADDRESS'))
+netmask = ipaddress.IPv4Address("255.255.255.0")
+gateway = ipaddress.IPv4Address("192.168.137.1")
+wifi.radio.set_ipv4_address(ipv4=ipv4, netmask=netmask, gateway=gateway)
+
+#  Connect to laptop SSID
+wifi.radio.connect(os.getenv('CIRCUITPY_WIFI_SSID'),
+                   os.getenv('CIRCUITPY_WIFI_PASSWORD'))
+pool = socketpool.SocketPool(wifi.radio)
+
+requests = adafruit_requests.Session(pool, ssl.create_default_context())
+server = HTTPServer(pool)
+
+print("\nStarting server...")
+# Startup the server
+try:
+    server.start(str(wifi.radio.ipv4_address))
+    print("Listening on http://%s\n" % wifi.radio.ipv4_address)
+
+#  If the server fails to begin, restart the Pico W
+except OSError:
+    time.sleep(5)
+    print("Restarting..")
+    microcontroller.reset()
+ping_address = ipaddress.ip_address("8.8.4.4")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ADDITIONAL FUNCTIONS
@@ -443,33 +484,36 @@ def check_sequence(sequence):
 # Wireless Functions
 # --------------------------------------------------------------------------------------------------------------------------------------------
 
-def init_wifi():
-    # Wifi setup
-    wifi.radio.connect(
-        os.getenv("CIRCUITPY_WIFI_SSID"), os.getenv("CIRCUITPY_WIFI_PASSWORD")
-    )
-    pool = socketpool.SocketPool(wifi.radio)
-    requests = adafruit_requests.Session(pool, ssl.create_default_context())
+@server.route("/pico_id", method=HTTPMethod.POST)
+# Route for uploading a pico_id
+def set_pico_id(request: HTTPRequest):
+    #  Get the raw text
+    raw_text = request.raw_request.decode("utf-8")
 
-def request_pico_id():
-    print("\n\nRequesting Pico ID")
-    try:
-        requests = adafruit_requests.Session
-        response = requests.get(MOVE_URL)
-        pico_id = response.text
-        print("\n\nReceived Pico ID:", pico_id)
-        return "PICO_ID_TEMP"
-        return pico_id
-    except Exception as e:
-        print("\n\nError Requesting Pico ID")
-        return "ERROR RECEIVING PICO ID"
+    # TODO: get "pico_id" value out of the request and save it to the pico_id variable
+    print("Pico ID received: ", raw_text)
+
+    # TODO: update this
+    pico_id = "some value"
+
+    output = "Pico ID received: " + raw_text
+    with HTTPResponse(request) as response:
+        response.send(output)
 
 def transmit_wireless_message(sequence):
-    print("\n\nTransmitting: ", final_sequence)
-    #TODO: transmit the sequence which is a list of strings
-    #      in the format needed by admin side
-    # format of string is ["pico id", "DOWN", "LEFT"]
+    # Transmit the sequence which is a list of strings
+    # in the format needed by admin side
+    print("\n\nTransmitting: ", sequence)
 
+    json = {
+        "pico_id" : pico_id,
+        "data" : sequence
+    }
+
+    response = requests.post(VALIDATE_URL, json=json)
+    output = response.text
+    print("\nResponse from server: ", output)
+    response.close()
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -498,15 +542,21 @@ while True:
         recording_led.value = False
         is_recording = False
 
+    # Wait to receive pico_id from client
+    # TODO: figure out why we aren't breaking out of the while loop once pico_id is changed
+    print("\nWaiting for pico_id from client")
+    while pico_id is None:
+        try:
+            server.poll()
+        except Exception as e:
+            print("Error polling server", e)
+            break
+
     # Update states for stop/start buttons
     if start_btn.value and not is_recording:
         is_recording = True
         ready_led.value = False
         recording_led.value = True
-        
-        # TODO: GET PICO ID HERE
-        pico_id = request_pico_id()
-        final_sequence.append(pico_id) # add the pico as the first element of the list
 
     elif stop_btn.value and is_recording:
         is_recording = False
@@ -517,12 +567,13 @@ while True:
         valid_moves = check_sequence(sequence)
         add_moves_to_sequence(valid_moves)
 
-        # TODO: Transmit the final sequence
+        # Transmit the final sequence
         transmit_wireless_message(final_sequence)
         
         # Reset the sequence for next recording    
         sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }        
         final_sequence = []
+        pico_id = None
          
 
     # Recording
