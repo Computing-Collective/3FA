@@ -155,7 +155,7 @@ def create_user_from_dict(request_data: dict, file) -> models.User:
     if request_data.get('auth_methods', None).get('password', None):
         user.set_password(request_data.get('password', None))
     if request_data.get('auth_methods', None).get('motion_pattern', None):
-        user.set_motion_pattern(str(request_data.get('motion_pattern', None)))
+        user.set_motion_pattern(request_data.get('motion_pattern', None))
     if request_data.get('auth_methods', None).get('face_recognition', None):
         user.set_face_recognition(file)
 
@@ -281,7 +281,11 @@ def add_pico_to_session(session: models.LoginSession, request_data: dict) -> mod
     :param session: The login session to add the pico ID and motions to
     :param request_data: The request data containing the pico ID and motions
     :return: The updated login session
+    :raises AssertionError: If any of the moves are invalid
     """
+
+    models.check_valid_moves(request_data.get('data', None))
+
     session.pico_id = request_data.get('pico_id', None)
     session.motion_added_sequence = json.dumps(request_data.get('data', None))
 

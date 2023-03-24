@@ -5,34 +5,38 @@ import pytest
 
 import api.helpers
 import api.models
+from constants import ValidMoves
 
 
 @pytest.mark.database
 @pytest.mark.parametrize("request_data, expected_result", [
-    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], True),  # Valid
-    (["a@d.co", None, "[\"up\", \"down\"]", False, True, False, "user1.png"], True),  # Valid
+    (["name@domain.com", "Valid53flksj", [ValidMoves.FLIP.value], True, True, True, "user1.png"], True),  # Valid
+    (["a@d.co", None, [ValidMoves.UP.value, ValidMoves.DOWN.value], False, True, False, "user1.png"], True),  # Valid
     (["lkjl@lkj.as", "lkjA2fsfsd", None, True, False, False, "user1.png"], True),  # Valid
     (["lslkwu@x.lw", None, None, False, False, True, "user1.png"], True),  # Valid
     (["lxns@lc.ca", None, None, False, False, False, "user1.png"], AssertionError),  # Need at least one auth method
-    (["name@domain.com", "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),  #
+    (["name@domain.com", "Valid53flksj", [ValidMoves.FLIP.value], True, True, True, "user1.png"], AssertionError),  #
     # Duplicate user
-    (["notarealemail@.co", "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    (["notarealemail@.co", "Valid53flksj", [ValidMoves.FLIP.value], True, True, True, "user1.png"], AssertionError),
     # Invalid Email
-    ([1, "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    ([1, "Valid53flksj", [ValidMoves.FLIP.value], True, True, True, "user1.png"], AssertionError),
     # Invalid Email (not a string)
     ([
          "lsdjalksjlksjdflaksjfaalslwoizjnlkdjvoiwenlknwelkjvoijlkajqlwkjlakjvoijwlkjadalkjdwoijvkdjfaslkdfjslkjf@llkjvowlklkjv.clajk",
-         "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),  # Invalid Email (too long)
-    ([None, "Valid53flksj", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+         "Valid53flksj", [ValidMoves.FLIP.value], True, True, True, "user1.png"], AssertionError),
+    # Invalid Email (too long)
+    ([None, "Valid53flksj", [ValidMoves.FLIP.value], True, True, True, "user1.png"], AssertionError),
     # Invalid Email (not provided)
-    (["slkdj@ldkjs.cl", "lkjA2", "[\"direction\"]", True, True, True, "user1.png"], AssertionError),
+    (["slkdj@ldkjs.cl", "lkjA2", [ValidMoves.FLIP.value], True, True, True, "user1.png"], AssertionError),
     # Invalid password (too short)
-    (["eroiwu@oijle.lkj", "adlfkjsld", "[\"up\", \"down\"]", True, True, True, "user1.png"], AssertionError),
-    # Invalid password (no capital or number)
-    (["lenvlksj@lsad.sklj", None, "[\"up\", \"down\"]", True, True, True, "user1.png"], AssertionError),
-    # Invalid password (not provided)
+    (["eroiwu@oijle.lkj", "adlfkjsld", [ValidMoves.UP.value, ValidMoves.DOWN.value], True, True, True, "user1.png"],
+     AssertionError),  # Invalid password (no capital or number)
+    (["lenvlksj@lsad.sklj", None, [ValidMoves.UP.value, ValidMoves.DOWN.value], True, True, True, "user1.png"],
+     AssertionError),  # Invalid password (not provided)
     (["lenvlksj@lsad.sklj", "lkjA2fsfsd", None, True, True, True, "user1.png"], AssertionError),
     # Invalid motion pattern (not provided)
+    (["slawo@lva.alc", "lkjA2fsfsd", [ValidMoves.UP.value, "not_a_move"], True, True, True, "user1.png"],
+     AssertionError),  # Invalid motion pattern (invalid move)
 ])
 def test_user_create_fetch(test_client, request_data, expected_result):
     """
@@ -125,18 +129,27 @@ def test_login_session_create_fetch(test_client, users, user, expected_result):
 
 @pytest.mark.database
 @pytest.mark.parametrize("user, expected_result", [
-    ([0, uuid.uuid5(uuid.uuid4(), "&M8n;24h'=U,%<QS"), ["left", "right", "down"],
-      ["left", "right", "down"]], [api.models.LoginSession, True, [], ["left", "right", "down"]]),
-    ([1, uuid.uuid5(uuid.uuid4(), "9,S<vGs^`k`}D+q"), ["left", "right", "down"],
-      ["right", "down"]], [api.models.LoginSession, True, [], ["right", "down"]]),
-    ([2, uuid.uuid5(uuid.uuid4(), "Xg4$q=gLVf&S{PR["), ["left", "right", "down"],
-      ["left", "right", "down", "flip"]], [api.models.LoginSession, True,
-                                           ["left"], ["right", "down", "flip"]]),
-    ([3, uuid.uuid5(uuid.uuid4(), "hX=tJ5a@@>Kmf(j`"), ["left", "right", "down"],
-      ["up", "down", "left", "right", "down"]], [api.models.LoginSession, True, ["up", "down"],
-                                                 ["left", "right", "down"]]),
-    ([3, uuid.uuid5(uuid.uuid4(), "/2<$w3,LkE%Zm!Wc"), None, ["left", "right", "down"]],
-     [api.models.LoginSession, True, ["left", "right", "down"], []]),
+    ([0, uuid.uuid5(uuid.uuid4(), "&M8n;24h'=U,%<QS"), [ValidMoves.LEFT.value, ValidMoves.RIGHT.value,
+                                                        ValidMoves.DOWN.value],
+      [ValidMoves.LEFT.value, ValidMoves.RIGHT.value, ValidMoves.DOWN.value]],
+     [api.models.LoginSession, True, [], [ValidMoves.LEFT.value, ValidMoves.RIGHT.value, ValidMoves.DOWN.value]]),
+    ([1, uuid.uuid5(uuid.uuid4(), "9,S<vGs^`k`}D+q"), [ValidMoves.LEFT.value, ValidMoves.RIGHT.value,
+                                                       ValidMoves.DOWN.value],
+      [ValidMoves.RIGHT.value, ValidMoves.DOWN.value]],
+     [api.models.LoginSession, True, [], [ValidMoves.RIGHT.value, ValidMoves.DOWN.value]]),
+    ([2, uuid.uuid5(uuid.uuid4(), "Xg4$q=gLVf&S{PR["), [ValidMoves.LEFT.value, ValidMoves.RIGHT.value,
+                                                        ValidMoves.DOWN.value],
+      [ValidMoves.LEFT.value, ValidMoves.RIGHT.value, ValidMoves.DOWN.value, ValidMoves.FLIP.value]],
+     [api.models.LoginSession, True, [ValidMoves.LEFT.value], [ValidMoves.RIGHT.value, ValidMoves.DOWN.value,
+                                                               ValidMoves.FLIP.value]]),
+    ([3, uuid.uuid5(uuid.uuid4(), "hX=tJ5a@@>Kmf(j`"), [ValidMoves.LEFT.value, ValidMoves.RIGHT.value,
+                                                        ValidMoves.DOWN.value],
+      [ValidMoves.UP.value, ValidMoves.DOWN.value, ValidMoves.LEFT.value, ValidMoves.RIGHT.value,
+       ValidMoves.DOWN.value]], [api.models.LoginSession, True, [ValidMoves.UP.value, ValidMoves.DOWN.value],
+                                 [ValidMoves.LEFT.value, ValidMoves.RIGHT.value, ValidMoves.DOWN.value]]),
+    ([3, uuid.uuid5(uuid.uuid4(), "/2<$w3,LkE%Zm!Wc"), None, [ValidMoves.LEFT.value, ValidMoves.RIGHT.value,
+                                                              ValidMoves.DOWN.value]],
+     [api.models.LoginSession, True, [ValidMoves.LEFT.value, ValidMoves.RIGHT.value, ValidMoves.DOWN.value], []]),
 ])
 def test_login_session_pico(test_client, users, user, expected_result):
     """
@@ -154,6 +167,12 @@ def test_login_session_pico(test_client, users, user, expected_result):
     }
 
     assert api.helpers.check_pico_id_unique(str(user[1])) == expected_result[1]
+
+    # Test pico creation failure
+    if user[2] is None:
+        with pytest.raises(AssertionError):
+            api.helpers.add_pico_to_session(session, request_data)
+        return
 
     # Test pico creation and fetching
     pico = api.helpers.add_pico_to_session(session, request_data)
