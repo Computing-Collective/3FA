@@ -1,19 +1,23 @@
-import * as React from "react";
-import { handleSubmit } from "../hooks/handleSubmit";
+import React, { useState } from "react";
+import { handleSubmit } from "../functions/handleSubmit";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Backdoor } from "./backdoor.jsx";
 import { sessionContext, authContext } from "../app.jsx";
-import { DisplayText } from "../components/DisplayText.jsx";
+import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
+/**
+ *
+ * @returns the email page
+ */
 export function Email() {
-  const [text, setText] = React.useState("");
+  const [error, setError] = useState("");
 
   return (
     <>
       <h1>Enter your Email</h1>
-      <DisplayText text={text} />
-      <SubmitButton type={"email"} endpoint={"email"} setText={setText} />
+      {error !== "" && <DisplayError text={error} />}
+      <SubmitButton type={"email"} endpoint={"email"} setError={setError} />
       <Backdoor />
     </>
   );

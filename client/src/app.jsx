@@ -1,7 +1,8 @@
 import * as React from "react";
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import * as ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
+import { reactLocalStorage } from "reactjs-localstorage";
 import {
   Routes,
   Route,
@@ -14,7 +15,7 @@ import {
 import { Password } from "./pages/password.jsx";
 import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
-import { RequireAuth } from "./hooks/RequireAuth.js";
+import { RequireAuth } from "./components/RequireAuth.js";
 import { Sensor } from "./pages/sensor.jsx";
 import { Camera } from "./pages/camera.jsx";
 
@@ -44,8 +45,20 @@ const router = createHashRouter(
 
 const App = () => {
   // the states for the authentication (to modify context later)
-  const [session, setSession] = useState(null);
-  const [auth, setAuth] = useState(null);
+  // cached in local storage
+  const [session, setSession] = useState(() => reactLocalStorage.get("session_id", null));
+  const [auth, setAuth] = useState(() => {
+    reactLocalStorage.get("auth_id", null);
+  });
+
+  useEffect(() => {
+    reactLocalStorage.set("session_id", session);
+  }, [session]);
+
+  useEffect(() => {
+    reactLocalStorage.set("auth_id", auth);
+  }, [auth]);
+
   return (
     <authContext.Provider value={[auth, setAuth]}>
       <sessionContext.Provider value={[session, setSession]}>
