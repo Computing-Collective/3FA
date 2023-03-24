@@ -36,10 +36,7 @@ from digitalio import DigitalInOut, Direction, Pull
 import busio
 from adafruit_lsm6ds.lsm6ds33 import LSM6DS33
 
-import os
-import ssl
-import wifi
-import socketpool
+
 import adafruit_requests
 
 
@@ -77,7 +74,7 @@ sensor = LSM6DS33(i2c)
 
 # Global parameters
 sensitivity = 18
-buffer_offset = 5 # there are typically 3 elements of feedback 
+buffer_offset = 4 # there are typically 3 elements of feedback 
                   # for example forward move is [20, -20, -18, -12, -4, 0, 0, 0]
 z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 to detect flips as the sign of the number)
 
@@ -137,6 +134,47 @@ def sign(num):
     if num == 0: 
         return 1 
     return num / abs(num)
+
+def add_all_sensor_data(sequence):
+    sequence["AX"].append(round(sensor.acceleration[0], 1))
+    sequence["AY"].append(round(sensor.acceleration[1], 1))
+    sequence["AZ"].append(round(sensor.acceleration[2], 1))
+    sequence["GX"].append(round(sensor.gyro[0], 1))
+    sequence["GY"].append(round(sensor.gyro[1], 1))
+    sequence["GZ"].append(round(sensor.gyro[2], 1))
+
+# Requires a list of valid moves in order
+# Just a case statement with added prints/led output
+def add_moves_to_sequence(valid_moves):
+    for move in valid_moves:
+        if move == "FLIP":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("FLIP")
+        if move == "RIGHT":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("RIGHT")
+        if move == "FORWARD":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("FORWARD")
+        if move == "UP":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("UP")
+        if move == "LEFT":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("LEFT")
+        if move == "BACKWARD":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("BACKWARD")
+        if move == "DOWN":
+            sequence_correct_led()
+            print(move)
+            final_sequence.append("DOWN")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # IMU DATA PARSING -> SEQUENCE
@@ -232,10 +270,10 @@ def check_sequence(sequence):
         # if z < 0 then ADD 9.8m/s^s
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if z - sign(z) * z_offset < (-1 * sensitivity) / 2:
+            if z - z_offset < (-1 * sensitivity) / 2:
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
-            elif z - sign(z) * z_offset > sensitivity:
+            elif z - z_offset > sensitivity:
                 valid_moves_indexed.append(("UP", i))
                 buffer = buffer + buffer_offset
 
@@ -281,10 +319,10 @@ def check_sequence(sequence):
 
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if (z - sign(z) * z_offset) > (sensitivity / 2):
+            if (z - z_offset) > (sensitivity / 2):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
-            elif (z - sign(z) * z_offset) < (-1 * sensitivity):
+            elif (z - z_offset) < (-1 * sensitivity):
                 valid_moves_indexed.append(("DOWN", i))  
                 buffer = buffer + buffer_offset
 
@@ -414,6 +452,10 @@ def init_wifi():
 def request_pico_id():
     return "PICO_XX_AA_123"
 
+def transmit_wireless_message(sequence):
+    pass
+
+
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # MAIN LOGIC
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -448,7 +490,7 @@ while True:
         
         # TODO: GET PICO ID HERE
         pico_id = request_pico_id()
-        final_sequence.append(pico_id)
+        final_sequence.append(pico_id) # add the pico as the first element of the list
 
     elif stop_btn.value and is_recording:
         is_recording = False
@@ -457,50 +499,14 @@ while True:
 
         # Validate move
         valid_moves = check_sequence(sequence)
-        for move in valid_moves:
-            if move == "FLIP":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("FLIP")
-            if move == "RIGHT":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("RIGHT")
-            if move == "FORWARD":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("FORWARD")
-            if move == "UP":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("UP")
-            if move == "LEFT":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("LEFT")
-            if move == "BACKWARD":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("BACKWARD")
-            if move == "DOWN":
-                sequence_correct_led()
-                print(move)
-                final_sequence.append("DOWN")
+        add_moves_to_sequence(valid_moves)
 
         # TODO: Transmit the final sequence
-        # send -> final_sequence
-
         print("\n\nTransmitting: ", final_sequence)
+        transmit_wireless_message(final_sequence)
         
         # Reset the sequence for next recording    
-        sequence = {"AX" : [],
-            "AY" : [],
-            "AZ" : [],
-            "GX" : [],
-            "GY" : [],
-            "GZ" : [],
-            }
-        
+        sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }        
         final_sequence = []
          
 
@@ -509,57 +515,11 @@ while True:
 
         # Prevent overflow (sequence terminates if trying to record for more than 10 seconds)    
         if len(sequence["AX"]) > 1000:
-            print("\n\n\n\n\n\n\n\nRestarting, overflowed 10s")
-            sequence = {"AX" : [],
-                "AY" : [],
-                "AZ" : [],
-                "GX" : [],
-                "GY" : [],
-                "GZ" : [],
-                }
+            print("\n\n\n\n\n\n\n\nRestarting, overflowed 10s\n\n")
+            sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }
 
-        sequence["AX"].append(round(sensor.acceleration[0], 1))
-        sequence["AY"].append(round(sensor.acceleration[1], 1))
-        sequence["AZ"].append(round(sensor.acceleration[2], 1))
-        sequence["GX"].append(round(sensor.gyro[0], 1))
-        sequence["GY"].append(round(sensor.gyro[1], 1))
-        sequence["GZ"].append(round(sensor.gyro[2], 1))
+        add_all_sensor_data(sequence)
         
-        if sensor.acceleration[2] > 0:
-            print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
-        else:
-            print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] + z_offset, 1), sensitivity, -1 * sensitivity))
-
-            
-        # print((sensor.acceleration[1], 16, -16))
+        print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
 
     time.sleep(0.1)
-
-    # print as tuple for the plotter
-    # AX: Green
-    # AY: Blue
-    # AZ: Orange
-    # print((sensor.acceleration[0], sensor.acceleration[1], sensor.acceleration[2]))
-    # print((sensor.gyro[0], sensor.gyro[1], sensor.gyro[2]))
-
-    # print_all_imu()
-
-
-
-
-
-    '''
-    Notes on IMU data
-
-    Fast movement is +/- 16    (m/s^2)
-
-    There is speed up and slow down
-    - Identify which came first
-
-
-
-    Note giving a slight smooth motion in the opposite direciton of where you want to go before doing the motion
-    Can get a stronger signal since the acceleration will be relatively greater
-    
-    
-    '''
