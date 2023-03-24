@@ -6,10 +6,16 @@ import { useNavToVault } from "../hooks/useNavToVault.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
-// props.type is 'password' | 'email' | none (for input field)
-// props.endpoint is 'email' | 'password' | 'camera' | 'motion_pattern/initialize' (for API endpoint)
-// props.setError used to display err messages
-// props.pico_id is used in 'sensor' page for admin
+/**
+ *
+ * @param {object} props
+ * @param {string} props.type - type of input field ('password' | 'email' | none (for input field))
+ * @param {string} props.endpoint - API endpoint to send data to ex: 'email' | 'password' | 'camera' | 'motion_pattern/initialize' (for API endpoint)
+ * @param {function} props.setError - function to set error message
+ * @param {string} props.pico_id - pico_id of user (used in the 'sensor' page)
+ *
+ * @returns a submit button that sends data to the API
+ */
 export function SubmitButton(props) {
   const navigate = useNavigate(); // TODO change to useNavigation() to provide loading screens (primarily sensor?)
   // https://reactrouter.com/en/main/hooks/use-navigation

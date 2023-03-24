@@ -2,9 +2,14 @@ import * as React from "react";
 import { useContext, useRef, useState, useEffect } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
-import { login } from "./auth.js";
+import { login } from "../functions/auth.js";
 
-// wrapper around routes that require authentication (i.e. /vault)
+/**
+ * wrapper around routes that require authentication (i.e. /vault)
+ * @param {object} props
+ * @param {React.ReactNode} props.children - the children of the component
+ * @returns a component that checks if the user is authenticated before rendering the children
+ */
 export function RequireAuth({ children }) {
   const [auth, setAuth] = useContext(authContext);
   // state that checks if the auth is checked (waiting for async function to finish)

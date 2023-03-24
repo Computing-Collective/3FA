@@ -15,7 +15,7 @@ import {
 import { Password } from "./pages/password.jsx";
 import { Email } from "./pages/email.jsx";
 import { Vault } from "./pages/vault.jsx";
-import { RequireAuth } from "./hooks/RequireAuth.js";
+import { RequireAuth } from "./components/RequireAuth.js";
 import { Sensor } from "./pages/sensor.jsx";
 import { Camera } from "./pages/camera.jsx";
 

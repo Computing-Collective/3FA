@@ -1,17 +1,18 @@
 import React, { useContext, useState, useEffect } from "react";
-import styled from "styled-components";
-import { handleNextNavigation, handleSubmit } from "../functions/handleSubmit";
 import { useLocation, useNavigate, useNavigation } from "react-router-dom";
 import { Backdoor } from "./backdoor.jsx";
 import { sessionContext, authContext } from "../app.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
-import { SubmitButton } from "../components/SubmitButton.jsx";
 import { Video } from "../components/Video.jsx";
 import { Button } from "@mui/material";
 import { useNavToVault } from "../hooks/useNavToVault";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
+/**
+ *
+ * the camera page
+ */
 export function Camera() {
   const [error, setError] = useState(""); // error msg
   const [data, setData] = useState(""); // camera input (base64?)
@@ -28,11 +29,6 @@ export function Camera() {
 
   /**
    * handler for submit button on camera page, sends API request to admin
-   * @param {*} blob the image to send to backend
-   * @param {*} session the session ID
-   * @param {*} navigate used for navigating to other routes
-   * @param {*} setText used for displaying error messages
-   * @param {*} setAuth sets Auth if on last stage
    */
   async function handleCameraSubmit() {
     // the endpoint for face
@@ -55,7 +51,7 @@ export function Camera() {
     handleNextNavigation(json, response);
   }
 
-  // duplicated code with submitButton.jsx
+  // TODO duplicated code with submitButton.jsx
   function handleNextNavigation(json, response) {
     const next = json.next;
     const success = json.success;
@@ -84,6 +80,7 @@ export function Camera() {
     navigate(`/${json.next}`);
   }
 
+  // TODO make this a nicer button with mui
   function CameraSubmitButton(props) {
     return <Button onClick={props.onClick}>Submit</Button>;
   }

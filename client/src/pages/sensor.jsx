@@ -9,7 +9,7 @@ import right from "../../public/icons/right.png";
 import forward from "../../public/icons/forward.png";
 import backward from "../../public/icons/backward.png";
 import flip from "../../public/icons/flip.png";
-import { getUniquePicoID } from "../hooks/auth";
+import { getUniquePicoID } from "../functions/auth.js";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
@@ -25,6 +25,10 @@ const picObj = {
   flip: flip,
 };
 
+/**
+ *
+ * @returns the sensor page
+ */
 export function Sensor() {
   const [moves, setMoves] = useState(
     _.sample(possMoves, 3) // initialize sensor with randomized moves
@@ -52,7 +56,12 @@ export function Sensor() {
   );
 }
 
-// component that displays the pictures
+/**
+ *
+ * @param {object} props
+ * @param {array} props.sensor the array of moves to display -- declared as a global variable. ex: ["forward", "backward", "left"]
+ * @returns the pictures of the moves (located in /public/icons)
+ */
 function Pictures(props) {
   const sensor = props.sensor;
   let count = 0;

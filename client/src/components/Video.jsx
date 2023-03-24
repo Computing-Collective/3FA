@@ -1,43 +1,24 @@
 import React, { useCallback, useRef, useState } from "react";
 import Measure from "react-measure";
-import { useUserMedia } from "../functions/useUserMedia";
+import { useUserMedia } from "../hooks/useUserMedia";
 import styled, { css, keyframes } from "styled-components";
 import { useOffsets } from "../hooks/useOffsets";
-import WebCam from "react-webcam";
-import { useCardRatio } from "../functions/useCardRatio";
 
 // constrain the size of screenshot / video
-const width = 600;
-const height = width;
 
-// component that renders the video feed
-const WebCamCapture = () => {
-  const webcamRef = useRef(null);
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    // TODO imageSrc is a blob
-  }, [webcamRef]);
-  return (
-    <>
-      <WebCam
-        audio={false}
-        width={width}
-        height={height}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        videoConstraints={CAPTURE_OPTIONS}
-      />
-      <button onClick={capture}>Capture photo</button>
-    </>
-  );
-};
 const CAPTURE_OPTIONS = {
   audio: false,
-  width: width,
-  height: height,
   video: { facingMode: "environment" },
 };
 
+/**
+ *
+ * @param {object} props
+ * @param {function} props.setText- sets the text of the error message
+ * @param {function} props.onCapture - callback for when the user captures an image
+ * @param {function} props.onClear - callback for when the user clears the canvas
+ * @returns a video component that displays the camera feed and allows the user to take a picture. also sends the picture to the admin
+ */
 export function Video({ setText, onCapture, onClear }) {
   const [container, setContainer] = useState({ width: 0, height: 0 });
   const videoRef = useRef();
@@ -54,10 +35,12 @@ export function Video({ setText, onCapture, onClear }) {
     container.height
   );
 
+  // update the videoRef if the mediaStream changes
   if (mediaStream && videoRef.current && !videoRef.current.srcObject) {
     videoRef.current.srcObject = mediaStream;
   }
 
+  // handler whenever the window size changes
   function handleResize(contentRect) {
     setContainer({
       width: contentRect.bounds.width,
@@ -65,6 +48,7 @@ export function Video({ setText, onCapture, onClear }) {
     });
   }
 
+  // handler for when the user clicks the button
   function handleCapture() {
     const context = canvasRef.current.getContext("2d");
 
@@ -85,6 +69,7 @@ export function Video({ setText, onCapture, onClear }) {
     setIsFlashing(true);
   }
 
+  // clears the canvas
   function handleClear() {
     const context = canvasRef.current.getContext("2d");
     context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -92,6 +77,7 @@ export function Video({ setText, onCapture, onClear }) {
     onClear();
   }
 
+  // autoplays the camera footage
   function handleCanPlay() {
     setIsVideoPlaying(true);
     videoRef.current.play();
@@ -99,14 +85,12 @@ export function Video({ setText, onCapture, onClear }) {
 
   return (
     <>
-      {/* <WebCamCapture /> */}
       <Measure bounds onResize={handleResize}>
         {({ measureRef }) => (
           <>
             <Container
               ref={measureRef}
-              maxHeight={videoRef.current && videoRef.current.videoHeight}
-              maxWidth={videoRef.current && videoRef.current.videoWidth}
+              maxWidth={videoRef.current && videoRef.current.videoWidth} // by removing height, we allow the video to finish renderering and be cropped 1:1
               style={{
                 height: `${container.height}px`,
               }}>
@@ -117,8 +101,11 @@ export function Video({ setText, onCapture, onClear }) {
                 playsInline
                 muted
                 style={{
-                  top: `-${offsets.y}px`,
-                  left: `-${offsets.x}px`,
+                  objectFit: "cover",
+                  // should already have an aspect ratio of 1
+                  width: `${container.width}px`,
+                  height: `${container.height}px`,
+                  transform: "scaleX(-1)",
                 }}
               />
               <Canvas ref={canvasRef} width={container.width} height={container.height} />

@@ -1,9 +1,13 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext, sessionContext } from "../app.jsx";
-import { login } from "../hooks/auth.js";
 
-// component used for backdoor routing :D
+/**
+ *
+ * @param {object} props
+ * @param {string} props.pico_id - the pico_id of the user
+ * @returns a component used for testing. It has buttons to navigate to other pages and set the auth state
+ */
 export function Backdoor(props) {
   const navigate = useNavigate();
   const [session, setSession] = useContext(sessionContext);

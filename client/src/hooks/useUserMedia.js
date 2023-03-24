@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 
 /**
  * gets the user media stream
- * @param {*} requestedMedia
- * @param {*} setErr
+ * @param {object} requestedMedia the media object that is passed to navigator.mediaDevices.getUserMedia() (e.g. { video: true, audio: true })
+ * @param {function} setErr state modifier that sets the error message
  * @returns a mediastream object
  */
 export function useUserMedia(requestedMedia, setErr) {

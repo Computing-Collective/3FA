@@ -6,6 +6,10 @@ import { sessionContext, authContext } from "../app.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
+/**
+ *
+ * @returns the email page
+ */
 export function Email() {
   const [error, setError] = useState("");
 
