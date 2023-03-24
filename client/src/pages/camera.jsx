@@ -94,8 +94,7 @@ export function Camera() {
         onCapture={async (blob) => {
           setData(blob);
         }}
-        onClear={(event) => {
-          event.preventDefault();
+        onClear={() => {
           setData(null);
         }}
       />

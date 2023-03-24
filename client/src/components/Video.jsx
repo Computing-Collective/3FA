@@ -48,10 +48,9 @@ export function Video({ setText, onCapture, onClear }) {
     });
   }
 
-  // handler for when the user clicks the button
+  // handler for when the user draws on the canvas
   function handleCapture() {
     const context = canvasRef.current.getContext("2d");
-
     context.drawImage(
       videoRef.current,
       offsets.x,
@@ -90,7 +89,7 @@ export function Video({ setText, onCapture, onClear }) {
           <>
             <Container
               ref={measureRef}
-              maxWidth={videoRef.current && videoRef.current.videoWidth} // by removing height, we allow the video to finish renderering and be cropped 1:1
+              maxWidth={videoRef.current && videoRef.current.videoHeight} // by removing height, we allow the video to finish renderering and be cropped 1:1
               style={{
                 height: `${container.height}px`,
               }}>
@@ -105,10 +104,18 @@ export function Video({ setText, onCapture, onClear }) {
                   // should already have an aspect ratio of 1
                   width: `${container.width}px`,
                   height: `${container.height}px`,
+                  // flips the camera
                   transform: "scaleX(-1)",
                 }}
               />
-              <Canvas ref={canvasRef} width={container.width} height={container.height} />
+              <Canvas
+                ref={canvasRef}
+                width={container.width}
+                height={container.height}
+                style={{
+                  transform: "scaleX(-1)",
+                }}
+              />
               <Flash flash={isFlashing} onAnimationEnd={() => setIsFlashing(false)} />
             </Container>
             {isVideoPlaying && (

@@ -63,6 +63,7 @@ export function Sensor() {
  * @returns the pictures of the moves (located in /public/icons)
  */
 function Pictures(props) {
+  // TODO fix the cropping on the pictures
   const sensor = props.sensor;
   let count = 0;
   return (
