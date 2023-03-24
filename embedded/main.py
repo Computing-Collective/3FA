@@ -78,6 +78,8 @@ buffer_offset = 4 # there are typically 3 elements of feedback
                   # for example forward move is [20, -20, -18, -12, -4, 0, 0, 0]
 z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 to detect flips as the sign of the number)
 
+MOVE_URL = "http://192.168.137.1:5000/move" # URL to receive move requests from
+
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ADDITIONAL FUNCTIONS
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -450,10 +452,24 @@ def init_wifi():
     requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
 def request_pico_id():
-    return "PICO_XX_AA_123"
+    print("\n\nRequesting Pico ID")
+    try:
+        requests = adafruit_requests.Session
+        response = requests.get(MOVE_URL)
+        pico_id = response.text
+        print("\n\nReceived Pico ID:", pico_id)
+        return "PICO_ID_TEMP"
+        return pico_id
+    except Exception as e:
+        print("\n\nError Requesting Pico ID")
+        return "ERROR RECEIVING PICO ID"
 
 def transmit_wireless_message(sequence):
-    pass
+    print("\n\nTransmitting: ", final_sequence)
+    #TODO: transmit the sequence which is a list of strings
+    #      in the format needed by admin side
+    # format of string is ["pico id", "DOWN", "LEFT"]
+
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -502,7 +518,6 @@ while True:
         add_moves_to_sequence(valid_moves)
 
         # TODO: Transmit the final sequence
-        print("\n\nTransmitting: ", final_sequence)
         transmit_wireless_message(final_sequence)
         
         # Reset the sequence for next recording    
