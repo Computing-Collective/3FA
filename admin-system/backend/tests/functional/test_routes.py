@@ -9,6 +9,7 @@ import pytest
 
 import api.helpers
 import constants
+from constants import ValidMoves
 
 
 @pytest.mark.get_request
@@ -52,13 +53,15 @@ def test_not_json(test_client, endpoint):
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("email, password, motion_pattern, auth_methods, image, expected_result", [
-    ("a@ab.com", "password", ["direction"], [True, True, True], "user1.png", 400),
+    ("a@ab.com", "password", [ValidMoves.LEFT.value], [True, True, True], "user1.png", 400),
     # Invalid password (no uppercase and number)
-    ("b@bc.ca", "Password1", ["up"], [True, True, False], "no_photo", 200),  # Valid user
-    ("c@de.cl", "Password1", ["down"], [False, False, True], "user1.png", 200),  # Valid user
-    ("only@motion.com", "Password1", ["up"], [False, True, False], "user1.png", 200),  # Valid user
-    ("slaj@slj.lka", "Sakjlkjd3", ["left", "right"], [True, False, False], "no_photo", 200),  # Valid user
-    ("ewou@xnc.skd", "Password1", ["up", "down"], [True, True, True], "no_photo", 400),  # No photo provided
+    ("b@bc.ca", "Password1", [ValidMoves.UP.value], [True, True, False], "no_photo", 200),  # Valid user
+    ("c@de.cl", "Password1", [ValidMoves.DOWN.value], [False, False, True], "user1.png", 200),  # Valid user
+    ("only@motion.com", "Password1", [ValidMoves.UP.value], [False, True, False], "user1.png", 200),  # Valid user
+    ("slaj@slj.lka", "Sakjlkjd3", [ValidMoves.LEFT.value, ValidMoves.RIGHT.value], [True, False, False], "no_photo",
+     200),  # Valid user
+    ("ewou@xnc.skd", "Password1", [ValidMoves.UP.value, ValidMoves.DOWN.value], [True, True, True], "no_photo", 400),
+    # No photo provided
 ])
 def test_user_create(test_client, email, password, motion_pattern, auth_methods, image, expected_result):
     """
@@ -162,7 +165,7 @@ def test_user_login_motion_pattern_unique(test_client):
     pico_id = "ac022bac-45d5-477c-a90e-e4447155cef3"
     request_data = {
         "pico_id": pico_id,
-        "data": ["up", "down", "left", "right"]
+        "data": [ValidMoves.UP.value, ValidMoves.DOWN.value, ValidMoves.LEFT.value, ValidMoves.RIGHT.value]
     }
     user = api.helpers.get_user_from_email("b@bc.ca")
     session = api.helpers.create_login_session(user)
@@ -180,9 +183,10 @@ def test_user_login_motion_pattern_unique(test_client):
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("seed, email, motion_added, pico_result, expected_result", [
-    ("seed1", "only@motion.com", ["down"], "complete", 200),  # Valid user
-    ("seed2", "only@motion.com", ["up"], "retry", 401),  # Wrong sequence
-    ("seed3", "only@motion.com", ["up"], "timeout", 401),  # Timeout
+    ("seed1", "only@motion.com", [ValidMoves.DOWN.value], "complete", 200),  # Valid user
+    ("seed2", "only@motion.com", [ValidMoves.UP.value], "retry", 401),  # Wrong sequence
+    ("seed3", "only@motion.com", [ValidMoves.UP.value], "timeout", 401),  # Timeout
+    ("seed4", "only@motion.com", ["invalid"], "complete", 400),  # Invalid move
 ])
 @patch("api.helpers.retry_motion_pattern")
 def test_user_login_motion_pattern(mock_retry, test_client, seed, email, motion_added, pico_result, expected_result):
@@ -215,10 +219,16 @@ def test_user_login_motion_pattern(mock_retry, test_client, seed, email, motion_
 @pytest.mark.database
 @pytest.mark.post_request
 @pytest.mark.parametrize("seed, email, key, motion_pattern, motion_added, expected_result", [
-    ("seed1", "only@motion.com", "data", ["up", "left", "right"], ["left", "right"], 200),  # Valid user
-    ("seed2", "only@motion.com", "data", ["down", "up"], ["up"], 401),  # Wrong base sequence
-    ("seed3", "only@motion.com", "data", ["up", "down"], ["left"], 401),  # Wrong added sequence
-    ("seed4", "only@motion.com", "notdata", ["up", "down"], ["down"], 400),  # Invalid key
+    ("seed1", "only@motion.com", "data", [ValidMoves.UP.value, ValidMoves.LEFT.value, ValidMoves.RIGHT.value],
+     [ValidMoves.LEFT.value, ValidMoves.RIGHT.value], 200),  # Valid user
+    ("seed2", "only@motion.com", "data", [ValidMoves.DOWN.value, ValidMoves.UP.value], [ValidMoves.UP.value], 401),
+    # Wrong base sequence
+    ("seed3", "only@motion.com", "data", [ValidMoves.UP.value, ValidMoves.DOWN.value], [ValidMoves.LEFT.value], 401),
+    # Wrong added sequence
+    ("seed4", "only@motion.com", "notdata", [ValidMoves.UP.value, ValidMoves.DOWN.value], [ValidMoves.DOWN.value], 400),
+    # Invalid key
+    ("seed5", "only@motion.com", "data", [ValidMoves.UP.value, "not_a_move"], [ValidMoves.DOWN.value], 400),
+    # Invalid move
 ])
 def test_user_login_motion_pattern_pico(test_client, seed, email, key, motion_pattern, motion_added, expected_result):
     """

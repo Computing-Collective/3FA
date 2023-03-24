@@ -1,3 +1,15 @@
+from enum import Enum
+
 LOGIN_SESSION_EXPIRY_MINUTES = 5
 AUTH_SESSION_EXPIRY_MINUTES = 60
 MOTION_PATTERN_TIMEOUT_SECONDS = 60
+
+
+class ValidMoves(Enum):
+    UP = "UP"
+    DOWN = "DOWN"
+    LEFT = "LEFT"
+    RIGHT = "RIGHT"
+    FORWARD = "FORWARD"
+    BACKWARD = "BACKWARD"
+    FLIP = "FLIP"

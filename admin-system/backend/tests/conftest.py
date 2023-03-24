@@ -4,6 +4,7 @@ import pytest
 
 import api.helpers
 from api.app import create_app, db
+from constants import ValidMoves
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -29,12 +30,14 @@ def list_of_users() -> list[list]:
     Returns a list of lists with valid user data
     """
     return [
-        ["nevlezayubyet@emaill.app", "x*8#5YLSG9%E", "[\"left\", \"right\"]", True, True, True, "user1.png"],
-        ["rajuhka@ogvoice.com", None, "[\"up\", \"down\", \"clockwise\"]", False, True, False, "user1.png"],
-        ["ad1723@xgod.cf", "2q5#KO2d*ym5", "[\"left\"]", True, True, False, "user1.png"],
+        ["nevlezayubyet@emaill.app", "x*8#5YLSG9%E", [ValidMoves.LEFT.value, ValidMoves.RIGHT.value],
+         True, True, True, "user1.png"],
+        ["rajuhka@ogvoice.com", None, [ValidMoves.UP.value, ValidMoves.DOWN.value, ValidMoves.FLIP.value], False, True,
+         False, "user1.png"],
+        ["ad1723@xgod.cf", "2q5#KO2d*ym5", [ValidMoves.LEFT.value], True, True, False, "user1.png"],
         ["doubleupmike21@rjostre.com", None,
-         "[\"up\", \"down\", \"clockwise\", \"left\", \"right\", \"counter-clockwise\"]", False, True, True,
-         "user1.png"],
+         [ValidMoves.UP.value, ValidMoves.DOWN.value, ValidMoves.FLIP.value, ValidMoves.LEFT.value,
+          ValidMoves.RIGHT.value, ValidMoves.FLIP.value], False, True, True, "user1.png"],
     ]
 
 
