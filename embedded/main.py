@@ -496,7 +496,7 @@ def set_pico_id(request: HTTPRequest):
     # TODO: update this
     pico_id = "some value"
 
-    output = "Pico ID received: " + raw_text
+    output = "Pico ID received: " + pico_id
     with HTTPResponse(request) as response:
         response.send(output)
 
