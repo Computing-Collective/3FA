@@ -1,8 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const { desktopCapturer } = require("electron");
-const { startCamera, getVideoFeed } = require("./functions/camera.js");
 require("dotenv").config();
+
+// TODO make elio pay microsoft
+app.commandLine.appendSwitch("ignore-certificate-errors");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -19,8 +21,6 @@ const createWindow = () => {
     },
   });
 
-  // send video feed to renderer on the "camera:live-feed" channel
-  mainWindow.webContents.send("camera:live-feed", getVideoFeed());
   // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
   mainWindow.webContents.send("API_ENDPOINT", process.env.API_ENDPOINT);
 
@@ -57,12 +57,3 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-
-// desktopCapturer.getSources({ types: ["window", "screen"] }).then(async (sources) => {
-//   for (const source of sources) {
-//     if (source.name === "Electron") {
-//       mainWindow.webContents.send("SET_SOURCE", source.id);
-//       return;
-//     }
-//   }
-// });
