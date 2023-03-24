@@ -18,6 +18,7 @@ export function Backdoor(props) {
       <h1>Session: {session}</h1>
       <h1>Auth: {auth}</h1>
       <h1>Pico ID: {props.pico_id}</h1>
+      <button onClick={() => navigate("/signup")}>Signup</button>
       <button onClick={() => navigate("/")}>Email</button>
       <button onClick={() => navigate("/password")}>Password</button>
       <button onClick={() => navigate("/sensor")}>Sensor</button>

@@ -12,12 +12,13 @@ import {
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
-import { Password } from "./pages/password.jsx";
-import { Email } from "./pages/email.jsx";
-import { Vault } from "./pages/vault.jsx";
+import { Password } from "./pages/Password.jsx";
+import { Email } from "./pages/Email.jsx";
+import { Vault } from "./pages/Vault.jsx";
 import { RequireAuth } from "./components/RequireAuth.js";
-import { Sensor } from "./pages/sensor.jsx";
-import { Camera } from "./pages/camera.jsx";
+import { Sensor } from "./pages/Sensor.jsx";
+import { Camera } from "./pages/Camera.jsx";
+import { Signup } from "./pages/Signup.jsx";
 
 // variables for authentication with admin
 export const authContext = createContext(null);
@@ -28,6 +29,7 @@ const router = createHashRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<Email />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/password" element={<Password />} />
       <Route path="/sensor" element={<Sensor />} />
       <Route path="/camera" element={<Camera />} />

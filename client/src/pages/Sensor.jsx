@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { Backdoor } from "./backdoor.jsx";
+import { Backdoor } from "./Backdoor.jsx";
 import _, { map } from "underscore";
 import up from "../../public/icons/up.png";
 import down from "../../public/icons/down.png";

@@ -3,10 +3,10 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
 import { logout } from "../functions/auth.js";
-import { Backdoor } from "./backdoor.jsx";
+import { Backdoor } from "./Backdoor.jsx";
 
 /**
- * 
+ *
  * @returns the vault page
  */
 export function Vault() {

@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useLocation, useNavigate, useNavigation } from "react-router-dom";
-import { Backdoor } from "./backdoor.jsx";
+import { Backdoor } from "./Backdoor.jsx";
 import { sessionContext, authContext } from "../app.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { Video } from "../components/Video.jsx";
 import { Button } from "@mui/material";
-import { useNavToVault } from "../hooks/useNavToVault";
+import { useNavToVault } from "../hooks/useNavToVault.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
@@ -91,7 +91,7 @@ export function Camera() {
       {error !== "" && <DisplayError text={error} />}
       <Video
         setText={setError}
-        onCapture={async (blob) => {
+        onCapture={(blob) => {
           setData(blob);
         }}
         onClear={() => {
@@ -103,7 +103,7 @@ export function Camera() {
         endpoint={"camera"}
         onClick={(event) => {
           event.preventDefault();
-          handleCameraSubmit();
+          handleCameraSubmit(); // TODO does this work?
         }}
       />
       <Backdoor />
