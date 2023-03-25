@@ -1,5 +1,5 @@
 import { Button, Checkbox, Select, Option, IconButton, Typography } from "@mui/joy";
-import React, { cloneElement, useState } from "react";
+import React, { cloneElement, useState, useRef } from "react";
 import { Done } from "@mui/icons-material";
 import { Backdoor } from "./Backdoor.jsx";
 import { InputField } from "../components/InputField.jsx";
@@ -115,8 +115,9 @@ function HoverCheckbox(props) {
 }
 
 function MotionPattern(props) {
-  const [count, setCount] = useState(1);
-  let motionPatternList = [];
+  const [count, setCount] = useState(1); // the displayed number
+  const motionPatternsRef = useRef([<SelectMotionPattern />]); // a list of selection dropdowns
+  let keyCount = 0; // used for unique keys for components
   return (
     <>
       <IconButton
@@ -125,7 +126,7 @@ function MotionPattern(props) {
         disabled={count < 2}
         onClick={() => {
           setCount((c) => c - 1);
-          motionPatternList.pop(<SelectMotionPattern />);
+          motionPatternsRef.current.pop(<SelectMotionPattern />);
         }}>
         <Remove />
       </IconButton>
@@ -136,15 +137,12 @@ function MotionPattern(props) {
         disabled={count > 3}
         onClick={() => {
           setCount((c) => c + 1);
-          motionPatternList.push(<SelectMotionPattern />);
+          motionPatternsRef.current.push(<SelectMotionPattern />);
         }}>
         <Add />
       </IconButton>
-      {/* // TODO render a variable amount of components */}
-      {motionPatternList.map((motionPattern) => {
-        <span key={motionCount++}>
-          <SelectMotionPattern />
-        </span>;
+      {motionPatternsRef.current.map(() => {
+        return <SelectMotionPattern key={keyCount++} />;
       })}
     </>
   );
@@ -153,14 +151,13 @@ function MotionPattern(props) {
 function SelectMotionPattern(props) {
   return (
     <>
-      <Select defaultValue="NONE">
+      <Select defaultValue="UP">
         <Option value="UP">Up</Option>
         <Option value="DOWN">Down</Option>
         <Option value="LEFT">Left</Option>
         <Option value="RIGHT">Right</Option>
         <Option value="FORWARD">Forward</Option>
         <Option value="BACKWARD">Backward</Option>
-        <Option value="NONE">None</Option>
       </Select>
     </>
   );
