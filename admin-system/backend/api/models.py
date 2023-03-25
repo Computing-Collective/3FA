@@ -70,6 +70,8 @@ class User(db.Model):
     motion_pattern = db.Column(db.String, nullable=True)
     # User's facial recognition reference photo - only used if the user has enabled facial recognition authentication
     photo = db.Column(db.LargeBinary, nullable=True)
+    # Whether the user has admin privileges
+    admin = db.Column(db.Boolean, nullable=False, default=False)
 
     # Ensures that the ID is a unique UUID and is not null
     @validates('id')

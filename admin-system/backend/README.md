@@ -17,6 +17,11 @@
     ```
 ### Usage
 
+Run the server (production):
+```shell
+
+```
+
 Run the server (development mode):
 > **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
