@@ -1,20 +1,20 @@
 import { Button, Checkbox, Select, Option, IconButton, Typography } from "@mui/joy";
 import React, { cloneElement, useState, useRef } from "react";
-import { Done } from "@mui/icons-material";
 import { Backdoor } from "./Backdoor.jsx";
 import { InputField } from "../components/InputField.jsx";
 import { Remove, Add } from "@mui/icons-material";
+import { HoverCheckbox } from "../components/HoverCheckbox.jsx";
 
 export function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [motionPattern, setMotionPattern] = useState([]);
+  const [motionPatterns, setMotionPatterns] = useState({}); // 0: "UP", 1: "DOWN", 2: "FORWARD", ...
   const [authMethods, setAuthMethods] = useState({
     password: true,
     motion_pattern: false,
     face_recognition: false,
   });
-  let motionCount = 0;
+  console.log(motionPatterns);
 
   async function handleSignup(props) {
     const endpoint = "signup";
@@ -35,7 +35,7 @@ export function Signup() {
     formData.append("email", email);
     formData.append("password", password);
     formData.append("auth_methods", authMethods);
-    formData.append("motion_pattern", motionPattern);
+    formData.append("motion_pattern", motionPatterns);
 
     const response = await fetch(`${api_endpoint}/api/login/${endpoint}/`, {
       method: "POST",
@@ -64,14 +64,17 @@ export function Signup() {
           }}
         />
         {authMethods.motion_pattern && <MotionPattern />}
-        <HoverCheckbox
+        {
+          // TODO force user to use password?
+          /* <HoverCheckbox
           label="Password"
           value={authMethods.password}
           onChange={(event) => {
             setAuthMethods({ ...authMethods, password: event.target.checked });
           }}
           defaultChecked
-        />
+        /> */
+        }
         <HoverCheckbox
           label="Facial Recognition"
           onChange={(event) => {
@@ -91,33 +94,27 @@ export function Signup() {
   );
 }
 
-function HoverCheckbox(props) {
-  return (
-    <Checkbox
-      uncheckedIcon={<Done />}
-      label={props.label}
-      onChange={props.onChange}
-      slotProps={{
-        root: ({ checked, focusVisible }) => ({
-          sx: !checked
-            ? {
-                "& svg": { opacity: focusVisible ? 0.32 : 0 },
-                "&:hover svg": {
-                  opacity: 0.32,
-                },
-              }
-            : undefined,
-        }),
-      }}
-      defaultChecked={props.defaultChecked}
-    />
-  );
-}
-
 function MotionPattern(props) {
   const [count, setCount] = useState(1); // the displayed number
-  const motionPatternsRef = useRef([<SelectMotionPattern />]); // a list of selection dropdowns
+  const motionPatternsRef = useRef([0]); // a list of 0s used to render a variable amount of select motion patterns
   let keyCount = 0; // used for unique keys for components
+
+  // the dropdown for user selection (jsx component)
+  function SelectMotionPattern() {
+    return (
+      <>
+        <Select>
+          <Option value="UP">Up</Option>
+          <Option value="DOWN">Down</Option>
+          <Option value="LEFT">Left</Option>
+          <Option value="RIGHT">Right</Option>
+          <Option value="FORWARD">Forward</Option>
+          <Option value="BACKWARD">Backward</Option>
+        </Select>
+      </>
+    );
+  }
+
   return (
     <>
       <IconButton
@@ -126,7 +123,7 @@ function MotionPattern(props) {
         disabled={count < 2}
         onClick={() => {
           setCount((c) => c - 1);
-          motionPatternsRef.current.pop(<SelectMotionPattern />);
+          motionPatternsRef.current.pop(0);
         }}>
         <Remove />
       </IconButton>
@@ -137,28 +134,14 @@ function MotionPattern(props) {
         disabled={count > 3}
         onClick={() => {
           setCount((c) => c + 1);
-          motionPatternsRef.current.push(<SelectMotionPattern />);
+          motionPatternsRef.current.push(0);
         }}>
         <Add />
       </IconButton>
       {motionPatternsRef.current.map(() => {
+        // render a variable amount of dropdowns
         return <SelectMotionPattern key={keyCount++} />;
       })}
-    </>
-  );
-}
-
-function SelectMotionPattern(props) {
-  return (
-    <>
-      <Select defaultValue="UP">
-        <Option value="UP">Up</Option>
-        <Option value="DOWN">Down</Option>
-        <Option value="LEFT">Left</Option>
-        <Option value="RIGHT">Right</Option>
-        <Option value="FORWARD">Forward</Option>
-        <Option value="BACKWARD">Backward</Option>
-      </Select>
     </>
   );
 }
