@@ -17,6 +17,13 @@
     ```
 ### Usage
 
+Run the server (production):
+> **Note**
+> Gunicorn does not run on Windows. You will need to use WSL
+```shell
+pipenv run gunicorn -b :5000 -w 4 'api.app:create_app()'
+```
+
 Run the server (development mode):
 > **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
