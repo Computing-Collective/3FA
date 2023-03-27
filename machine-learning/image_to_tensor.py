@@ -26,7 +26,7 @@ from torchvision.transforms import ToTensor, Compose, Resize
 (_______/(_______/|/     \||/   \__/|/    )_)\_______/|/    )_)(_______)
 """
 
-### ----------- SKIP TO LINE 100 -------------- ###
+### ----------- SKIP TO LINE 120 -------------- ###
 
 class EmbeddingNetwork(nn.Module):
     def __init__(self):
@@ -129,9 +129,17 @@ model.load_state_dict(torch.load("machine-learning/model.pth", map_location=torc
 model.eval()
 
 """ --------------- IMAGE LOADING --------------- """
-# example paths, replace with your own
-eval_image = Image.open(os.path.join("machine-learning", "data", "positive", "0adb6779-c43b-11ed-ba19-40ec9985096b.jpg"))
-anchor_image = Image.open(os.path.join("machine-learning", "data", "anchor", "0a2aae88-c43b-11ed-96ee-40ec9985096b.jpg"))
+# matt
+# eval_image = Image.open(os.path.join("machine-learning", "data", "matt", "positive", "9a3c2702-ca63-11ed-9d8e-40ec9985096b.jpg"))
+# anchor_image = Image.open(os.path.join("machine-learning", "data", "matt", "anchor", "9a9ce6eb-ca63-11ed-98a7-40ec9985096b.jpg"))
+
+# divy
+# eval_image = Image.open(os.path.join("machine-learning", "data", "divy", "positive", "00ac5842-ca5e-11ed-9fa0-40ec9985096b.jpg"))
+# anchor_image = Image.open(os.path.join("machine-learning", "data", "divy", "anchor", "5eae90d5-ca61-11ed-a988-40ec9985096b.jpg"))
+
+# arnav
+eval_image = Image.open(os.path.join("machine-learning", "data", "arnav", "positive", "ab98b000-ca68-11ed-b2ed-40ec9985096b.jpg"))
+anchor_image = Image.open(os.path.join("machine-learning", "data", "arnav", "anchor", "adbeff95-ca68-11ed-ae5e-40ec9985096b.jpg"))
 
 # resize img to 105x105 and convert to tensor
 img_transforms = Compose([
@@ -160,3 +168,4 @@ with torch.no_grad():
     pred = model(anchor_tensor, eval_tensor)
     predicted = classes[pred[0].argmax(0)]
     print(f'Predicted: "{predicted}"')
+    print(pred[0])
