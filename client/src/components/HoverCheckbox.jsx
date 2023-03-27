@@ -1,26 +1,30 @@
 import React from "react";
-import { Checkbox } from "@mui/joy";
+import { Checkbox, FormControl, FormControlLabel } from "@mui/material";
 import { Done } from "@mui/icons-material";
 
-export function HoverCheckbox(props) {
+export function HoverCheckbox({ label, onChange }) {
   return (
-    <Checkbox
-      uncheckedIcon={<Done />}
-      label={props.label}
-      onChange={props.onChange}
-      slotProps={{
-        root: ({ checked, focusVisible }) => ({
-          sx: !checked
-            ? {
-                "& svg": { opacity: focusVisible ? 0.32 : 0 },
-                "&:hover svg": {
-                  opacity: 0.32,
-                },
-              }
-            : undefined,
-        }),
+    <FormControlLabel
+      control={
+        <Checkbox
+          onChange={onChange}
+          sx={{
+            "&.MuiCheckbox-root": {
+              color: "white",
+            },
+            "&.MuiCheckbox-root:hover": {
+              backgroundColor: "transparent",
+            },
+          }}
+          checkedIcon={<Done />}
+        />
+      }
+      label={label}
+      sx={{
+        "&.MuiFormControlLabel-root": {
+          color: "white",
+        },
       }}
-      defaultChecked={props.defaultChecked}
     />
   );
 }

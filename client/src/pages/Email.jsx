@@ -24,7 +24,7 @@ export function Email() {
           setError={setError}
         />
         <CreateAccount />
-        {/* <Backdoor /> */}
+        <Backdoor />
       </div>
     </>
   );

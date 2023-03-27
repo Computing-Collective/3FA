@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
-import { Button, IconButton, Typography } from "@mui/joy";
 import { Backdoor } from "./Backdoor.jsx";
-import { Select, MenuItem } from "@mui/material";
+import { Select, MenuItem, Button, IconButton, Typography } from "@mui/material";
 import { InputField } from "../components/InputField.jsx";
 import { Remove, Add } from "@mui/icons-material";
 import { HoverCheckbox } from "../components/HoverCheckbox.jsx";
@@ -61,68 +60,64 @@ export function Signup() {
   }
   return (
     <>
-      {error !== "" && <DisplayError text={error} />}
-      <form
-        onSubmit={async (event) => {
-          event.preventDefault();
-          handleSignup();
-        }}>
-        <InputField
-          placeholder="Email"
-          value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-          }}
-          type="email"
-        />
-        <InputField
-          placeholder="Password"
-          value={password}
-          onChange={(event) => {
-            setPassword(event.target.value);
-          }}
-          type="password"
-        />
-        {
-          // TODO force user to use password?
-          /* <HoverCheckbox
-          label="Password"
-          value={authMethods.password}
-          onChange={(event) => {
-            setAuthMethods({ ...authMethods, password: event.target.checked });
-          }}
-          defaultChecked
-        /> */
-        }
-        <HoverCheckbox
-          label="Facial Recognition"
-          onChange={(event) => {
-            setAuthMethods({ ...authMethods, face_recognition: event.target.checked });
-          }}
-        />
-        <HoverCheckbox
-          label="Sensor"
-          onChange={(event) => {
-            setAuthMethods({ ...authMethods, motion_pattern: event.target.checked });
-          }}
-        />
-        <Button type="submit">Submit</Button>
-        {/* render camera if needed */}
-        {authMethods.face_recognition && (
-          <Video
-            setText={setError}
-            onCapture={(blob) => {
-              setPhoto(blob);
+      <div className="space-2 flex flex-col justify-center text-center">
+        {error !== "" && <DisplayError text={error} />}
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault();
+            handleSignup();
+          }}>
+          <InputField
+            placeholder="Email"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
             }}
-            onClear={() => {
-              setPhoto(null);
-            }}
+            type="email"
           />
-        )}
-        {/* render sensor dropdowns if needed */}
-        {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
-      </form>
-      <Backdoor />
+          <InputField
+            placeholder="Password"
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+            }}
+            type="password"
+          />
+          <div className="flex flex-col justify-center">
+            <HoverCheckbox
+              label="Facial Recognition"
+              onChange={(event) => {
+                setAuthMethods({
+                  ...authMethods,
+                  face_recognition: event.target.checked,
+                });
+              }}
+            />
+            {/* render camera if needed */}
+            {authMethods.face_recognition && (
+              <Video
+                setText={setError}
+                onCapture={(blob) => {
+                  setPhoto(blob);
+                }}
+                onClear={() => {
+                  setPhoto(null);
+                }}
+              />
+            )}
+            <HoverCheckbox
+              label="Sensor"
+              onChange={(event) => {
+                setAuthMethods({ ...authMethods, motion_pattern: event.target.checked });
+              }}
+            />
+            {/* render sensor dropdowns if needed */}
+            {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+        {/* <Backdoor /> */}
+      </div>
     </>
   );
 }
@@ -167,9 +162,7 @@ function MotionPattern({ selectRefs }) {
 
   return (
     <>
-      <IconButton
-        size="sm"
-        variant="outlined"
+      <NumberButton
         disabled={count < 2}
         onClick={() => {
           setCount((c) => c - 1);
@@ -177,11 +170,9 @@ function MotionPattern({ selectRefs }) {
           selectRefs.current.pop();
         }}>
         <Remove />
-      </IconButton>
+      </NumberButton>
       <Typography fontWeight="md">{count}</Typography>
-      <IconButton
-        size="sm"
-        variant="outlined"
+      <NumberButton
         disabled={count > 3}
         onClick={() => {
           setCount((c) => c + 1);
@@ -189,8 +180,28 @@ function MotionPattern({ selectRefs }) {
           selectRefs.current.push("UP");
         }}>
         <Add />
-      </IconButton>
+      </NumberButton>
       {motionPatterns}
+    </>
+  );
+}
+
+function NumberButton({ onClick, disabled, children }) {
+  return (
+    <>
+      <IconButton
+        size="sm"
+        variant="outlined"
+        disabled={disabled}
+        onClick={onClick}
+        sx={{
+          color: "white",
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+        }}>
+        {children}
+      </IconButton>
     </>
   );
 }
