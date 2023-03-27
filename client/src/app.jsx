@@ -3,6 +3,8 @@ import { useState, createContext, useEffect } from "react";
 import * as ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 import { reactLocalStorage } from "reactjs-localstorage";
+import { purple } from "@mui/material/colors";
+import { createTheme, ThemeProvider } from "@mui/material";
 import {
   Routes,
   Route,
@@ -19,6 +21,7 @@ import { RequireAuth } from "./components/RequireAuth.js";
 import { Sensor } from "./pages/Sensor.jsx";
 import { Camera } from "./pages/Camera.jsx";
 import { Signup } from "./pages/Signup.jsx";
+import "./index.css";
 
 // variables for authentication with admin
 export const authContext = createContext(null);
@@ -45,6 +48,19 @@ const router = createHashRouter(
   )
 );
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      // This is green.A700 as hex.
+      main: "#11cb5f",
+    },
+    secondary: {
+      // Purple and green play nicely together.
+      main: purple[500],
+    },
+  },
+});
+
 const App = () => {
   // the states for the authentication (to modify context later)
   // cached in local storage
@@ -64,7 +80,9 @@ const App = () => {
   return (
     <authContext.Provider value={[auth, setAuth]}>
       <sessionContext.Provider value={[session, setSession]}>
-        <RouterProvider router={router} />
+        <ThemeProvider theme={theme}>
+          <RouterProvider router={router} />
+        </ThemeProvider>
       </sessionContext.Provider>
     </authContext.Provider>
   );
