@@ -15,7 +15,7 @@ export function Backdoor(props) {
 
   return (
     <>
-      <h1>Session: {session}</h1>
+      <h1 className="bg-gray-500 text-center text-white">Session: {session}</h1>
       <h1>Auth: {auth}</h1>
       <h1>Pico ID: {props.pico_id}</h1>
       <button onClick={() => navigate("/signup")}>Signup</button>
@@ -32,6 +32,7 @@ export function Backdoor(props) {
         set auth
       </button>
       <button
+        className="rounded-full"
         onClick={() => {
           setAuth(null);
         }}>

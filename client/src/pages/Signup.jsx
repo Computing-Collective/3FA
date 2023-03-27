@@ -1,4 +1,4 @@
-import React, { cloneElement, useState, useRef, createRef, useMemo } from "react";
+import React, { useState, useRef } from "react";
 import { Button, IconButton, Typography } from "@mui/joy";
 import { Backdoor } from "./Backdoor.jsx";
 import { Select, MenuItem } from "@mui/material";
@@ -8,6 +8,10 @@ import { HoverCheckbox } from "../components/HoverCheckbox.jsx";
 import { Video } from "../components/Video.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 
+/**
+ *
+ * @returns the main signup page
+ */
 export function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -123,6 +127,11 @@ export function Signup() {
   );
 }
 
+/**
+ *
+ * @param {object} selectRefs the refs to update in the higher order component to update with the selected motion pattern ex: "UP", "DOWN", "LEFT", "RIGHT", "FORWARD", "BACKWARD", "FLIP
+ * @returns a list of dropdowns for the user to select their motion pattern
+ */
 function MotionPattern({ selectRefs }) {
   const [count, setCount] = useState(1); // the displayed number
   const motionPatternsRef = useRef([0]); // a list of 0s used to render a variable amount of select motion patterns
@@ -142,7 +151,7 @@ function MotionPattern({ selectRefs }) {
             console.log(event.target.value, index);
             selectRefs.current[index] = event.target.value;
             console.log(selectRefs);
-            // TODO buggy behaviour
+            // TODO buggy behaviour on new
           }}>
           <MenuItem value="UP">Up</MenuItem>
           <MenuItem value="DOWN">Down</MenuItem>
