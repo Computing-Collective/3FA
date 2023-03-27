@@ -5,10 +5,14 @@ import { Select, MenuItem } from "@mui/material";
 import { InputField } from "../components/InputField.jsx";
 import { Remove, Add } from "@mui/icons-material";
 import { HoverCheckbox } from "../components/HoverCheckbox.jsx";
+import { Video } from "../components/Video.jsx";
+import { DisplayError } from "../components/DisplayError.jsx";
 
 export function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [error, setError] = useState("");
   const [authMethods, setAuthMethods] = useState({
     password: true,
     motion_pattern: false,
@@ -33,19 +37,27 @@ export function Signup() {
     //   }
     // }
     let formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
-    formData.append("auth_methods", authMethods);
-    formData.append("motion_pattern", selectRefs.current);
-    console.log(formData);
+    formData.append(
+      "request",
+      JSON.stringify({
+        email: email,
+        password: password,
+        motion_pattern: selectRefs.current,
+        auth_methods: authMethods,
+      })
+    );
+    formData.append("photo", photo);
 
     const response = await fetch(`${api_endpoint}/api/login/${endpoint}/`, {
       method: "POST",
       body: formData,
     });
+    const json = await response.json();
+    console.log(json);
   }
   return (
     <>
+      {error !== "" && <DisplayError text={error} />}
       <form
         onSubmit={async (event) => {
           event.preventDefault();
@@ -67,7 +79,6 @@ export function Signup() {
           }}
           type="password"
         />
-        {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
         {
           // TODO force user to use password?
           /* <HoverCheckbox
@@ -92,6 +103,20 @@ export function Signup() {
           }}
         />
         <Button type="submit">Submit</Button>
+        {/* render camera if needed */}
+        {authMethods.face_recognition && (
+          <Video
+            setText={setError}
+            onCapture={(blob) => {
+              setPhoto(blob);
+            }}
+            onClear={() => {
+              setPhoto(null);
+            }}
+          />
+        )}
+        {/* render sensor dropdowns if needed */}
+        {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
       </form>
       <Backdoor />
     </>
