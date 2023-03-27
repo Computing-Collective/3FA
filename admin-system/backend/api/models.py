@@ -6,6 +6,7 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 
 from api.app import db
+from api.machine_learning import evaluate_images
 from constants import ValidMoves
 
 
@@ -143,10 +144,7 @@ class User(db.Model):
 
     # Checks the provided photo against the stored facial recognition model
     def check_face_recognition(self, file):
-        # TODO: load the ML model and check the image against the output classification (email preferred)
-        # Preview the received image - testing only
-        # file.save('instance/' + self.email + '.jpg')
-        return True
+        return evaluate_images(self.photo, file)
 
 
 class UserFiles(db.Model):

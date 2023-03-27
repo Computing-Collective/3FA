@@ -12,6 +12,9 @@ sqlalchemy = "*"
 flask-cors = "*"
 pyopenssl = "*"
 gunicorn = "*"
+torch = "*"
+torchvision = "*"
+pillow = "*"
 
 [dev-packages]
 pytest = "*"

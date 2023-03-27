@@ -1,5 +1,6 @@
 import os
 
+import torch
 from dotenv import load_dotenv
 from flask import Flask
 from flask_bcrypt import Bcrypt
@@ -43,6 +44,10 @@ def create_app(test_config=None):
             db.drop_all()
 
         db.create_all()
+        from api.machine_learning import model
+        model.load_state_dict(torch.load(os.path.join(app.instance_path, "model.pth"),
+                                         map_location=torch.device('cpu')))
+        model.eval()
 
     # Initialize the encryption extension
     bcrypt.init_app(app)
