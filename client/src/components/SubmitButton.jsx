@@ -3,6 +3,8 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
+import { InputField } from "./InputField.jsx";
+import { Button } from "@mui/material";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
@@ -100,20 +102,24 @@ export function SubmitButton(props) {
     <>
       <form
         onSubmit={(event) => {
-          event.preventDefault();
+          event.preventDefault(); // prevents page refresh
           handleSubmit({
             // if we want an input field, use the data from the input field else we take props.data (camera / motion)
             data: inputField ? data : props.data, // main data payload to api
           });
         }}>
-        {inputField ? (
-          <input
-            type={props.type}
-            value={data}
-            onChange={(e) => setData(e.target.value)}
-          />
-        ) : null}
-        <input id="submitButton" type="submit" value="Submit" />
+        <div className="m-2 flex flex-col justify-center space-y-2">
+          {inputField ? (
+            <InputField
+              className="p-2"
+              placeholder={props.placeholder}
+              type={props.type}
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+            />
+          ) : null}
+          <Button type="submit">Submit</Button>
+        </div>
       </form>
     </>
   );

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext, sessionContext } from "../app.jsx";
+import "../index.css";
 
 /**
  *
@@ -15,15 +16,29 @@ export function Backdoor(props) {
 
   return (
     <>
-      <h1 className="bg-gray-500 text-center text-white">Session: {session}</h1>
-      <h1>Auth: {auth}</h1>
-      <h1>Pico ID: {props.pico_id}</h1>
-      <button onClick={() => navigate("/signup")}>Signup</button>
-      <button onClick={() => navigate("/")}>Email</button>
-      <button onClick={() => navigate("/password")}>Password</button>
-      <button onClick={() => navigate("/sensor")}>Sensor</button>
-      <button onClick={() => navigate("/camera")}>Camera</button>
-      <button onClick={() => navigate("/vault")}>Vault</button>
+      <h1 className="bg-neutral-700">Session: {session}</h1>
+      <h1 className="bg-neutral-700">Auth: {auth}</h1>
+      <h1 className="bg-neutral-700">Pico ID: {props.pico_id}</h1>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/signup")}>
+        Signup
+      </button>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/")}>
+        Email
+      </button>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/password")}>
+        Password
+      </button>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/sensor")}>
+        Sensor
+      </button>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/camera")}>
+        Camera
+      </button>
+      <button
+        className="mx-5 rounded-full bg-neutral-500"
+        onClick={() => navigate("/vault")}>
+        Vault
+      </button>
       <button
         onClick={() => {
           setAuth(true);

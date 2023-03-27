@@ -14,11 +14,18 @@ export function Email() {
 
   return (
     <>
-      <h1>Enter your Email</h1>
-      {error !== "" && <DisplayError text={error} />}
-      <CreateAccount />
-      <SubmitButton type={"email"} endpoint={"email"} setError={setError} />
-      <Backdoor />
+      <div className="m-2 flex flex-col justify-center text-center">
+        {error !== "" && <DisplayError className="text-center" text={error} />}
+        <h1 className="">Log in or create a new account to access your secure vault.</h1>
+        <SubmitButton
+          placeholder="Email"
+          type={"email"}
+          endpoint={"email"}
+          setError={setError}
+        />
+        <CreateAccount />
+        {/* <Backdoor /> */}
+      </div>
     </>
   );
 }
@@ -27,7 +34,7 @@ function CreateAccount() {
   const navigate = useNavigate();
   return (
     <>
-      <Button variant="plain" onClick={() => navigate("/signup")}>
+      <Button color="primary" variant="outlined" onClick={() => navigate("/signup")}>
         Create Account
       </Button>
     </>

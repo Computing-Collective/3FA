@@ -13,6 +13,22 @@ export function InputField(props) {
         variant="outlined"
         size="md"
         required
+        sx={{
+          input: {
+            color: "white",
+          },
+          "& label": {
+            color: "white",
+          },
+          "&.MuiTextField-root": {
+            fieldset: {
+              borderColor: "white",
+            },
+            "&:hover fieldset": {
+              borderColor: "primary.main",
+            },
+          },
+        }}
         type={props.type}
         onChange={props.onChange}
       />
