@@ -6,6 +6,7 @@ import { Remove, Add } from "@mui/icons-material";
 import { HoverCheckbox } from "../components/HoverCheckbox.jsx";
 import { Video } from "../components/Video.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
+import { handleCameraSubmit } from "../functions/handleCameraSubmit.js";
 
 /**
  *
@@ -21,7 +22,9 @@ export function Signup() {
     motion_pattern: false,
     face_recognition: false,
   });
-  const selectRefs = useRef(["UP"]); // array of refs for each SelectMotionPattern component
+  const [patterns, setPatterns] = useState([
+    { id: crypto.randomUUID(), direction: "UP" },
+  ]);
 
   async function handleSignup(props) {
     const endpoint = "signup";
@@ -98,15 +101,17 @@ export function Signup() {
             />
             {/* render camera if needed */}
             {authMethods.face_recognition && (
-              <Video
-                setText={setError}
-                onCapture={(blob) => {
-                  setPhoto(blob);
-                }}
-                onClear={() => {
-                  setPhoto(null);
-                }}
-              />
+              <>
+                <Video
+                  setText={setError}
+                  onCapture={(blob) => {
+                    setPhoto(blob);
+                  }}
+                  onClear={() => {
+                    setPhoto(null);
+                  }}
+                />
+              </>
             )}
             <HoverCheckbox
               label="Sensor"
@@ -118,7 +123,9 @@ export function Signup() {
               }}
             />
             {/* render sensor dropdowns if needed */}
-            {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
+            {authMethods.motion_pattern && (
+              <MotionPattern patterns={patterns} setPatterns={setPatterns} />
+            )}
             <Button type="submit">Submit</Button>
           </div>
         </form>
@@ -128,84 +135,83 @@ export function Signup() {
   );
 }
 
+function SelectMotionPattern({ index, patterns, setPatterns }) {
+  return (
+    <>
+      <Select
+        defaultValue="UP"
+        // size="small"
+        onChange={(event) => {
+          const tempPatterns = [...patterns];
+          tempPatterns[index].direction = event.target.value;
+          setPatterns(tempPatterns);
+        }}
+        value={patterns[index].direction}
+        sx={{
+          color: "white",
+          ".MuiOutlinedInput-notchedOutline": {
+            borderColor: "white",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "primary.main",
+          },
+          ".MuiSvgIcon-root": {
+            fill: "white",
+          },
+        }}>
+        <MenuItem value="UP">Up</MenuItem>
+        <MenuItem value="DOWN">Down</MenuItem>
+        <MenuItem value="LEFT">Left</MenuItem>
+        <MenuItem value="RIGHT">Right</MenuItem>
+        <MenuItem value="FORWARD">Forward</MenuItem>
+        <MenuItem value="BACKWARD">Backward</MenuItem>
+        <MenuItem value="FLIP">Flip</MenuItem>
+      </Select>
+    </>
+  );
+}
+
 /**
  *
  * @param {object} selectRefs the refs to update in the higher order component to update with the selected motion pattern ex: "UP", "DOWN", "LEFT", "RIGHT", "FORWARD", "BACKWARD", "FLIP
  * @returns a list of dropdowns for the user to select their motion pattern
  */
-function MotionPattern({ selectRefs }) {
-  const [count, setCount] = useState(1); // the displayed number
-  const motionPatternsRef = useRef([0]); // a list of 0s used to render a variable amount of select motion patterns
-  const motionPatterns = [];
-
-  for (let i = 0; i < count; i++) {
-    motionPatterns.push(
-      <div className=" self-center">
-        <SelectMotionPattern key={i} index={i} />
-      </div>
-    );
-  }
-
+function MotionPattern({ patterns, setPatterns }) {
   // the dropdown for user selection (jsx component)
-  function SelectMotionPattern({ index }) {
-    return (
-      <>
-        <Select
-          defaultValue="UP"
-          // size="small"
-          onChange={(event) => {
-            selectRefs.current[index] = event.target.value;
-            // TODO buggy behaviour on new
-          }}
-          sx={{
-            color: "white",
-            ".MuiOutlinedInput-notchedOutline": {
-              borderColor: "white",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
-            },
-            ".MuiSvgIcon-root": {
-              fill: "white",
-            },
-          }}>
-          <MenuItem value="UP">Up</MenuItem>
-          <MenuItem value="DOWN">Down</MenuItem>
-          <MenuItem value="LEFT">Left</MenuItem>
-          <MenuItem value="RIGHT">Right</MenuItem>
-          <MenuItem value="FORWARD">Forward</MenuItem>
-          <MenuItem value="BACKWARD">Backward</MenuItem>
-          <MenuItem value="FLIP">Flip</MenuItem>
-        </Select>
-      </>
-    );
-  }
 
   return (
     <>
       <div className="grid grid-flow-col grid-cols-5 gap-x-5">
         <div className="">
           <NumberButton
-            disabled={count < 2}
+            disabled={patterns.length < 2}
             onClick={() => {
-              setCount((c) => c - 1);
-              motionPatternsRef.current.pop(0);
-              selectRefs.current.pop();
+              const tempPatterns = [...patterns];
+              tempPatterns.pop();
+              setPatterns(tempPatterns);
             }}>
             <Remove />
           </NumberButton>
-          <Typography fontWeight="md">{count}</Typography>
+          <Typography fontWeight="md">{patterns.length}</Typography>
           <NumberButton
-            disabled={count > 3}
+            disabled={patterns.length > 3}
             onClick={() => {
-              setCount((c) => c + 1);
-              motionPatternsRef.current.push(0);
-              selectRefs.current.push("UP");
+              setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
             }}>
             <Add />
           </NumberButton>
         </div>
-        {motionPatterns}
+        {patterns.map((pattern, index) => {
+          return (
+            <div key={pattern.id} className="self-center">
+              <SelectMotionPattern
+                index={index}
+                patterns={patterns}
+                setPatterns={setPatterns}
+              />
+            </div>
+          );
+        })}
       </div>
     </>
   );
