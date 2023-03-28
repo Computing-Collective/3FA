@@ -22,6 +22,7 @@ export function Email() {
           type={"email"}
           endpoint={"email"}
           setError={setError}
+          text={"Submit"}
         />
         <CreateAccount />
         <Backdoor />

@@ -22,7 +22,7 @@ export function Backdoor(props) {
       <button className="mx-5 bg-neutral-500" onClick={() => navigate("/signup")}>
         Signup
       </button>
-      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/")}>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/email")}>
         Email
       </button>
       <button className="mx-5 bg-neutral-500" onClick={() => navigate("/password")}>

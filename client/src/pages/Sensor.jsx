@@ -13,16 +13,16 @@ import { getUniquePicoID } from "../functions/auth.js";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
-const possMoves = ["forward", "backward", "left", "right", "up", "down", "flip"];
+const possMoves = ["Forward", "Backward", "Left", "Right", "Up", "Down", "Flip"];
 
 const picObj = {
-  up: up,
-  down: down,
-  left: left,
-  right: right,
-  forward: forward,
-  backward: backward,
-  flip: flip,
+  Up: up,
+  Down: down,
+  Left: left,
+  Right: right,
+  Forward: forward,
+  Backward: backward,
+  Flip: flip,
 };
 
 /**
@@ -39,40 +39,40 @@ export function Sensor() {
   const [error, setError] = useState("");
   // TODO send matt a pico_id
 
-  return (
-    <>
-      <h1>Move your sensor!</h1>
-      <h3>Additionally, add these moves to the end of your sequence: {moves}</h3>
-      {/* <Pictures sensor={moves} /> */}
-      {error !== "" && <DisplayError text={error} refreshButton={true} />}
-      <SubmitButton
-        endpoint={"motion_pattern/initialize"}
-        data={moves}
-        setError={setError}
-        pico_id={pico_id}
-      />
-      <Backdoor pico_id={pico_id} />
-    </>
-  );
-}
+  /**
+   *
+   * @param {number} index the index of the move (0, 1, 2)
+   * @returns the move text AND the pictures of the moves (located in /public/icons)
+   */
+  function Picture({ index }) {
+    return (
+      <>
+        <div className="self-center">{moves[index]}</div>
+        <img src={_.get(picObj, moves[index])} width="50" height="50" />
+      </>
+    );
+  }
 
-/**
- *
- * @param {object} props
- * @param {array} props.sensor the array of moves to display -- declared as a global variable. ex: ["forward", "backward", "left"]
- * @returns the pictures of the moves (located in /public/icons)
- */
-function Pictures(props) {
-  // TODO fix the cropping on the pictures
-  const sensor = props.sensor;
-  let count = 0;
   return (
     <>
-      {sensor.map((motion) => (
-        <span key={count++}>
-          <img src={_.get(picObj, motion)} />
-        </span>
-      ))}
+      <div className="flex flex-col text-center">
+        <h1>Move your sensor!</h1>
+        <h3>Additionally, add these moves to the end of your sequence: </h3>
+        <div class="grid grid-cols-2 gap-2">
+          <Picture index={0} />
+          <Picture index={1} />
+          <Picture index={2} />
+        </div>
+        {error !== "" && <DisplayError text={error} refreshButton={true} />}
+        <SubmitButton
+          endpoint={"motion_pattern/initialize"}
+          data={moves}
+          setError={setError}
+          pico_id={pico_id}
+          text="Start the sequence"
+        />
+        <Backdoor pico_id={pico_id} />
+      </div>
     </>
   );
 }

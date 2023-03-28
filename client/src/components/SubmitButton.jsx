@@ -29,6 +29,7 @@ export function SubmitButton(props) {
   const pico_id = props.pico_id;
   const setError = props.setError;
   const endpoint = props.endpoint;
+  const text = props.text;
 
   // if we want an input field (email or password)
   const inputField = props.endpoint === "email" || props.endpoint === "password";
@@ -118,7 +119,7 @@ export function SubmitButton(props) {
               onChange={(e) => setData(e.target.value)}
             />
           ) : null}
-          <Button type="submit">Submit</Button>
+          <Button type="submit">{text}</Button>
         </div>
       </form>
     </>

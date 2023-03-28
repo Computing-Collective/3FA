@@ -14,6 +14,7 @@ import {
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
+import { ErrorPage } from "./pages/ErrorPage.jsx";
 import { Password } from "./pages/Password.jsx";
 import { Email } from "./pages/Email.jsx";
 import { Vault } from "./pages/Vault.jsx";
@@ -31,19 +32,21 @@ export const sessionContext = createContext(null);
 const router = createHashRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<Email />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/password" element={<Password />} />
-      <Route path="/sensor" element={<Sensor />} />
-      <Route path="/camera" element={<Camera />} />
-      <Route
-        path="/vault"
-        element={
-          <RequireAuth>
-            <Vault />
-          </RequireAuth>
-        }
-      />
+      <Route path="/" errorElement={<ErrorPage />}>
+        <Route path="/email" element={<Email />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/password" element={<Password />} />
+        <Route path="/sensor" element={<Sensor />} error />
+        <Route path="/camera" element={<Camera />} />
+        <Route
+          path="/vault"
+          element={
+            <RequireAuth>
+              <Vault />
+            </RequireAuth>
+          }
+        />
+      </Route>
     </>
   )
 );

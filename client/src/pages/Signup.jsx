@@ -62,68 +62,66 @@ export function Signup() {
       <div className="flex flex-col justify-center text-center">
         {error !== "" && <DisplayError text={error} />}
         <h1>Enter your email, password, and other information</h1>
-        <div className="m-2">
-          <form
-            onSubmit={async (event) => {
-              event.preventDefault();
-              handleSignup();
-            }}>
-            <div className="flex flex-col gap-y-2">
-              <InputField
-                placeholder="Email"
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value);
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault();
+            handleSignup();
+          }}>
+          <div className="flex flex-col gap-y-2">
+            <InputField
+              placeholder="Email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+              }}
+              type="email"
+            />
+            <InputField
+              placeholder="Password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+              }}
+              type="password"
+            />
+          </div>
+          <div className="flex flex-col justify-center">
+            <HoverCheckbox
+              label="Facial Recognition"
+              onChange={(event) => {
+                setAuthMethods({
+                  ...authMethods,
+                  face_recognition: event.target.checked,
+                });
+              }}
+            />
+            {/* render camera if needed */}
+            {authMethods.face_recognition && (
+              <Video
+                setText={setError}
+                onCapture={(blob) => {
+                  setPhoto(blob);
                 }}
-                type="email"
-              />
-              <InputField
-                placeholder="Password"
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                }}
-                type="password"
-              />
-            </div>
-            <div className="flex flex-col justify-center">
-              <HoverCheckbox
-                label="Facial Recognition"
-                onChange={(event) => {
-                  setAuthMethods({
-                    ...authMethods,
-                    face_recognition: event.target.checked,
-                  });
-                }}
-              />
-              {/* render camera if needed */}
-              {authMethods.face_recognition && (
-                <Video
-                  setText={setError}
-                  onCapture={(blob) => {
-                    setPhoto(blob);
-                  }}
-                  onClear={() => {
-                    setPhoto(null);
-                  }}
-                />
-              )}
-              <HoverCheckbox
-                label="Sensor"
-                onChange={(event) => {
-                  setAuthMethods({
-                    ...authMethods,
-                    motion_pattern: event.target.checked,
-                  });
+                onClear={() => {
+                  setPhoto(null);
                 }}
               />
-              {/* render sensor dropdowns if needed */}
-              {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
-              <Button type="submit">Submit</Button>
-            </div>
-          </form>
-          <Backdoor />
-        </div>
+            )}
+            <HoverCheckbox
+              label="Sensor"
+              onChange={(event) => {
+                setAuthMethods({
+                  ...authMethods,
+                  motion_pattern: event.target.checked,
+                });
+              }}
+            />
+            {/* render sensor dropdowns if needed */}
+            {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+        <Backdoor />
       </div>
     </>
   );
