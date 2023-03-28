@@ -44,7 +44,7 @@
     "camera-capture": "^0.0.11",
     "dotenv": "^16.0.3",
     "electron-squirrel-startup": "^1.0.0",
-    "node-fetch": "^3.3.0",
+    "node-fetch": "^3.3.1",
     "puppeteer": "^1.20.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
