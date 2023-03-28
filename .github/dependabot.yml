@@ -15,3 +15,15 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "ElioDiNino"
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "America/Vancouver"
+    insecure-external-code-execution: deny
+    labels:
+      - "Dependency"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "im-calvin"
