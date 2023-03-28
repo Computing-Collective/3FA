@@ -30,7 +30,7 @@ export function RequireAuth({ children }) {
   if (!authChecked) {
     return null;
   }
-  authed.current = true;
+  
   return authed.current === true ? (
     children
   ) : (

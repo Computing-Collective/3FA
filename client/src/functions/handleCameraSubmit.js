@@ -1,10 +1,12 @@
 import React from "react";
 import { handleNextNavigation } from "./handleNextNavigation";
 
+const api_endpoint = window.internal.getAPIEndpoint;
+
 /**
  * handler for submit button on camera page, sends API request to admin
  */
-export async function handleCameraSubmit() {
+export async function handleCameraSubmit({ data, session, setError, setAuth, navigate }) {
   // the endpoint for face
   const endpoint = "face_recognition";
   // form because need to include img

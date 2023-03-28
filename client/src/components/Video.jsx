@@ -119,7 +119,12 @@ export function Video({ setText, onCapture, onClear }) {
               <Flash flash={isFlashing} onAnimationEnd={() => setIsFlashing(false)} />
             </Container>
             {isVideoPlaying && (
-              <button onClick={isCanvasEmpty ? handleCapture : handleClear}>
+              // TODO make this mui
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  isCanvasEmpty ? handleCapture() : handleClear();
+                }}>
                 {isCanvasEmpty ? "Take a picture" : "Take another picture"}
               </button>
             )}

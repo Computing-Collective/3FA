@@ -23,6 +23,9 @@ export function handleNextNavigation({ json, response, setError, setAuth, naviga
     case "face_recognition":
       navigate("/camera");
       return;
+    case "email":
+      navigate("/");
+      return;
   }
   // generally, want to go to next place directed by admin
   navigate(`/${json.next}`);

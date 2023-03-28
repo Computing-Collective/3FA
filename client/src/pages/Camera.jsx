@@ -17,7 +17,6 @@ export function Camera() {
   const [data, setData] = useState(""); // camera input (base64?)
   const [auth, setAuth] = useContext(authContext);
   const [session, setSession] = useContext(sessionContext);
-  const navigation = useNavigation();
   const navigate = useNavigate();
 
   const { initNav } = useNavToVault();
@@ -41,11 +40,10 @@ export function Camera() {
           }}
         />
         <Button
-          data={data}
           endpoint={"camera"}
           onClick={(event) => {
             event.preventDefault();
-            handleCameraSubmit();
+            handleCameraSubmit({ data, session, setError, setAuth, navigate });
           }}>
           Submit
         </Button>

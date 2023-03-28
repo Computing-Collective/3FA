@@ -6,7 +6,7 @@ import { Remove, Add } from "@mui/icons-material";
 import { HoverCheckbox } from "../components/HoverCheckbox.jsx";
 import { Video } from "../components/Video.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
-import { handleCameraSubmit } from "../functions/handleCameraSubmit.js";
+import { useNavigate } from "react-router-dom";
 
 /**
  *
@@ -25,10 +25,13 @@ export function Signup() {
   const [patterns, setPatterns] = useState([
     { id: crypto.randomUUID(), direction: "UP" },
   ]);
+  const navigate = useNavigate();
 
   async function handleSignup(props) {
-    const endpoint = "signup";
     const api_endpoint = window.internal.getAPIEndpoint;
+    const motion_payload = patterns.map((obj, i) => {
+      return obj.direction;
+    });
 
     // follows the same format as in Postman
     // {
@@ -47,13 +50,13 @@ export function Signup() {
       JSON.stringify({
         email: email,
         password: password,
-        motion_pattern: selectRefs.current,
+        motion_pattern: motion_payload,
         auth_methods: authMethods,
       })
     );
     formData.append("photo", photo);
 
-    const response = await fetch(`${api_endpoint}/api/login/${endpoint}/`, {
+    const response = await fetch(`${api_endpoint}/api/signup/`, {
       method: "POST",
       body: formData,
     });
@@ -69,8 +72,9 @@ export function Signup() {
           onSubmit={async (event) => {
             event.preventDefault();
             handleSignup();
+            navigate("/");
           }}>
-          <div className="flex flex-col gap-y-2">
+          <div className="m-2 flex flex-col gap-y-2">
             <InputField
               autoFocus
               placeholder="Email"
