@@ -3,6 +3,7 @@ import Measure from "react-measure";
 import { useUserMedia } from "../hooks/useUserMedia";
 import styled, { css, keyframes } from "styled-components";
 import { useOffsets } from "../hooks/useOffsets";
+import { Button } from "@mui/material";
 
 // constrain the size of screenshot / video
 
@@ -119,14 +120,13 @@ export function Video({ setText, onCapture, onClear }) {
               <Flash flash={isFlashing} onAnimationEnd={() => setIsFlashing(false)} />
             </Container>
             {isVideoPlaying && (
-              // TODO make this mui
-              <button
+              <Button
                 onClick={(e) => {
                   e.preventDefault();
                   isCanvasEmpty ? handleCapture() : handleClear();
                 }}>
                 {isCanvasEmpty ? "Take a picture" : "Take another picture"}
-              </button>
+              </Button>
             )}
           </>
         )}
