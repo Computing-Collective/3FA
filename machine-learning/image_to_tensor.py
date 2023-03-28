@@ -131,15 +131,15 @@ model.eval()
 """ --------------- IMAGE LOADING --------------- """
 # matt
 # eval_image = Image.open(os.path.join("machine-learning", "data", "matt", "positive", "9a3c2702-ca63-11ed-9d8e-40ec9985096b.jpg"))
-# anchor_image = Image.open(os.path.join("machine-learning", "data", "matt", "anchor", "9a9ce6eb-ca63-11ed-98a7-40ec9985096b.jpg"))
+anchor_image = Image.open(os.path.join("machine-learning", "data", "matt", "anchor", "9a9ce6eb-ca63-11ed-98a7-40ec9985096b.jpg"))
 
 # divy
 # eval_image = Image.open(os.path.join("machine-learning", "data", "divy", "positive", "00ac5842-ca5e-11ed-9fa0-40ec9985096b.jpg"))
 # anchor_image = Image.open(os.path.join("machine-learning", "data", "divy", "anchor", "5eae90d5-ca61-11ed-a988-40ec9985096b.jpg"))
 
 # arnav
-eval_image = Image.open(os.path.join("machine-learning", "data", "arnav", "positive", "ab98b000-ca68-11ed-b2ed-40ec9985096b.jpg"))
-anchor_image = Image.open(os.path.join("machine-learning", "data", "arnav", "anchor", "adbeff95-ca68-11ed-ae5e-40ec9985096b.jpg"))
+eval_image = Image.open(os.path.join("machine-learning", "data", "arnav", "positive", "97e37220-ccf9-11ed-bb29-40ec9985096b.jpg"))
+# anchor_image = Image.open(os.path.join("machine-learning", "data", "arnav", "anchor", "adbeff95-ca68-11ed-ae5e-40ec9985096b.jpg"))
 
 # resize img to 105x105 and convert to tensor
 img_transforms = Compose([
