@@ -6,8 +6,7 @@ import { DisplayError } from "../components/DisplayError.jsx";
 import { Video } from "../components/Video.jsx";
 import { Button } from "@mui/material";
 import { useNavToVault } from "../hooks/useNavToVault.js";
-
-const api_endpoint = window.internal.getAPIEndpoint;
+import { handleCameraSubmit } from "../functions/handleCameraSubmit.js";
 
 /**
  *
@@ -27,64 +26,6 @@ export function Camera() {
     initNav();
   }, [auth]);
 
-  /**
-   * handler for submit button on camera page, sends API request to admin
-   */
-  async function handleCameraSubmit() {
-    // the endpoint for face
-    const endpoint = "face_recognition";
-    // form because need to include img
-    let formData = new FormData();
-    formData.append("photo", data);
-    formData.append(
-      "request",
-      JSON.stringify({
-        session_id: session,
-      })
-    );
-    // send api request with blob
-    const response = await fetch(`${api_endpoint}/api/login/${endpoint}/`, {
-      method: "POST",
-      body: formData,
-    });
-    const json = await response.json();
-    handleNextNavigation(json, response);
-  }
-
-  // TODO duplicated code with submitButton.jsx
-  function handleNextNavigation(json, response) {
-    const next = json.next;
-    const success = json.success;
-    // retry api request
-    if (success === 0 && next === undefined) {
-      setError(json.msg); // change text for frontend
-      return;
-    }
-
-    // go to vault
-    if (response.ok && next === null) {
-      // auth occurs within component
-      setAuth(json.auth_session_id);
-      return;
-    }
-    // name mangling between admin / client
-    switch (next) {
-      case "motion_pattern":
-        navigate("/sensor");
-        return;
-      case "face_recognition":
-        navigate("/camera");
-        return;
-    }
-    // generally, want to go to next place directed by admin
-    navigate(`/${json.next}`);
-  }
-
-  // TODO make this a nicer button with mui
-  function CameraSubmitButton(props) {
-    return <Button onClick={props.onClick}>Submit</Button>;
-  }
-
   return (
     <>
       <div className="flex flex-col text-center">
@@ -99,14 +40,15 @@ export function Camera() {
             setData(null);
           }}
         />
-        <CameraSubmitButton
+        <Button
           data={data}
           endpoint={"camera"}
           onClick={(event) => {
             event.preventDefault();
-            handleCameraSubmit(); // TODO does this work?
-          }}
-        />
+            handleCameraSubmit();
+          }}>
+          Submit
+        </Button>
         <Backdoor />
       </div>
     </>

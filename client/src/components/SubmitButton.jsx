@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
 import { InputField } from "./InputField.jsx";
 import { Button } from "@mui/material";
+import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
@@ -46,7 +47,7 @@ export function SubmitButton(props) {
     endpoint === "motion_pattern/initialize"
       ? (apiPayload = props.data.map((item) => {
           return item.toUpperCase();
-        })) // capitalize every elem in array
+        })) // full-capitalize every elem in array
       : (apiPayload = props.data);
 
     // url to go to (defined in Postman)
@@ -68,35 +69,7 @@ export function SubmitButton(props) {
       setSession(json.session_id);
     }
 
-    handleNextNavigation(json, response);
-  }
-
-  function handleNextNavigation(json, response) {
-    const next = json.next;
-    const success = json.success;
-    // retry api request
-    if (success === 0 && next === undefined) {
-      setError(json.msg); // change text for frontend
-      return;
-    }
-
-    // go to vault
-    if (response.ok && next === null) {
-      // auth occurs within component
-      setAuth(json.auth_session_id);
-      return;
-    }
-    // name mangling between admin / client
-    switch (next) {
-      case "motion_pattern":
-        navigate("/sensor");
-        return;
-      case "face_recognition":
-        navigate("/camera");
-        return;
-    }
-    // generally, want to go to next place directed by admin
-    navigate(`/${json.next}`);
+    handleNextNavigation({ json, response, setError, setAuth, navigate });
   }
 
   return (

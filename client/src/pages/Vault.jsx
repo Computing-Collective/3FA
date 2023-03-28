@@ -19,14 +19,14 @@ export function Vault() {
       <div className="absolute left-8 top-8 h-16 w-16">
         <Button
           color="primary"
-          variant="outlined"
+          variant="contained"
           onClick={() => logout(auth, setAuth, navigate)}>
           Logout
         </Button>
       </div>
       <div className="flex flex-col text-center">
         <h1>Vault</h1>
-        {/* <Backdoor /> */}
+        <Backdoor />
       </div>
     </>
   );
