@@ -58,7 +58,7 @@ export function Sensor() {
       <div className="flex flex-col text-center">
         <h1>Move your sensor!</h1>
         <h3>Additionally, add these moves to the end of your sequence: </h3>
-        <div className="grid grid-cols-2 gap-x-5 py-2">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-2 py-2">
           <Picture index={0} />
           <Picture index={1} />
           <Picture index={2} />
