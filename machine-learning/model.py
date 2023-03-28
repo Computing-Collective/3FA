@@ -8,12 +8,10 @@ from torch.utils.data import Subset
 from torch.utils.data import random_split
 
 from torchvision import datasets
-from torchvision.transforms import ToTensor, Lambda, Compose, RandomHorizontalFlip, Resize
+from torchvision.transforms import ToTensor, Compose, RandomHorizontalFlip, Resize
 
 from torchdata.datapipes.iter import Zipper, IterableWrapper
 
-import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
 
 PEOPLE = ('dummy1', 'dummy2')
