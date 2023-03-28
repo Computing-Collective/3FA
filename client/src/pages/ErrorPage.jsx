@@ -17,7 +17,7 @@ export function ErrorPage() {
     }
 
     if (error.status === 500) {
-      text = "Looks like our API is down";
+      text = "Looks like our API encountered an issue. Please kindly report the issue to our support team";
     }
   }
 
