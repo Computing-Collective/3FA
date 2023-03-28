@@ -40,7 +40,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@mui/material": "^5.11.14",
+    "@mui/material": "^5.11.15",
     "camera-capture": "^0.0.11",
     "dotenv": "^16.0.3",
     "electron-squirrel-startup": "^1.0.0",
