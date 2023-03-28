@@ -24,7 +24,7 @@ export function HoverCheckbox({ label, onChange }) {
         "&.MuiFormControlLabel-root": {
           color: "white",
         },
-      }}
-    />
+      }}>
+    </FormControlLabel>
   );
 }

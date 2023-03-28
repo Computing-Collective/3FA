@@ -22,7 +22,6 @@ export function Signup() {
     face_recognition: false,
   });
   const selectRefs = useRef(["UP"]); // array of refs for each SelectMotionPattern component
-  console.log(selectRefs);
 
   async function handleSignup(props) {
     const endpoint = "signup";
@@ -60,63 +59,71 @@ export function Signup() {
   }
   return (
     <>
-      <div className="space-2 flex flex-col justify-center text-center">
+      <div className="flex flex-col justify-center text-center">
         {error !== "" && <DisplayError text={error} />}
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            handleSignup();
-          }}>
-          <InputField
-            placeholder="Email"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-            }}
-            type="email"
-          />
-          <InputField
-            placeholder="Password"
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-            }}
-            type="password"
-          />
-          <div className="flex flex-col justify-center">
-            <HoverCheckbox
-              label="Facial Recognition"
-              onChange={(event) => {
-                setAuthMethods({
-                  ...authMethods,
-                  face_recognition: event.target.checked,
-                });
-              }}
-            />
-            {/* render camera if needed */}
-            {authMethods.face_recognition && (
-              <Video
-                setText={setError}
-                onCapture={(blob) => {
-                  setPhoto(blob);
+        <h1>Enter your email, password, and other information</h1>
+        <div className="m-2">
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              handleSignup();
+            }}>
+            <div className="flex flex-col gap-y-2">
+              <InputField
+                placeholder="Email"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
                 }}
-                onClear={() => {
-                  setPhoto(null);
+                type="email"
+              />
+              <InputField
+                placeholder="Password"
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                }}
+                type="password"
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <HoverCheckbox
+                label="Facial Recognition"
+                onChange={(event) => {
+                  setAuthMethods({
+                    ...authMethods,
+                    face_recognition: event.target.checked,
+                  });
                 }}
               />
-            )}
-            <HoverCheckbox
-              label="Sensor"
-              onChange={(event) => {
-                setAuthMethods({ ...authMethods, motion_pattern: event.target.checked });
-              }}
-            />
-            {/* render sensor dropdowns if needed */}
-            {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
-            <Button type="submit">Submit</Button>
-          </div>
-        </form>
-        {/* <Backdoor /> */}
+              {/* render camera if needed */}
+              {authMethods.face_recognition && (
+                <Video
+                  setText={setError}
+                  onCapture={(blob) => {
+                    setPhoto(blob);
+                  }}
+                  onClear={() => {
+                    setPhoto(null);
+                  }}
+                />
+              )}
+              <HoverCheckbox
+                label="Sensor"
+                onChange={(event) => {
+                  setAuthMethods({
+                    ...authMethods,
+                    motion_pattern: event.target.checked,
+                  });
+                }}
+              />
+              {/* render sensor dropdowns if needed */}
+              {authMethods.motion_pattern && <MotionPattern selectRefs={selectRefs} />}
+              <Button type="submit">Submit</Button>
+            </div>
+          </form>
+          <Backdoor />
+        </div>
       </div>
     </>
   );
@@ -133,7 +140,11 @@ function MotionPattern({ selectRefs }) {
   const motionPatterns = [];
 
   for (let i = 0; i < count; i++) {
-    motionPatterns.push(<SelectMotionPattern key={i} index={i} />);
+    motionPatterns.push(
+      <div className=" self-center">
+        <SelectMotionPattern key={i} index={i} />
+      </div>
+    );
   }
 
   // the dropdown for user selection (jsx component)
@@ -142,11 +153,22 @@ function MotionPattern({ selectRefs }) {
       <>
         <Select
           defaultValue="UP"
+          // size="small"
           onChange={(event) => {
-            console.log(event.target.value, index);
             selectRefs.current[index] = event.target.value;
-            console.log(selectRefs);
             // TODO buggy behaviour on new
+          }}
+          sx={{
+            color: "white",
+            ".MuiOutlinedInput-notchedOutline": {
+              borderColor: "white",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main",
+            },
+            ".MuiSvgIcon-root": {
+              fill: "white",
+            },
           }}>
           <MenuItem value="UP">Up</MenuItem>
           <MenuItem value="DOWN">Down</MenuItem>
@@ -162,26 +184,30 @@ function MotionPattern({ selectRefs }) {
 
   return (
     <>
-      <NumberButton
-        disabled={count < 2}
-        onClick={() => {
-          setCount((c) => c - 1);
-          motionPatternsRef.current.pop(0);
-          selectRefs.current.pop();
-        }}>
-        <Remove />
-      </NumberButton>
-      <Typography fontWeight="md">{count}</Typography>
-      <NumberButton
-        disabled={count > 3}
-        onClick={() => {
-          setCount((c) => c + 1);
-          motionPatternsRef.current.push(0);
-          selectRefs.current.push("UP");
-        }}>
-        <Add />
-      </NumberButton>
-      {motionPatterns}
+      <div className="grid grid-flow-col grid-cols-5 gap-x-5">
+        <div className="">
+          <NumberButton
+            disabled={count < 2}
+            onClick={() => {
+              setCount((c) => c - 1);
+              motionPatternsRef.current.pop(0);
+              selectRefs.current.pop();
+            }}>
+            <Remove />
+          </NumberButton>
+          <Typography fontWeight="md">{count}</Typography>
+          <NumberButton
+            disabled={count > 3}
+            onClick={() => {
+              setCount((c) => c + 1);
+              motionPatternsRef.current.push(0);
+              selectRefs.current.push("UP");
+            }}>
+            <Add />
+          </NumberButton>
+        </div>
+        {motionPatterns}
+      </div>
     </>
   );
 }
@@ -189,19 +215,24 @@ function MotionPattern({ selectRefs }) {
 function NumberButton({ onClick, disabled, children }) {
   return (
     <>
-      <IconButton
-        size="sm"
-        variant="outlined"
-        disabled={disabled}
-        onClick={onClick}
-        sx={{
-          color: "white",
-          "&:hover": {
-            backgroundColor: "transparent",
-          },
-        }}>
-        {children}
-      </IconButton>
+      <div className="flex flex-row justify-center">
+        <IconButton
+          size="sm"
+          variant="outlined"
+          disabled={disabled}
+          onClick={onClick}
+          sx={{
+            color: "white",
+            "&:hover": {
+              backgroundColor: "transparent",
+            },
+            "&:disabled": {
+              color: "gray",
+            },
+          }}>
+          {children}
+        </IconButton>
+      </div>
     </>
   );
 }
