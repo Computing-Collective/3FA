@@ -24,6 +24,7 @@ export function Password() {
         <h1>Enter your password</h1>
         {error !== "" && <DisplayError text={error} />}
         <SubmitButton
+          text="Submit"
           placeholder="Password"
           endpoint={"password"}
           type={"password"}

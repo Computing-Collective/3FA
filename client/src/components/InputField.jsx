@@ -6,6 +6,7 @@ export function InputField(props) {
   return (
     <>
       <TextField
+        autoFocus={props.autoFocus}
         color="primary"
         disabled={false}
         label={props.placeholder}

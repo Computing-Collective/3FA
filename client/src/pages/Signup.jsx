@@ -69,6 +69,7 @@ export function Signup() {
           }}>
           <div className="flex flex-col gap-y-2">
             <InputField
+              autoFocus
               placeholder="Email"
               value={email}
               onChange={(event) => {

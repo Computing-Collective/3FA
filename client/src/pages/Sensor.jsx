@@ -48,7 +48,7 @@ export function Sensor() {
     return (
       <>
         <div className="self-center justify-self-end">{moves[index]}</div>
-        <img src={_.get(picObj, moves[index])} width="50" height="50" />
+        <img src={_.get(picObj, moves[index])} width="35" height="35" />
       </>
     );
   }

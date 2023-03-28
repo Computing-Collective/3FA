@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
 import { logout } from "../functions/auth.js";
 import { Backdoor } from "./Backdoor.jsx";
+import { Button } from "@mui/material";
 
 /**
  *
@@ -14,9 +15,19 @@ export function Vault() {
   const [auth, setAuth] = useContext(authContext);
   return (
     <>
-      <h1>Vault</h1>
-      <button onClick={() => logout(auth, setAuth, navigate)}>Logout</button>
-      <Backdoor />
+      {/* hardcoded code hf */}
+      <div className="absolute left-8 top-8 h-16 w-16">
+        <Button
+          color="primary"
+          variant="outlined"
+          onClick={() => logout(auth, setAuth, navigate)}>
+          Logout
+        </Button>
+      </div>
+      <div className="flex flex-col text-center">
+        <h1>Vault</h1>
+        {/* <Backdoor /> */}
+      </div>
     </>
   );
 }

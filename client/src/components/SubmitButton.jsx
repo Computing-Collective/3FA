@@ -112,6 +112,7 @@ export function SubmitButton(props) {
         <div className="m-2 flex flex-col justify-center space-y-2">
           {inputField ? (
             <InputField
+              autoFocus
               className="p-2"
               placeholder={props.placeholder}
               type={props.type}
