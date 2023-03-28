@@ -20,15 +20,17 @@ export function Password() {
 
   return (
     <>
-      <h1>Enter your password</h1>
-      {error !== "" && <DisplayError text={error} />}
-      <SubmitButton
-        endpoint={"password"}
-        setText={setText}
-        type={"password"}
-        setError={setError}
-      />
-      <Backdoor />
+      <div className="flex flex-col text-center">
+        <h1>Enter your password</h1>
+        {error !== "" && <DisplayError text={error} />}
+        <SubmitButton
+          placeholder="Password"
+          endpoint={"password"}
+          type={"password"}
+          setError={setError}
+        />
+        <Backdoor />
+      </div>
     </>
   );
 }
