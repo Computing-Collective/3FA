@@ -33,10 +33,10 @@ const router = createHashRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<Email />} errorElement={<ErrorPage />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/password" element={<Password />} />
-      <Route path="/sensor" element={<Sensor />} error />
-      <Route path="/camera" element={<Camera />} />
+      <Route path="/signup" element={<Signup />} errorElement={<ErrorPage />} />
+      <Route path="/password" element={<Password />} errorElement={<ErrorPage />} />
+      <Route path="/sensor" element={<Sensor />} errorElement={<ErrorPage />} />
+      <Route path="/camera" element={<Camera />} errorElement={<ErrorPage />} />
       <Route
         path="/vault"
         element={
@@ -44,6 +44,7 @@ const router = createHashRouter(
             <Vault />
           </RequireAuth>
         }
+        errorElement={<ErrorPage />}
       />
     </>
   )
