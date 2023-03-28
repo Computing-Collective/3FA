@@ -173,7 +173,12 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
 
 /**
  *
- * @param {object} selectRefs the refs to update in the higher order component to update with the selected motion pattern ex: "UP", "DOWN", "LEFT", "RIGHT", "FORWARD", "BACKWARD", "FLIP
+ * @param {array} patterns the state to update with the selected motion pattern
+ * contains an object {
+ *  id: crypto.randomUUID(),
+ *  direction: "UP" | "DOWN" | "LEFT" | "RIGHT" | "FORWARD" | "BACKWARD" | "FLIP"
+ * }
+ * @param {function} setPatterns the state updator for the state above ^
  * @returns a list of dropdowns for the user to select their motion pattern
  */
 function MotionPattern({ patterns, setPatterns }) {
@@ -217,6 +222,13 @@ function MotionPattern({ patterns, setPatterns }) {
   );
 }
 
+/**
+ *
+ * @param {function} onClick the onClick for the button
+ * @param {function} disabled the conditions for the button to be disabled
+ * @param {JSX.Element} children the children for the component
+ * @returns a wrapper for the number button
+ */
 function NumberButton({ onClick, disabled, children }) {
   return (
     <>
