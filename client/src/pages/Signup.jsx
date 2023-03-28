@@ -37,7 +37,7 @@ export function Signup() {
     // {
     //   "email": "llj-email@email.com",
     //   "password": "Password1",
-    //   "motion_pattern": ["left", "RIGHT", "UP", "DOWN"],
+    //   "motion_pattern": ["LEFT", "RIGHT", "UP", "DOWN"],
     //   "auth_methods": {
     //       "password": true,
     //       "motion_pattern": true,
