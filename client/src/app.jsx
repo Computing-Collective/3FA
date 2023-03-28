@@ -32,21 +32,19 @@ export const sessionContext = createContext(null);
 const router = createHashRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" errorElement={<ErrorPage />}>
-        <Route path="/email" element={<Email />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/password" element={<Password />} />
-        <Route path="/sensor" element={<Sensor />} error />
-        <Route path="/camera" element={<Camera />} />
-        <Route
-          path="/vault"
-          element={
-            <RequireAuth>
-              <Vault />
-            </RequireAuth>
-          }
-        />
-      </Route>
+      <Route path="/" element={<Email />} errorElement={<ErrorPage />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/password" element={<Password />} />
+      <Route path="/sensor" element={<Sensor />} error />
+      <Route path="/camera" element={<Camera />} />
+      <Route
+        path="/vault"
+        element={
+          <RequireAuth>
+            <Vault />
+          </RequireAuth>
+        }
+      />
     </>
   )
 );
