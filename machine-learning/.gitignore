@@ -1,6 +1,8 @@
-data/
+data/*
+!data/dummy1
+!data/dummy2
 lfw.tgz
 lfw/
 model.pth
 model-divy95.pth
-negative/
+negative/*
