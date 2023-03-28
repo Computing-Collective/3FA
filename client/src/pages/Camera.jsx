@@ -87,26 +87,28 @@ export function Camera() {
 
   return (
     <>
-      <h1>Smile for the camera</h1>
-      {error !== "" && <DisplayError text={error} />}
-      <Video
-        setText={setError}
-        onCapture={(blob) => {
-          setData(blob);
-        }}
-        onClear={() => {
-          setData(null);
-        }}
-      />
-      <CameraSubmitButton
-        data={data}
-        endpoint={"camera"}
-        onClick={(event) => {
-          event.preventDefault();
-          handleCameraSubmit(); // TODO does this work?
-        }}
-      />
-      <Backdoor />
+      <div className="flex flex-col text-center">
+        {error !== "" && <DisplayError text={error} />}
+        <h1 className="m-2">Smile for the camera</h1>
+        <Video
+          setText={setError}
+          onCapture={(blob) => {
+            setData(blob);
+          }}
+          onClear={() => {
+            setData(null);
+          }}
+        />
+        <CameraSubmitButton
+          data={data}
+          endpoint={"camera"}
+          onClick={(event) => {
+            event.preventDefault();
+            handleCameraSubmit(); // TODO does this work?
+          }}
+        />
+        <Backdoor />
+      </div>
     </>
   );
 }

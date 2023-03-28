@@ -22,7 +22,7 @@ export function Backdoor(props) {
       <button className="mx-5 bg-neutral-500" onClick={() => navigate("/signup")}>
         Signup
       </button>
-      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/email")}>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/")}>
         Email
       </button>
       <button className="mx-5 bg-neutral-500" onClick={() => navigate("/password")}>
@@ -34,25 +34,10 @@ export function Backdoor(props) {
       <button className="mx-5 bg-neutral-500" onClick={() => navigate("/camera")}>
         Camera
       </button>
-      <button
-        className="mx-5 rounded-full bg-neutral-500"
-        onClick={() => navigate("/vault")}>
+      <button className="mx-5 bg-neutral-500" onClick={() => navigate("/vault")}>
         Vault
       </button>
-      <button
-        onClick={() => {
-          setAuth(true);
-          navigate("/vault");
-        }}>
-        set auth
-      </button>
-      <button
-        className="rounded-full"
-        onClick={() => {
-          setAuth(null);
-        }}>
-        unauth
-      </button>
+      <button onClick={() => navigate("/error")}>Error</button>
     </>
   );
 }
