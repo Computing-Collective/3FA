@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-PEOPLE = ('divy', 'matt', 'arnav')
+PEOPLE = ('dummy1', 'dummy2')
 
 img_transforms = Compose([
     RandomHorizontalFlip(),
