@@ -5,4 +5,5 @@ lfw/
 model.pth
 model-divy95.pth
 model-all3-99.pth
+model-bc-data-97.pth
 negative/
