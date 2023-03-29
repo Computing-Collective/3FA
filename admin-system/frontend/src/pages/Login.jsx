@@ -9,42 +9,6 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function InputField({ autoFocus, label, placeholder, type, onChange, value }) {
-    return (
-      <>
-        <TextField
-          autoFocus={autoFocus}
-          color="primary"
-          disabled={false}
-          label={label}
-          placeholder={placeholder}
-          variant="outlined"
-          size="md"
-          required
-          value={value}
-          sx={{
-            input: {
-              color: "white",
-            },
-            "& label": {
-              color: "white",
-            },
-            "&.MuiTextField-root": {
-              fieldset: {
-                borderColor: "white",
-              },
-              "&:hover fieldset": {
-                borderColor: "primary.main",
-              },
-            },
-          }}
-          type={type}
-          onChange={onChange}
-        />
-      </>
-    );
-  }
-
   async function handleSubmit() {
     // TODO endpoint url
     const response = await fetch(`${API_ENDPOINT}/login`, {
@@ -62,34 +26,67 @@ export function Login() {
     <>
       <form
         onSubmit={async (event) => {
-          event.preventDefault();
-          handleSubmit();
+          // event.preventDefault();
+          // handleSubmit();
         }}>
         <div className="gap-y-2 m-2 flex flex-col">
           {error !== "" && <DisplayError text={error} />}
           <InputField
-            autoFocus
             label="Email"
             placeholder="Enter your email"
-            type="email"
+            value={email}
             onChange={(e) => {
-              e.preventDefault();
               setEmail(e.target.value);
             }}
-            value={email}
+            type="email"
           />
           <InputField
-            label="Password"
             placeholder="Enter your password"
-            type="password"
+            label="Password"
+            value={password}
             onChange={(e) => {
-              e.preventDefault();
               setPassword(e.target.value);
             }}
-            value={password}
+            type="password"
           />
         </div>
       </form>
+    </>
+  );
+}
+
+function InputField({ autoFocus, label, placeholder, type, onChange, value }) {
+  return (
+    <>
+      <TextField
+        autoFocus={autoFocus}
+        color="primary"
+        disabled={false}
+        label={label}
+        placeholder={placeholder}
+        variant="outlined"
+        size="md"
+        required
+        value={value}
+        sx={{
+          input: {
+            color: "white",
+          },
+          "& label": {
+            color: "white",
+          },
+          "&.MuiTextField-root": {
+            fieldset: {
+              borderColor: "white",
+            },
+            "&:hover fieldset": {
+              borderColor: "primary.main",
+            },
+          },
+        }}
+        type={type}
+        onChange={onChange}
+      />
     </>
   );
 }
