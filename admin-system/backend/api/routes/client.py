@@ -409,3 +409,11 @@ def client_logout():
     helpers.disable_auth_session(auth_session)
 
     return jsonify(msg="Logout successful.", success=1), 200
+
+
+########################################
+#           File Interaction           #
+########################################
+@client.route("/client/file", methods=["POST"], strict_slashes=False)
+def client_file():
+    pass
