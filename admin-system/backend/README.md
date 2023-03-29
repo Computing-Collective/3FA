@@ -13,6 +13,21 @@
     ```shell
     pipenv sync --dev
     ```
+3. Run the Machine Learning model generation script:
+   ```shell
+   cd ../../machine-learning
+    ```
+    ```shell
+   pip install -r requirements.txt
+   ```
+    ```shell
+   python model.py
+   ```
+   ```shell
+   cd ../admin-system/backend
+   ```
+4. Move the generated model to the `instance` folder   
+
 ## Usage
 
 ### Docker

@@ -31,7 +31,7 @@ img_transforms = Compose([
 full_dataset = {}
 
 for person in PEOPLE:
-    full_dataset[person] = datasets.ImageFolder(root=os.path.join('machine-learning', 'data', person), transform=img_transforms)
+    full_dataset[person] = datasets.ImageFolder(root=os.path.join('data', person), transform=img_transforms)
 
 # dataset = [img_paths, labels]
 # 
