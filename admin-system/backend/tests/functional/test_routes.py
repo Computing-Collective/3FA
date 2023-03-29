@@ -16,6 +16,8 @@ from constants import ValidMoves
 def test_index(test_client):
     response = test_client.get("/api")
     assert response.status_code == 200
+    response = test_client.get("/")
+    assert response.status_code == 200
 
 
 @pytest.mark.get_request

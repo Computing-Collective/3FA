@@ -10,19 +10,22 @@ import constants
 from api import helpers, models
 from api.app import db
 
-api = Blueprint("api", __name__)
+client = Blueprint("client", __name__, url_prefix="/api")
 
 
 ###################################################################################
 #                               Client API Routes                                 #
 ###################################################################################
-@api.route("/api", methods=["GET"], strict_slashes=False)
+@client.route("/", methods=["GET"], strict_slashes=False)
 def index():
     """Index route for the API"""
     return Response("Hello, world!", status=200)
 
 
-@api.route("/api/signup", methods=["POST"], strict_slashes=False)
+########################################
+#                Signup                #
+########################################
+@client.route("/signup", methods=["POST"], strict_slashes=False)
 def signup():
     """
     Route for signing up a new user
@@ -67,7 +70,10 @@ def signup():
         return jsonify(msg='Error: {}. User not created.'.format(exception_message), success=0), 400
 
 
-@api.route("/api/login/email", methods=["POST"], strict_slashes=False)
+########################################
+#             Login Routes             #
+########################################
+@client.route("/login/email", methods=["POST"], strict_slashes=False)
 def init():
     """
     Route for initializing a login session
@@ -103,7 +109,7 @@ def init():
         return jsonify(msg='Error: {}. Login not initialized.'.format(exception_message), success=0), 400
 
 
-@api.route("/api/login/password", methods=["POST"], strict_slashes=False)
+@client.route("/login/password", methods=["POST"], strict_slashes=False)
 def login_password():
     """
     Route for logging in with a password
@@ -141,7 +147,7 @@ def login_password():
         return jsonify(msg="Password validated.", next=next_stage, auth_session_id=auth_id, success=1), 200
 
 
-@api.route("/api/login/motion_pattern/unique", methods=["POST"], strict_slashes=False)
+@client.route("/login/motion_pattern/unique", methods=["POST"], strict_slashes=False)
 def login_motion_pattern_unique():
     """
     Route for validating whether a pico_id is unique
@@ -167,7 +173,7 @@ def login_motion_pattern_unique():
         return jsonify(msg="Pico ID is not unique.", success=0), 400
 
 
-@api.route("/api/login/motion_pattern/initialize", methods=["POST"], strict_slashes=False)
+@client.route("/login/motion_pattern/initialize", methods=["POST"], strict_slashes=False)
 def login_motion_pattern():
     """
     Route for initializing a motion pattern login
@@ -230,7 +236,7 @@ def login_motion_pattern():
         return jsonify(msg="Motion pattern validated.", next=next_stage, auth_session_id=auth_id, success=1), 200
 
 
-@api.route("/api/login/motion_pattern/validate", methods=["POST"], strict_slashes=False)
+@client.route("/login/motion_pattern/validate", methods=["POST"], strict_slashes=False)
 def login_motion_pattern_validate():
     """
     Route for validating a motion pattern login
@@ -284,7 +290,7 @@ def login_motion_pattern_validate():
         return jsonify(msg="Motion pattern validated.", success=1), 200
 
 
-@api.route("/api/login/face_recognition", methods=["POST"], strict_slashes=False)
+@client.route("/login/face_recognition", methods=["POST"], strict_slashes=False)
 def login_face_recognition():
     """
     Route for logging in with face recognition
@@ -332,7 +338,10 @@ def login_face_recognition():
         return jsonify(msg="Face recognition validated.", next=next_stage, auth_session_id=auth_id, success=1), 200
 
 
-@api.route("/api/client/validate", methods=["POST"], strict_slashes=False)
+########################################
+#             Validate Auth            #
+########################################
+@client.route("/client/validate", methods=["POST"], strict_slashes=False)
 def client_validate():
     """
     Route for a client to check that their ``auth_session_id`` is valid
@@ -366,7 +375,10 @@ def client_validate():
     return jsonify(msg="Auth session ID is valid.", success=1), 200
 
 
-@api.route("/api/client/logout", methods=["POST"], strict_slashes=False)
+########################################
+#                Logout                #
+########################################
+@client.route("/client/logout", methods=["POST"], strict_slashes=False)
 def client_logout():
     """
     Route for a client to log out
@@ -399,44 +411,9 @@ def client_logout():
     return jsonify(msg="Logout successful.", success=1), 200
 
 
-###################################################################################
-#                             Admin Dashboard Routes                              #
-###################################################################################
-@api.route("/health", strict_slashes=False)
-def health():
-    """Health check route for the backend server"""
-    return Response("OK", status=200)
-
-
-@api.route("/api/dashboard/failed_events", methods=["GET"], strict_slashes=False)
-def get_failed_events():
-    """
-    Route for getting failed login events
-
-    If both email and session_id are provided, the email will be used.
-
-    Query params:
-
-    - ``email``: The email of the user to get failed events for (optional)
-    - ``session_id``: The session ID of the login session (optional)
-
-    :return: The failed events for the user
-    """
-    email: str = request.args.get('email', None)
-    session_id: str = request.args.get('session_id', None)
-
-    user = None
-    session = None
-
-    if email is not None:
-        user = helpers.get_user_from_email(email)
-        if user is None:
-            return jsonify(msg="Invalid email, please try again.", success=0), 401
-    elif session_id is not None:
-        session = helpers.get_login_session_from_id(uuid.UUID(session_id))
-        if session is None:
-            return jsonify(msg="Invalid session_id, please try again.", success=0), 401
-
-    events = helpers.get_failed_login_events_as_dict(user, session)
-
-    return jsonify(msg="Failed events retrieved.", success=1, events=events), 200
+########################################
+#           File Interaction           #
+########################################
+@client.route("/client/file", methods=["POST"], strict_slashes=False)
+def client_file():
+    pass

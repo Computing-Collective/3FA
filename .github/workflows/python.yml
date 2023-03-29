@@ -12,21 +12,35 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     defaults:
       run:
         working-directory: admin-system/backend
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
         cache: 'pipenv'
+    
     - name: Install pipenv
       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-    - name: Install dependencies
+
+    - name: Install Backend Dependencies
       run: pipenv sync --dev
+
+    - name: Install Machine Learning Dependencies
+      run: pip install -r requirements.txt
+      working-directory: machine-learning
+
+    - name: Generate Machine Learning Model
+      run: |
+        python model.py
+        mv model.pth ../admin-system/backend/instance/model.pth
+      working-directory: machine-learning      
+
     - name: Test with pytest
       run: pipenv run pytest --cov=api --cov-branch
