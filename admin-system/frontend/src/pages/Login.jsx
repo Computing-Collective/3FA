@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { TextField } from "@mui/material";
+import { DisplayError } from "../components/DisplayError.jsx";
+
+const API_ENDPOINT = `${import.meta.env.VITE_API_ENDPOINT}/api/dashboard`;
 
 export function Login() {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function DisplayText() {
-    return <h1>text</h1>;
-  }
-
-  function InputField({ autoFocus, label, placeholder, type, onChange }) {
+  function InputField({ autoFocus, label, placeholder, type, onChange, value }) {
     return (
       <>
         <TextField
@@ -22,6 +21,7 @@ export function Login() {
           variant="outlined"
           size="md"
           required
+          value={value}
           sx={{
             input: {
               color: "white",
@@ -45,31 +45,51 @@ export function Login() {
     );
   }
 
+  async function handleSubmit() {
+    // TODO endpoint url
+    const response = await fetch(`${API_ENDPOINT}/login`, {
+      method: "POST",
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
+    });
+    const json = await response.json();
+    console.log(json);
+  }
+
   return (
     <>
-      <div className="flex flex-col">
-        {/* {error !== "" && <DisplayText />} */}
-        <InputField
-          autoFocus
-          label="Email"
-          placeholder="Enter your email"
-          type="email"
-          onChange={(e) => {
-            e.preventDefault();
-            setEmail(e.target.value);
-          }}
-        />
-        <InputField
-          autoFocus
-          label="Password"
-          placeholder="Enter your password"
-          type="password"
-          onChange={(e) => {
-            e.preventDefault();
-            setPassword(e.target.value);
-          }}
-        />
-      </div>
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          handleSubmit();
+        }}>
+        <div className="gap-y-2 m-2 flex flex-col">
+          {error !== "" && <DisplayError text={error} />}
+          <InputField
+            autoFocus
+            label="Email"
+            placeholder="Enter your email"
+            type="email"
+            onChange={(e) => {
+              e.preventDefault();
+              setEmail(e.target.value);
+            }}
+            value={email}
+          />
+          <InputField
+            label="Password"
+            placeholder="Enter your password"
+            type="password"
+            onChange={(e) => {
+              e.preventDefault();
+              setPassword(e.target.value);
+            }}
+            value={password}
+          />
+        </div>
+      </form>
     </>
   );
 }
