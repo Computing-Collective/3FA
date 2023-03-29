@@ -49,6 +49,8 @@ from adafruit_httpserver.response import HTTPResponse
 from adafruit_httpserver.methods import HTTPMethod
 from adafruit_httpserver.mime_type import MIMEType
 
+import json
+
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # INIT
@@ -106,6 +108,7 @@ wifi.radio.connect(os.getenv('CIRCUITPY_WIFI_SSID'),
 pool = socketpool.SocketPool(wifi.radio)
 
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
+
 server = HTTPServer(pool)
 
 print("\nStarting server...")
@@ -487,14 +490,24 @@ def check_sequence(sequence):
 @server.route("/pico_id", method=HTTPMethod.POST)
 # Route for uploading a pico_id
 def set_pico_id(request: HTTPRequest):
+    # Must use global to specify we want to modify the pico_id variable that was defined outside
+    global pico_id 
     #  Get the raw text
     raw_text = request.raw_request.decode("utf-8")
+    print("Raw Text received: ", raw_text)
 
-    # TODO: get "pico_id" value out of the request and save it to the pico_id variable
-    print("Pico ID received: ", raw_text)
+    # Get "pico_id" value out of the request and save it to the pico_id variable
 
-    # TODO: update this
-    pico_id = "some value"
+    # Find the JSON data within the string
+    start_index = raw_text.find('{')
+    end_index = raw_text.find('}', start_index) + 1
+    json_data = raw_text[start_index:end_index]
+
+    # Parse the JSON data and extract the value of "a" key
+    parsed_data = json.loads(json_data)
+    pico_id = parsed_data['pico_id']
+
+    print("Pico ID received: " + pico_id)
 
     output = "Pico ID received: " + pico_id
     with HTTPResponse(request) as response:
@@ -514,6 +527,7 @@ def transmit_wireless_message(sequence):
     output = response.text
     print("\nResponse from server: ", output)
     response.close()
+    print("Transmission Complete")
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -542,50 +556,52 @@ while True:
         recording_led.value = False
         is_recording = False
 
+        print("\nSetup Complete. Waiting for pico_id from client")
+
     # Wait to receive pico_id from client
-    # TODO: figure out why we aren't breaking out of the while loop once pico_id is changed
-    print("\nWaiting for pico_id from client")
-    while pico_id is None:
+    if pico_id is None:
         try:
             server.poll()
         except Exception as e:
             print("Error polling server", e)
             break
 
-    # Update states for stop/start buttons
-    if start_btn.value and not is_recording:
-        is_recording = True
-        ready_led.value = False
-        recording_led.value = True
+    else:
+        # Update states for stop/start buttons
+        if start_btn.value and not is_recording:
+            is_recording = True
+            ready_led.value = False
+            recording_led.value = True
 
-    elif stop_btn.value and is_recording:
-        is_recording = False
-        ready_led.value = True
-        recording_led.value = False
+        elif stop_btn.value and is_recording:
+            is_recording = False
+            ready_led.value = True
+            recording_led.value = False
 
-        # Validate move
-        valid_moves = check_sequence(sequence)
-        add_moves_to_sequence(valid_moves)
+            # Validate move
+            valid_moves = check_sequence(sequence)
+            add_moves_to_sequence(valid_moves)
 
-        # Transmit the final sequence
-        transmit_wireless_message(final_sequence)
-        
-        # Reset the sequence for next recording    
-        sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }        
-        final_sequence = []
-        pico_id = None
-         
+            # Transmit the final sequence
+            transmit_wireless_message(final_sequence)
+            
+            # Reset the sequence for next recording    
+            sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }        
+            final_sequence = []
+            pico_id = None
+            print("\nWaiting for pico_id from client")
+            
 
-    # Recording
-    if (is_recording):
+        # Recording
+        if (is_recording):
 
-        # Prevent overflow (sequence terminates if trying to record for more than 10 seconds)    
-        if len(sequence["AX"]) > 1000:
-            print("\n\n\n\n\n\n\n\nRestarting, overflowed 10s\n\n")
-            sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }
+            # Prevent overflow (sequence terminates if trying to record for more than 10 seconds)    
+            if len(sequence["AX"]) > 1000:
+                print("\n\n\n\n\n\n\n\nRestarting, overflowed 10s\n\n")
+                sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }
 
-        add_all_sensor_data(sequence)
-        
-        print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
+            add_all_sensor_data(sequence)
+            
+            print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
 
-    time.sleep(0.1)
+        time.sleep(0.1)
