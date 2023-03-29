@@ -4,18 +4,20 @@ export function Backdoor() {
   const navigate = useNavigate();
   return (
     <>
-      <button
-        onClick={() => {
-          navigate("/");
-        }}>
-        Login
-      </button>
-      <button
-        onClick={() => {
-          navigate("/home");
-        }}>
-        Home
-      </button>
+      <div className="bg-gray-500">
+        <button
+          onClick={() => {
+            navigate("/");
+          }}>
+          Login
+        </button>
+        <button
+          onClick={() => {
+            navigate("/home");
+          }}>
+          Home
+        </button>
+      </div>
     </>
   );
 }

@@ -45,6 +45,26 @@ const router = createBrowserRouter(
         }
         loader={async ({ params }) => {
           console.log("loading home");
+          return [
+            {
+              id: 1234,
+              name: "Bob",
+              methods: {
+                password: true,
+                face_recognition: true,
+                motion_pattern: false,
+              },
+              time: Date(),
+              success: true,
+              email: "bob@email.com",
+            },
+            {
+              id: 123,
+            },
+            {
+              id: 6,
+            },
+          ];
           // return;
           const response = await fetch(
             // TODO endpoint url
