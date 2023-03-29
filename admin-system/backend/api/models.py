@@ -6,7 +6,7 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 
 from api.app import db
-from api.machine_learning import evaluate_images
+from api.machine_learning_eval import evaluate_images
 from constants import ValidMoves
 
 

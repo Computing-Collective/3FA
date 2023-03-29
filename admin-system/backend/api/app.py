@@ -7,7 +7,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-from api.errors import errors
+from api.routes.errors import errors
 
 # Load environment variables from .env file
 load_dotenv(".env")
@@ -21,11 +21,17 @@ def create_app(test_config=None):
     # Create the Flask app
     app = Flask(__name__)
     CORS(app)
+
     # Register the error handling endpoint
     app.register_blueprint(errors)
+
     # Register the API endpoints
-    from api.routes import api
-    app.register_blueprint(api)
+    from api.routes.base import base
+    app.register_blueprint(base)
+    from api.routes.client import client
+    app.register_blueprint(client)
+    from api.routes.admin import admin
+    app.register_blueprint(admin)
 
     # Load the configuration
     app.secret_key = os.getenv("SECRET_KEY")
@@ -44,7 +50,7 @@ def create_app(test_config=None):
             db.drop_all()
 
         db.create_all()
-        from api.machine_learning import model
+        from api.machine_learning_eval import model
         model.load_state_dict(torch.load(os.path.join(app.instance_path, "model.pth"),
                                          map_location=torch.device('cpu')))
         model.eval()
