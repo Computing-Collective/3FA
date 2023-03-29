@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { TextField } from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import { DisplayError } from "../components/DisplayError.jsx";
+import { useNavigate } from "react-router-dom";
+import { Backdoor } from "../components/Backdoor.jsx";
 
 const API_ENDPOINT = `${import.meta.env.VITE_API_ENDPOINT}/api/dashboard`;
 
@@ -8,6 +10,7 @@ export function Login() {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   async function handleSubmit() {
     // TODO endpoint url
@@ -20,16 +23,19 @@ export function Login() {
     });
     const json = await response.json();
     console.log(json);
+    setError(json.msg); // TODO
+    navigate("/home");
   }
 
   return (
     <>
+      <h1 className="text-xl">Admin Dashboard</h1>
       <form
         onSubmit={async (event) => {
-          // event.preventDefault();
-          // handleSubmit();
+          event.preventDefault();
+          handleSubmit();
         }}>
-        <div className="gap-y-2 m-2 flex flex-col">
+        <div className="gap-y-2 m-2 flex p-2 flex-col">
           {error !== "" && <DisplayError text={error} />}
           <InputField
             label="Email"
@@ -49,8 +55,10 @@ export function Login() {
             }}
             type="password"
           />
+          <Button type="submit">Submit</Button>
         </div>
       </form>
+      {import.meta.env.DEV && <Backdoor />}
     </>
   );
 }

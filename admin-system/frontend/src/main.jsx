@@ -13,7 +13,8 @@ import { Login } from "./pages/Login";
 import { Home } from "./pages/Home";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { purple } from "@mui/material/colors";
-// import { RequireAuth } from "./components/RequireAuth";
+import { ErrorPage } from "./pages/ErrorPage.jsx";
+import { RequireAuth } from "./components/RequireAuth";
 
 // context for auth
 export const authContext = createContext(null);
@@ -34,7 +35,7 @@ const theme = createTheme({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Login />} errorElement={<ErrorPage />} />
       <Route
         path="/home"
         element={
@@ -42,6 +43,16 @@ const router = createBrowserRouter(
           <Home />
           // </RequireAuth>
         }
+        loader={async ({ params }) => {
+          console.log("loading home");
+          // return;
+          const response = await fetch(
+            // TODO endpoint url
+            `${import.meta.env.VITE_API_ENDPOINT}/api/dashboard/`
+          );
+          return await response.json();
+        }}
+        errorElement={<ErrorPage />}
       />
     </>
   )

@@ -14,6 +14,7 @@ export function RequireAuth({ children }) {
   const [auth, setAuth] = useContext(authContext);
   // state that checks if the auth is checked (waiting for async function to finish)
   const [authChecked, setAuthChecked] = useState(false);
+  const navigate = useNavigate();
 
   const authed = useRef(false);
 
@@ -32,15 +33,11 @@ export function RequireAuth({ children }) {
   }
 
   authed.current = true;
-
-  return authed.current === true ? (
-    children
-  ) : (
-    <Navigate to="/" replace state={{ path: location.pathname }} />
-  );
+  return authed.current === true ? children : navigate("/");
 }
 
 async function login(auth) {
+  // TODO test
   const endpoint = "validate";
   const url = `${api_endpoint}/api/dashboard/${endpoint}/`;
 
