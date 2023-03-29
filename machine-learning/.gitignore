@@ -1,4 +1,5 @@
 data/
+datasets/
 lfw.tgz
 lfw/
 model.pth
