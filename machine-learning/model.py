@@ -1,20 +1,18 @@
 import os
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
-from torch.utils.data import Subset
 from torch.utils.data import random_split
-
+from torch.utils.data import Subset
+from torchdata.datapipes.iter import Zipper, IterableWrapper
 from torchvision import datasets
 from torchvision.transforms import ToTensor, Compose, RandomHorizontalFlip, Resize
 
-from torchdata.datapipes.iter import Zipper, IterableWrapper
-
-import numpy as np
-
-PEOPLE = ('dummy1', 'dummy2')
+DATA_PATH = os.path.join("data")
+PEOPLE = tuple([name for name in os.listdir(DATA_PATH) if os.path.isdir(os.path.join(DATA_PATH, name))])
 
 img_transforms = Compose([
     RandomHorizontalFlip(),
@@ -33,47 +31,45 @@ full_dataset = {}
 for person in PEOPLE:
     full_dataset[person] = datasets.ImageFolder(root=os.path.join('data', person), transform=img_transforms)
 
-# dataset = [img_paths, labels]
-# 
-# Labels:
-# - anchor = 0
-# - positive = 1
-# - negative = 2
-
 # maps "person" -> array of booleans of where the anchor, positive, and negative images are in the dataset
 is_anchor = {}
 is_positive = {}
-is_negative = {}
 
 for person in PEOPLE:
     is_anchor[person] = torch.tensor(full_dataset[person].targets) == 0
-    is_negative[person] = torch.tensor(full_dataset[person].targets) == 1
-    is_positive[person] = torch.tensor(full_dataset[person].targets) == 2
+    is_positive[person] = torch.tensor(full_dataset[person].targets) == 1
 
 # extract the anchor, positive, and negative img indices
 anchor_indices = {}
 positive_indices = {}
-negative_indices = {}
 
 for person in PEOPLE:
     anchor_indices[person] = is_anchor[person].nonzero().flatten()
-    negative_indices[person] = is_negative[person].nonzero().flatten()
     positive_indices[person] = is_positive[person].nonzero().flatten()
 
 # create the anchor, positive, and negative datasets
 anchor_dataset = {}
 positive_dataset = {}
-negative_dataset = {}
 
 for person in PEOPLE:
     anchor_dataset[person] = Subset(full_dataset[person], anchor_indices[person])
-    negative_dataset[person] = Subset(full_dataset[person], negative_indices[person])
     positive_dataset[person] = Subset(full_dataset[person], positive_indices[person])
 
+# Now, the datasets are [(img, label), (img, label), (img, label), ...]. We need them to be [img, img, img, ...] only, no label needed since they are already split by label.
+# WARNING: this takes about 2 minutes to run, please only run it once
 for person in PEOPLE:
     anchor_dataset[person] = [sublist[0] for sublist in list(anchor_dataset[person])]
-    negative_dataset[person] = [sublist[0] for sublist in list(negative_dataset[person])]
     positive_dataset[person] = [sublist[0] for sublist in list(positive_dataset[person])]
+
+# Zip other people's positives to make each negative
+negative_dataset = {}
+
+for person in PEOPLE:
+    negative_dataset[person] = []
+    for other_person in PEOPLE:
+        if other_person == person:
+            continue
+        negative_dataset[person].extend(positive_dataset[other_person])
 
 zipped_pos_dataset = {}
 zipped_neg_dataset = {}
@@ -96,7 +92,7 @@ np.random.shuffle(final_dataset)
 #####                    Data Loading                   #####
 #############################################################
 
-batch_size = 4
+batch_size = 16
 
 # split between training and testing 80-20
 train_set, test_set = random_split(final_dataset, [int(len(final_dataset) * 0.8), len(final_dataset) - int(len(final_dataset) * 0.8)])
