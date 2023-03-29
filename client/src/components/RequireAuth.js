@@ -30,10 +30,11 @@ export function RequireAuth({ children }) {
   if (!authChecked) {
     return null;
   }
-
+  
   return authed.current === true ? (
     children
   ) : (
     <Navigate to="/" replace state={{ path: location.pathname }} />
   );
 }
+  

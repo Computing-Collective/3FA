@@ -27,6 +27,7 @@
     "@electron-forge/maker-zip": "^6.1.0",
     "@electron-forge/plugin-webpack": "^6.1.0",
     "@vercel/webpack-asset-relocator-loader": "1.7.3",
+    "autoprefixer": "^10.4.14",
     "babel-loader": "^9.1.2",
     "css-loader": "^6.0.0",
     "dotenv-webpack": "^8.0.1",
