@@ -1,0 +1,28 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/admin-system/backend"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "America/Vancouver"
+    insecure-external-code-execution: deny
+    labels:
+      - "Dependency"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "ElioDiNino"
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "America/Vancouver"
+    labels:
+      - "Dependency"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "im-calvin"

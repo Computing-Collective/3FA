@@ -1,0 +1,7 @@
+TODO.md
+.idea/
+__pycache__/
+.pytest_cache
+.coverage
+instance/*
+!instance/database.db
