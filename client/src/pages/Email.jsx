@@ -15,8 +15,8 @@ export function Email() {
   return (
     <>
       <div className="m-2 flex flex-col justify-center text-center">
-        {error !== "" && <DisplayError className="text-center" text={error} />}
         <h1>Log in or create a new account to access your secure vault.</h1>
+        {error !== "" && <DisplayError className="text-center" text={error} />}
         <SubmitButton
           placeholder="Email"
           type={"email"}

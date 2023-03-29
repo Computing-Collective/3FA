@@ -8,6 +8,7 @@ import { Button } from "@mui/material";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
+const pico_api_endpoint = ""; // TODO
 
 /**
  *
@@ -44,11 +45,22 @@ export function SubmitButton(props) {
 
   async function handleSubmit(props) {
     let apiPayload;
-    endpoint === "motion_pattern/initialize"
-      ? (apiPayload = props.data.map((item) => {
-          return item.toUpperCase();
-        })) // full-capitalize every elem in array
-      : (apiPayload = props.data);
+    if (endpoint === "motion_pattern/initialize") {
+      // full-capitalize every elem in array
+      apiPayload = props.data.map((item) => {
+        return item.toUpperCase();
+      });
+      // TODO send api request to matt
+      // const response = await fetch(`${pico_api_endpoint}`, {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     pico_id: pico_id,
+      //   }),
+      // });
+      // const json = await response.json();
+    } else {
+      apiPayload = props.data;
+    }
 
     // url to go to (defined in Postman)
     const url = `${api_endpoint}/api/login/${endpoint}/`;

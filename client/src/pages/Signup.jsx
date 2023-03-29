@@ -95,6 +95,19 @@ export function Signup() {
           </div>
           <div className="flex flex-col justify-center">
             <HoverCheckbox
+              label="Sensor"
+              onChange={(event) => {
+                setAuthMethods({
+                  ...authMethods,
+                  motion_pattern: event.target.checked,
+                });
+              }}
+            />
+            {/* render sensor dropdowns if needed */}
+            {authMethods.motion_pattern && (
+              <MotionPattern patterns={patterns} setPatterns={setPatterns} />
+            )}
+            <HoverCheckbox
               label="Facial Recognition"
               onChange={(event) => {
                 setAuthMethods({
@@ -116,19 +129,6 @@ export function Signup() {
                   }}
                 />
               </>
-            )}
-            <HoverCheckbox
-              label="Sensor"
-              onChange={(event) => {
-                setAuthMethods({
-                  ...authMethods,
-                  motion_pattern: event.target.checked,
-                });
-              }}
-            />
-            {/* render sensor dropdowns if needed */}
-            {authMethods.motion_pattern && (
-              <MotionPattern patterns={patterns} setPatterns={setPatterns} />
             )}
             <Button type="submit">Submit</Button>
           </div>
