@@ -1,5 +1,6 @@
 import os
 import uuid
+from unittest.mock import patch
 
 import pytest
 
@@ -38,7 +39,8 @@ from constants import ValidMoves
     (["slawo@lva.alc", "lkjA2fsfsd", [ValidMoves.UP.value, "not_a_move"], True, True, True, "user1.png"],
      AssertionError),  # Invalid motion pattern (invalid move)
 ])
-def test_user_create_fetch(test_client, request_data, expected_result):
+@patch("api.models.User.check_face_recognition")
+def test_user_create_fetch(mock_face, test_client, request_data, expected_result):
     """
     Tests creating a user and fetching it from the database.
 
@@ -55,6 +57,8 @@ def test_user_create_fetch(test_client, request_data, expected_result):
         }
     }
     path = os.path.abspath(os.path.join(os.curdir, "tests", "images", request_data[6]))
+
+    mock_face.return_value = True
 
     if expected_result is True:
         with open(path, 'rb') as photo:
