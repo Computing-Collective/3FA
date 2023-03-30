@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
+const { readFileSync } = require("node:fs");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
@@ -37,6 +38,8 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", () => {
+  ipcMain.handle("dialog:openFile", handleFileOpen);
+  ipcMain.handle("fs:readFile", handleFileData);
   createWindow();
 });
 
@@ -59,3 +62,19 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+async function handleFileOpen() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ["openFile"],
+  });
+  if (canceled) {
+    return;
+  } else {
+    return filePaths[0];
+  }
+}
+
+function handleFileData(filePath) {
+  console.log(filePath);
+  return readFileSync(filePath, "utf-8");
+}
