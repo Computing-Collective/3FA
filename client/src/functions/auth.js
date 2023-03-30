@@ -15,6 +15,7 @@ export async function login(auth) {
     }),
     headers: { "Content-Type": "application/json" },
   });
+
   const json = await response.json();
   return json.success === 1;
 }

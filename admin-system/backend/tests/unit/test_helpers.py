@@ -59,7 +59,6 @@ def test_user_create_fetch(mock_face, test_client, request_data, expected_result
     path = os.path.abspath(os.path.join(os.curdir, "tests", "images", request_data[6]))
 
     mock_face.return_value = True
-
     if expected_result is True:
         with open(path, 'rb') as photo:
             user = api.helpers.create_user_from_dict(data, photo)

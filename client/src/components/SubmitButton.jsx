@@ -3,8 +3,12 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
+import { InputField } from "./InputField.jsx";
+import { Button } from "@mui/material";
+import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
+const pico_api_endpoint = ""; // TODO
 
 /**
  *
@@ -27,6 +31,7 @@ export function SubmitButton(props) {
   const pico_id = props.pico_id;
   const setError = props.setError;
   const endpoint = props.endpoint;
+  const text = props.text;
 
   // if we want an input field (email or password)
   const inputField = props.endpoint === "email" || props.endpoint === "password";
@@ -40,11 +45,22 @@ export function SubmitButton(props) {
 
   async function handleSubmit(props) {
     let apiPayload;
-    endpoint === "motion_pattern/initialize"
-      ? (apiPayload = props.data.map((item) => {
-          return item.toUpperCase();
-        })) // capitalize every elem in array
-      : (apiPayload = props.data);
+    if (endpoint === "motion_pattern/initialize") {
+      // full-capitalize every elem in array
+      apiPayload = props.data.map((item) => {
+        return item.toUpperCase();
+      });
+      // TODO send api request to matt
+      // const response = await fetch(`${pico_api_endpoint}`, {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     pico_id: pico_id,
+      //   }),
+      // });
+      // const json = await response.json();
+    } else {
+      apiPayload = props.data;
+    }
 
     // url to go to (defined in Postman)
     const url = `${api_endpoint}/api/login/${endpoint}/`;
@@ -65,55 +81,32 @@ export function SubmitButton(props) {
       setSession(json.session_id);
     }
 
-    handleNextNavigation(json, response);
-  }
-
-  function handleNextNavigation(json, response) {
-    const next = json.next;
-    const success = json.success;
-    // retry api request
-    if (success === 0 && next === undefined) {
-      setError(json.msg); // change text for frontend
-      return;
-    }
-
-    // go to vault
-    if (response.ok && next === null) {
-      // auth occurs within component
-      setAuth(json.auth_session_id);
-      return;
-    }
-    // name mangling between admin / client
-    switch (next) {
-      case "motion_pattern":
-        navigate("/sensor");
-        return;
-      case "face_recognition":
-        navigate("/camera");
-        return;
-    }
-    // generally, want to go to next place directed by admin
-    navigate(`/${json.next}`);
+    handleNextNavigation({ json, response, setError, setAuth, navigate });
   }
 
   return (
     <>
       <form
         onSubmit={(event) => {
-          event.preventDefault();
+          event.preventDefault(); // prevents page refresh
           handleSubmit({
             // if we want an input field, use the data from the input field else we take props.data (camera / motion)
             data: inputField ? data : props.data, // main data payload to api
           });
         }}>
-        {inputField ? (
-          <input
-            type={props.type}
-            value={data}
-            onChange={(e) => setData(e.target.value)}
-          />
-        ) : null}
-        <input id="submitButton" type="submit" value="Submit" />
+        <div className="m-2 flex flex-col justify-center space-y-2">
+          {inputField ? (
+            <InputField
+              autoFocus
+              className="p-2"
+              placeholder={props.placeholder}
+              type={props.type}
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+            />
+          ) : null}
+          <Button type="submit">{text}</Button>
+        </div>
       </form>
     </>
   );
