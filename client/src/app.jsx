@@ -34,13 +34,13 @@ const api_endpoint = window.internal.getAPIEndpoint;
 const router = createHashRouter(
   createRoutesFromElements(
     <>
-      {/* <Route path="/" element={<Email />} errorElement={<ErrorPage />} /> */}
+      <Route path="/" element={<Email />} errorElement={<ErrorPage />} />
       <Route path="/signup" element={<Signup />} errorElement={<ErrorPage />} />
       <Route path="/password" element={<Password />} errorElement={<ErrorPage />} />
       <Route path="/sensor" element={<Sensor />} errorElement={<ErrorPage />} />
       <Route path="/camera" element={<Camera />} errorElement={<ErrorPage />} />
       <Route
-        path="/"
+        path="/vault"
         element={
           // <RequireAuth>
           <Vault />

@@ -15,7 +15,6 @@ export function UploadButton({ auth, setError }) {
   const [open, setOpen] = useState(false);
   const [filePath, setFilePath] = useState("");
   const [fileName, setFileName] = useState("");
-  console.log(filePath, fileName);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -30,7 +29,6 @@ export function UploadButton({ auth, setError }) {
   async function handleUpload() {
     // fileName is required
     const file = window.internal.getFileData(filePath);
-    console.log(file);
 
     // TODO fix admin
     let formData = new FormData();
