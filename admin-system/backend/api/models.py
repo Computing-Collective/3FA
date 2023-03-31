@@ -2,6 +2,7 @@ import json
 import re
 import uuid
 
+import werkzeug
 from flask_bcrypt import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 
@@ -136,14 +137,14 @@ class User(db.Model):
         return check_password_hash(self.motion_pattern, motion_pattern)
 
     # Saves the provided photo as the facial recognition reference photo
-    def set_face_recognition(self, file):
+    def set_face_recognition(self, file: werkzeug.datastructures.FileStorage):
         if file is None:
             raise AssertionError("No photo submitted")
 
         self.photo = file.read()
 
     # Checks the provided photo against the stored facial recognition model
-    def check_face_recognition(self, file):
+    def check_face_recognition(self, file: werkzeug.datastructures.FileStorage):
         return evaluate_images(self.photo, file)
 
 
@@ -157,14 +158,17 @@ class UserFiles(db.Model):
     :param id: A unique ID
     :param user_id: The ID of the user that the file is attached to
     :param file_name: The name of the file
-    :param file_data: The data of the file
+    :param file_type: The type of the file
+    :param file_path: The relative path to the file (from instance path)
     """
     __tablename__ = "user_files"
 
     id = db.Column(db.Uuid, primary_key=True, unique=True, nullable=False)
     user_id = db.Column(db.Uuid, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     file_name = db.Column(db.String, nullable=False)
-    file_data = db.Column(db.LargeBinary, nullable=False)
+    file_type = db.Column(db.String, nullable=False)
+    file_path = db.Column(db.String, nullable=False)
 
     # Ensures that the ID is a unique UUID and is not null
     @validates('id')
@@ -236,7 +240,7 @@ class LoginSession(db.Model):
     session_id = db.Column(db.Uuid, unique=True, nullable=False, primary_key=True)
     id = db.Column(db.Uuid, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
-    # A string of booleans indicating which authentication methods have been completed
+    # A dictionary of booleans indicating which authentication methods have been completed
     auth_stage = db.Column(db.String, nullable=False)
     # The user's pico_id (if applicable)
     pico_id = db.Column(db.String, unique=True, nullable=True)
@@ -346,10 +350,10 @@ class AuthSession(db.Model):
     enabled = db.Column(db.Boolean, nullable=False)
 
     # Ensures that the session ID is a unique UUID and is not null
-    @validates('id')
+    @validates('session_id')
     def validate_id(self, key, identifier):
         validate_id(identifier)
-        while AuthSession.query.filter(AuthSession.id == identifier).first():
+        while AuthSession.query.filter(AuthSession.session_id == identifier).first():
             identifier = uuid.uuid4()
 
         return validate_id(identifier)
