@@ -74,7 +74,7 @@ async function handleFileOpen() {
   }
 }
 
-function handleFileData(filePath) {
+function handleFileData(event, filePath) {
   console.log(filePath);
   return readFileSync(filePath, "utf-8");
 }
