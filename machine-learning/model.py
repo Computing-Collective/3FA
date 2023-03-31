@@ -16,7 +16,7 @@ PEOPLE = tuple([name for name in os.listdir(DATA_PATH) if os.path.isdir(os.path.
 img_transforms = Compose([
     RandomHorizontalFlip(),
     ToTensor(),
-    Resize((105, 105)),
+    Resize((105, 105), antialias=None),
 ])
 
 
@@ -69,6 +69,7 @@ for person in PEOPLE:
         if other_person == person:
             continue
         negative_dataset[person].extend(positive_dataset[other_person])
+    np.random.shuffle(negative_dataset[person])
 
 zipped_pos_dataset = {}
 zipped_neg_dataset = {}
@@ -91,7 +92,7 @@ np.random.shuffle(final_dataset)
 #####                    Data Loading                   #####
 #############################################################
 
-batch_size = 16
+batch_size = 64
 
 # split between training and testing 80-20
 train_set, test_set = random_split(final_dataset, [int(len(final_dataset) * 0.8), len(final_dataset) - int(len(final_dataset) * 0.8)])
@@ -197,59 +198,49 @@ model = SiameseNetwork().to(device)
 
 # using cross entropy loss function and adam optimizer
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
+optimizer = torch.optim.Adam(model.parameters(recurse=True), lr=0.00001)
 
 def train(dataloader, model, loss_fn, optimizer):
-    # Get the size of the dataset
-    size = len(dataloader.dataset)
-    # Put the model in training mode
     model.train()
     # Loop over the dataset
     for batch, (X, Y, z) in enumerate(dataloader):
         X, Y, z = X.to(device), Y.to(device), z.to(device)
-        
         z = z.type(torch.LongTensor)
 
         pred = model(X, Y)
         loss = loss_fn(pred, z)
 
-        # Backpropagation
-        # Disable the gradient calculation for the model parameters
         optimizer.zero_grad()
-        # Compute the gradient of the loss with respect to the model parameters
         loss.backward()
-        # Update the model parameters
         optimizer.step()
 
 def test(dataloader, model, loss_fn):
-    # Get the size of the dataset
     size = len(dataloader.dataset)
-    # Get the number of batches
     num_batches = len(dataloader)
-    # Put the model in evaluation mode
     model.eval()
     test_loss, correct = 0, 0
+
     with torch.no_grad(): # for memory efficiency when testing
-        # Loop over the dataset
         for X, Y, z in dataloader:
             X, Y, z = X.to(device), Y.to(device), z.to(device)
             z = z.type(torch.LongTensor)
+
             pred = model(X, Y)
             test_loss += loss_fn(pred, z).item()
-            # Add the output value (1 or 0) to the correct variable
             correct += (pred.argmax(1) == z).type(torch.float).sum().item()
-    # Compute the average loss and accuracy
+
     test_loss /= num_batches
     correct /= size
+    print(f"Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
 epochs = 5
 for t in range(epochs):
-    # print(f"Epoch {t+1}: -------------------------------")
+    print(f"Epoch {t+1}: -------------------------------")
     # Train the model
     train(train_dataloader, model, loss_fn, optimizer)
     # Test the model
     test(test_dataloader, model, loss_fn)
-# print("Done!")
+print("Done!")
 
 
 # Saving the model in a file, we will use it in the next cell

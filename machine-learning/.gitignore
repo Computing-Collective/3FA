@@ -1,7 +1,6 @@
 datasets/
 data/*
-!data/dummy1
-!data/dummy2
+!data/B3*
 lfw.tgz
 lfw/
 model.pth
