@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 // In the preload script.
 
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, app } = require("electron");
 
 // 'internal' channel is used for internal stuff
 contextBridge.exposeInMainWorld("internal", {
@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld("internal", {
   // bidirectional communiation on the dialog:openFile channel
   openFile: () => ipcRenderer.invoke("dialog:openFile"),
   getFileData: (filePath) => ipcRenderer.invoke("fs:readFile", filePath),
+  getPicoEndpoint: process.env.PICO_API_ENDPOINT,
 });

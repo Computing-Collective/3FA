@@ -8,7 +8,7 @@ import { Button } from "@mui/material";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
-const pico_api_endpoint = ""; // TODO
+const pico_api_endpoint = window.internal.getPicoEndpoint; // TODO
 
 /**
  *
@@ -50,14 +50,22 @@ export function SubmitButton(props) {
       apiPayload = props.data.map((item) => {
         return item.toUpperCase();
       });
-      // TODO send api request to matt
-      // const response = await fetch(`${pico_api_endpoint}`, {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     pico_id: pico_id,
-      //   }),
-      // });
-      // const json = await response.json();
+      const response = await fetch(`${pico_api_endpoint}/pico_id`, {
+        mode: "no-cors",
+        method: "POST",
+        body: JSON.stringify({
+          pico_id: pico_id,
+        }),
+      });
+      console.log(response);
+      console.log(response.status);
+      const json = await response.json();
+      console.log(json);
+      const status = json.status;
+      status === 1
+        ? setError("Success, waiting for your sensor   input")
+        : setError("Error please try again");
+      console.log(json);
     } else {
       apiPayload = props.data;
     }
