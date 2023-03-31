@@ -13,6 +13,7 @@ def test_client():
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': "sqlite:///test-database.db",
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'DATA_FOLDER': "test-data",
     })
 
     # Establish an application context

@@ -1,9 +1,12 @@
 import json
+import mimetypes
+import os
 import uuid
 from datetime import datetime, timedelta
 
 import flask
-from flask import jsonify
+import werkzeug.datastructures
+from flask import jsonify, current_app
 
 import constants
 from api import models
@@ -91,6 +94,58 @@ def input_validate_login(request: flask.Request, param: str, curr_stage: str,
     return user, session, request_data
 
 
+def input_validate_auth(request: flask.Request, request_type: str = "json", expiry_check: bool = True,
+                        admin_check: bool = False
+                        ) -> tuple[models.User, models.AuthSession, dict] | tuple[flask.Response, int]:
+    """
+    Validate that an admin dashboard request has the correct parameters
+
+    This performs the following checks:
+
+    - The request is of the correct type (JSON or multipart/form-data)
+    - The auth session ID is valid
+    - The session is not expired
+
+    :param request: The request object
+    :param request_type: The type of request to validate (JSON or multipart/form-data)
+    :param expiry_check: Whether to check that the session is not expired
+    :param admin_check: Whether to check that the user is an admin
+    :return: A tuple containing the user, auth session, and request data if the request is valid. Otherwise, a tuple
+             containing a response object and status code
+    """
+    if request_type == "multipart/form-data":
+        # Check that the request is multipart/form-data
+        if "multipart/form-data" not in request.content_type:
+            return jsonify(msg="Missing multipart form data in request.", success=0), 400
+        # Load the request data and get the login session
+        request_data: dict = json.loads(request.form.get('request', None))
+    else:
+        # Validate that the request is JSON
+        try:
+            request_data = json_validate(request)
+        except AssertionError as exception_message:
+            return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
+
+    if request_data.get('auth_session_id', None) is None:
+        return jsonify(msg="Missing auth_session_id in request.", success=0), 400
+
+    auth_session: models.AuthSession = get_auth_session_from_id(
+        uuid.UUID(request_data.get('auth_session_id', None)))
+
+    if auth_session is None:
+        return jsonify(msg="Invalid auth_session_id, please try again.", success=0), 401
+    elif expiry_check and ((datetime.now() - timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES))
+                            > auth_session.date) or not auth_session.enabled):
+        return jsonify(msg="Session expired, please start a new login session.", next="email", success=0), 401
+
+    user: models.User = get_user_from_id(auth_session.id)
+
+    if admin_check and not user.admin:
+        return jsonify(msg="User is not an admin.", success=0), 401
+
+    return user, auth_session, request_data
+
+
 ###################################################################################
 #                               Database Fetching                                 #
 ###################################################################################
@@ -117,7 +172,7 @@ def get_user_from_id(user_id: uuid.UUID) -> models.User | None:
     return db.session.execute(db.select(models.User).filter(models.User.id == user_id)).scalars().first()
 
 
-def create_user_from_dict(request_data: dict, file) -> models.User:
+def create_user_from_dict(request_data: dict, file: werkzeug.datastructures.FileStorage) -> models.User:
     """
     Create a user from a dictionary
 
@@ -161,10 +216,120 @@ def create_user_from_dict(request_data: dict, file) -> models.User:
 
     create_auth_methods_from_dict(request_data, user)
 
+    # Create the user's data directory
+    os.makedirs(os.path.join(current_app.instance_path, current_app.config['DATA_FOLDER'], str(user.id)), exist_ok=True)
+
     db.session.add(user)
     db.session.commit()
 
     return user
+
+
+########################################
+#             User Files               #
+########################################
+def add_user_file(user: models.User, filename: str, file: werkzeug.datastructures.FileStorage) -> models.UserFiles:
+    """
+    Add a file to a user
+
+    :param user: The user to add the file to
+    :param filename: The name of the file
+    :param file: The actual file
+    :return: The created file object
+    """
+    user_file: models.UserFiles = models.UserFiles(
+        id=uuid.uuid4(),
+        user_id=user.id,
+        date=datetime.now(),
+        file_name=filename,
+        file_type=file.mimetype,
+    )
+
+    user_file.file_path = os.path.relpath(
+        os.path.join(current_app.instance_path, current_app.config['DATA_FOLDER'], str(user.id),
+                     str(user_file.id) + mimetypes.guess_extension(user_file.file_type)),
+        start=current_app.instance_path)
+
+    # Create the user's data directory in case it doesn't exist
+    os.makedirs(os.path.join(current_app.instance_path, current_app.config['DATA_FOLDER'], str(user.id)), exist_ok=True)
+
+    # TODO: encrypt the file
+
+    # Save the file
+    file.save(os.path.join(current_app.instance_path, user_file.file_path))
+
+    db.session.add(user_file)
+    db.session.commit()
+
+    return user_file
+
+
+def filename_unique(user: models.User, filename: str) -> bool:
+    """
+    Check if a filename is unique for a user
+
+    :param user: The user to check the filename for
+    :param filename: The filename to check
+    :return: Whether the filename is unique
+    """
+    return not db.session.execute(db.select(models.UserFiles).filter(
+        models.UserFiles.user_id == user.id, models.UserFiles.file_name == filename)).scalars().first()
+
+
+def get_user_file(user: models.User, file_id: uuid.UUID) -> models.UserFiles | None:
+    """
+    Get a user's file
+
+    :param user: The user to get the file for
+    :param file_id: The ID of the file to get
+    :return: The file object
+    """
+    return db.session.execute(db.select(models.UserFiles).filter(
+        models.UserFiles.user_id == user.id, models.UserFiles.id == file_id)).scalars().first()
+
+
+def get_user_files(user: models.User) -> list[models.UserFiles]:
+    """
+    Get all of a user's files
+
+    :param user: The user to get the files for
+    :return: A list of the user's files
+    """
+    return db.session.execute(db.select(models.UserFiles).filter(models.UserFiles.user_id == user.id)).scalars().all()
+
+
+def get_user_files_as_dict(user: models.User) -> list[dict]:
+    """
+    Get all of a user's files as a dictionary
+
+    :param user: The user to get the files for
+    :return: A list of the user's files as a dictionary
+    """
+    out = []
+    for user_file in get_user_files(user):
+        out.append({
+            "id": str(user_file.id),
+            "date": user_file.date.strftime("%Y-%m-%d %H:%M:%S"),
+            "file_name": user_file.file_name,
+            "file_type": user_file.file_type,
+            "size": os.path.getsize(os.path.join(current_app.instance_path, user_file.file_path)),
+        })
+    return out
+
+
+def delete_user_file(file_id: uuid.UUID) -> None:
+    """
+    Delete a user's file
+
+    :param file_id: The ID of the file to delete
+    """
+    user_file: models.UserFiles = db.session.execute(db.select(models.UserFiles).filter(
+        models.UserFiles.id == file_id)).scalars().first()
+
+    os.remove(os.path.join(current_app.instance_path, user_file.file_path))
+
+    db.session.delete(user_file)
+    db.session.commit()
 
 
 ########################################
@@ -245,6 +410,39 @@ def create_login_session(user: models.User) -> models.LoginSession:
     db.session.commit()
 
     return session
+
+
+def get_login_sessions(count: int) -> list[models.LoginSession]:
+    """
+    Get the last ``count`` login sessions
+
+    :param count: The number of login sessions to get
+    :return: A list of the last ``count`` login sessions
+    """
+    return db.session.execute(db.select(models.LoginSession)
+                              .order_by(models.LoginSession.date.desc()).limit(count)).scalars().all()
+
+
+def get_login_sessions_as_dict(count: int) -> list[dict]:
+    """
+    Get the last ``count`` login sessions as a dictionary
+
+    :param count: The number of login sessions to get
+    :return: A list of the last ``count`` login sessions as a dictionary
+    """
+    out = []
+    for login_session in get_login_sessions(count):
+        out.append({
+            "session_id": str(login_session.session_id),
+            "user_id": str(login_session.id),
+            "user_email": get_user_from_id(login_session.id).email,
+            "date": login_session.date.strftime("%d/%m/%Y %H:%M:%S"),
+            "auth_stages": login_session.auth_stage,
+            "motion_added_sequence": login_session.motion_added_sequence,
+            "motion_completed": login_session.motion_pattern_completed,
+            "login_photo": str(login_session.login_photo),
+        })
+    return out
 
 
 def get_login_session_from_id(session_id: uuid.UUID) -> models.LoginSession | None:
@@ -385,7 +583,7 @@ def save_face_recognition_photo(session: models.LoginSession, file) -> models.Lo
     :param file: The file to save
     :return: The updated login session
     """
-    session.login_photo = file.read()
+    session.login_photo = file
 
     db.session.commit()
 
@@ -461,6 +659,24 @@ def get_auth_session_from_id(session_id: uuid.UUID) -> models.AuthSession | None
     """
     return (db.session.execute(db.select(models.AuthSession).filter(models.AuthSession.session_id == session_id))
             .scalars().first())
+
+
+def get_latest_valid_auth_session(user: models.User) -> models.AuthSession | None:
+    """
+    Get the latest valid auth session for a user
+
+    :param user: The user to get the auth session from
+    :return: The latest valid auth session or None if one does not exist
+    """
+    auth_session: models.AuthSession = (db.session.execute(db.select(models.AuthSession)
+                                                           .filter(models.AuthSession.id == user.id)
+                                        .order_by(models.AuthSession.date.desc())).scalars().first())
+
+    if not auth_session.enabled or (datetime.now() - timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES))
+                                    > auth_session.date):
+        return None
+    else:
+        return auth_session
 
 
 def disable_auth_session(session: models.AuthSession) -> models.AuthSession:
