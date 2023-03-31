@@ -319,7 +319,8 @@ def test_auth_verify(mock_auth, test_client, email, key, auth_output, date, expe
     ("noemail@email.com", None, 401),  # Invalid email
     (None, uuid.uuid5(namespace=uuid.uuid4(), name="no_session"), 401),  # Invalid session
 ])
-def test_get_failed_events(test_client, email, session_id, expected_result):
+@patch("api.helpers.input_validate_auth")
+def test_get_failed_events(mock_validate, test_client, email, session_id, expected_result):
     """
     Tests the get failed events endpoint
     """
@@ -327,6 +328,9 @@ def test_get_failed_events(test_client, email, session_id, expected_result):
         "email": email,
         "session_id": session_id,
     }
+
+    mock_validate.return_value = [True]
+
     response = test_client.get("/api/dashboard/failed_events", query_string=data)
     assert response.status_code == expected_result
 

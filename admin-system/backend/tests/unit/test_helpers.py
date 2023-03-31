@@ -222,7 +222,7 @@ def test_save_face_recognition_photo(test_client, users):
     path = os.path.abspath(os.path.join(os.curdir, "tests", "images", "user1.png"))
 
     with open(path, 'rb') as photo:
-        session = api.helpers.save_face_recognition_photo(session, photo)
+        session = api.helpers.save_face_recognition_photo(session, photo.read())
     with open(path, 'rb') as photo:
         assert session.login_photo == photo.read()
 

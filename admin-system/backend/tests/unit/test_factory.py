@@ -9,5 +9,6 @@ def test_config():
     assert create_app({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': "sqlite:///no-database.db",
-        'SQLALCHEMY_TRACK_MODIFICATIONS': False
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'DATA_FOLDER': "no-data",
     }).testing
