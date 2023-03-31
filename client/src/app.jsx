@@ -28,22 +28,52 @@ import "./index.css";
 export const authContext = createContext(null);
 export const sessionContext = createContext(null);
 
+const api_endpoint = window.internal.getAPIEndpoint;
+
 // routes used in the app
 const router = createHashRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<Email />} errorElement={<ErrorPage />} />
+      {/* <Route path="/" element={<Email />} errorElement={<ErrorPage />} /> */}
       <Route path="/signup" element={<Signup />} errorElement={<ErrorPage />} />
       <Route path="/password" element={<Password />} errorElement={<ErrorPage />} />
       <Route path="/sensor" element={<Sensor />} errorElement={<ErrorPage />} />
       <Route path="/camera" element={<Camera />} errorElement={<ErrorPage />} />
       <Route
-        path="/vault"
+        path="/"
         element={
-          <RequireAuth>
-            <Vault />
-          </RequireAuth>
+          // <RequireAuth>
+          <Vault />
+          // <RequireAuth>
         }
+        loader={async () => {
+          return {
+            json: [
+              {
+                date: "2023-03-29 22:50:13",
+                file_name: "picture",
+                file_type: "image/jpeg",
+                id: "aa35b09c-ddec-425f-acf4-442ead625aeb",
+                size: 1859839,
+              },
+              {
+                date: "2023-03-29 22:50:24",
+                file_name: "picture2",
+                file_type: "image/jpeg",
+                id: "7093be37-dd7e-48e4-b0bd-33da2731eb4b",
+                size: 1397795,
+              },
+            ],
+            msg: "File fetch successful.",
+            success: 1,
+          };
+          const response = await fetch(`${api_endpoint}/api/client/files/list/`, {
+            body: JSON.stringify({
+              auth_session_id: auth,
+            }),
+          });
+          return await response.json();
+        }}
         errorElement={<ErrorPage />}
       />
     </>
@@ -59,6 +89,9 @@ const theme = createTheme({
     secondary: {
       // Purple and green play nicely together.
       main: purple[500],
+    },
+    background: {
+      paper: "#1E2839",
     },
   },
 });

@@ -10,4 +10,7 @@ contextBridge.exposeInMainWorld("internal", {
   getVideoFeed: (callback) => ipcRenderer.on("camera:live-feed", callback),
   // exposes the getAPIEndpoint function to get the API endpoint from env
   getAPIEndpoint: process.env.API_ENDPOINT,
+  // bidirectional communiation on the dialog:openFile channel
+  openFile: () => ipcRenderer.invoke("dialog:openFile"),
+  getFileData: (filePath) => ipcRenderer.invoke("fs:readFile", filePath),
 });
