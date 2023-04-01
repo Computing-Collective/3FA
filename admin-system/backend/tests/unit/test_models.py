@@ -22,7 +22,7 @@ def test_user_create(user_id, email, pwd, motion_pattern, photo, expected_result
 
     This allows for id validation to be checked as usually this is handled by the helper methods.
     """
-    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", photo))
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", photo))
 
     if expected_result is True:
         user = User(id=user_id, email=email, pwd=pwd, motion_pattern=motion_pattern)

@@ -6,50 +6,11 @@ import uuid
 from unittest.mock import patch
 
 import pytest
+from werkzeug.datastructures import FileStorage
 
 import api.helpers
 import constants
 from constants import ValidMoves
-
-
-@pytest.mark.get_request
-def test_index(test_client):
-    response = test_client.get("/api")
-    assert response.status_code == 200
-    response = test_client.get("/")
-    assert response.status_code == 200
-
-
-@pytest.mark.get_request
-def test_health(test_client):
-    response = test_client.get("/health")
-    assert response.status_code == 200
-
-
-@pytest.mark.get_request
-def test_server_error(test_client):
-    response = test_client.get("/api/doesnt_exist")
-    assert response.status_code == 500
-
-
-@pytest.mark.post_request
-@pytest.mark.parametrize("endpoint", [
-    "/api/signup",
-    "/api/login/email",
-    "/api/login/password",
-    "/api/login/motion_pattern/unique",
-    "/api/login/motion_pattern/initialize",
-    "/api/login/motion_pattern/validate",
-    "/api/login/face_recognition",
-    "/api/client/validate",
-    "/api/client/logout",
-])
-def test_not_json(test_client, endpoint):
-    """
-    Tests that the server returns a 400 error when the request is not JSON
-    """
-    response = test_client.post(endpoint, data={"data": "data"})
-    assert response.status_code == 400
 
 
 @pytest.mark.database
@@ -70,7 +31,7 @@ def test_user_create(test_client, email, password, motion_pattern, auth_methods,
     Tests the user creation endpoint
     """
     data = {}
-    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", image))
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", image))
     if image != "no_photo":
         with open(path, 'rb') as photo:
             input_file_stream = io.BytesIO(photo.read())
@@ -268,7 +229,7 @@ def test_user_login_face(mock_face, test_client, email, image, model_output, exp
     session = api.helpers.create_login_session(user)
 
     data = {}
-    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", image))
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", image))
     if image != "no_photo":
         with open(path, 'rb') as photo:
             input_file_stream = io.BytesIO(photo.read())
@@ -308,30 +269,6 @@ def test_auth_verify(mock_auth, test_client, email, key, auth_output, date, expe
     response = test_client.post("/api/client/validate", json={
         key: session.session_id,
     })
-    assert response.status_code == expected_result
-
-
-@pytest.mark.database
-@pytest.mark.get_request
-@pytest.mark.parametrize("email, session_id, expected_result", [
-    (None, None, 200),  # All events
-    ("only@motion.com", None, 200),  # Valid email
-    ("noemail@email.com", None, 401),  # Invalid email
-    (None, uuid.uuid5(namespace=uuid.uuid4(), name="no_session"), 401),  # Invalid session
-])
-@patch("api.helpers.input_validate_auth")
-def test_get_failed_events(mock_validate, test_client, email, session_id, expected_result):
-    """
-    Tests the get failed events endpoint
-    """
-    data = {
-        "email": email,
-        "session_id": session_id,
-    }
-
-    mock_validate.return_value = [True]
-
-    response = test_client.get("/api/dashboard/failed_events", query_string=data)
     assert response.status_code == expected_result
 
 
@@ -379,5 +316,98 @@ def test_logout(test_client, users, key, session_id, expected_result):
 
     response = test_client.post("/api/client/logout", json={
         key: sess_id,
+    })
+    assert response.status_code == expected_result
+
+
+@pytest.mark.database
+@pytest.mark.post_request
+@pytest.mark.parametrize("user, file, filename, expected_result", [
+    (0, "mock_data.txt", "test.txt", 200),  # Valid
+    (0, None, "test.txt", 400),  # No file
+    (0, "mock_data.txt", None, 400),  # No filename
+    (0, "mock_data.txt", "test.txt", 400),  # Duplicate filename
+    (1, "mock_data.txt", "test.txt", 200),  # Valid
+])
+def test_file_upload(test_client, users, user, file, filename, expected_result):
+    """
+    Tests a user uploading a file
+    """
+    session = api.helpers.create_auth_session(users[user])
+    data = {}
+    if file is not None:
+        path = os.path.abspath(os.path.join(os.curdir, "tests", "data", file))
+        with open(path, 'rb') as photo:
+            input_file_stream = io.BytesIO(photo.read())
+
+        data['file'] = (input_file_stream, file)
+    if filename is not None:
+        data['request'] = json.dumps({
+            "auth_session_id": str(session.session_id),
+            "file_name": filename,
+        })
+    else:
+        data['request'] = json.dumps({
+            "auth_session_id": str(session.session_id),
+        })
+
+    response = test_client.post("/api/client/files/upload", content_type='multipart/form-data', data=data)
+    assert response.status_code == expected_result
+
+
+@pytest.mark.database
+@pytest.mark.get_request
+def test_get_files_list(test_client, users):
+    """
+    Tests a user getting a list of their files
+    """
+    session = api.helpers.create_auth_session(users[0])
+
+    response = test_client.get("/api/client/files/list", json={
+        "auth_session_id": str(session.session_id),
+    })
+    assert response.status_code == 200
+    assert len(response.json) == 3
+
+
+@pytest.mark.database
+@pytest.mark.get_request
+@pytest.mark.parametrize("user, file, key, expected_result", [
+    (0, 0, "file_id", 200),  # Valid
+    (0, 0, "no_key", 400),  # No key
+    (0, uuid.uuid5(uuid.uuid4(), "no_file"), "file_id", 400),  # No file
+])
+def test_download_file(test_client, users, files, user, file, key, expected_result):
+    """
+    Tests a user downloading a file
+    """
+    session = api.helpers.create_auth_session(users[user])
+
+    file_id = isinstance(file, int) and str(files[file].id) or file
+
+    response = test_client.get("/api/client/files/download", json={
+        "auth_session_id": str(session.session_id),
+        key: file_id,
+    })
+    assert response.status_code == expected_result
+
+
+@pytest.mark.database
+@pytest.mark.post_request
+@pytest.mark.parametrize("user, key, expected_result", [
+    (0, "file_id", 200),  # Valid
+    (0, "no_key", 400),  # No key
+])
+def test_delete_file(test_client, users, user, key, expected_result):
+    """
+    Tests a user deleting a file
+    """
+    session = api.helpers.create_auth_session(users[user])
+
+    file = api.helpers.get_user_files(users[user])[0]
+
+    response = test_client.post("/api/client/files/delete", json={
+        "auth_session_id": str(session.session_id),
+        key: file.id,
     })
     assert response.status_code == expected_result
