@@ -442,7 +442,7 @@ def client_file_upload():
     return jsonify(msg="File upload successful.", success=1), 200
 
 
-@client.route("/client/files/list", methods=["GET"], strict_slashes=False)
+@client.route("/client/files/list", methods=["POST"], strict_slashes=False)
 def client_file_fetch():
     """
     Route for a client to fetch all of their files as a list
@@ -467,7 +467,7 @@ def client_file_fetch():
     return jsonify(msg="File fetch successful.", json=files, success=1), 200
 
 
-@client.route("/client/files/download", methods=["GET"], strict_slashes=False)
+@client.route("/client/files/download", methods=["POST"], strict_slashes=False)
 def client_file_download():
     """
     Route for a client to download a file

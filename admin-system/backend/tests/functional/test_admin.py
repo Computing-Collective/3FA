@@ -51,7 +51,7 @@ def test_get_login_events(test_client, email, session, expected_result):
     else:
         data = {}
 
-    response = test_client.get("/api/dashboard/login_sessions", json=data)
+    response = test_client.post("/api/dashboard/login_sessions", json=data)
     assert response.status_code == expected_result
 
 
@@ -81,5 +81,5 @@ def test_get_failed_events(test_client, admin_email, email, session_id, expected
         "session_id": session_id,
     }
 
-    response = test_client.get("/api/dashboard/failed_events", query_string=data, json=json_data)
+    response = test_client.post("/api/dashboard/failed_events", query_string=data, json=json_data)
     assert response.status_code == expected_result

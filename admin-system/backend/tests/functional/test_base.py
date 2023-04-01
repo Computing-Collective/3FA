@@ -22,32 +22,27 @@ def test_server_error(test_client):
 
 
 @pytest.mark.post_request
-@pytest.mark.parametrize("endpoint, request_type", [
-    ("/api/signup", "POST"),
-    ("/api/login/email", "POST"),
-    ("/api/login/password", "POST"),
-    ("/api/login/motion_pattern/unique", "POST"),
-    ("/api/login/motion_pattern/initialize", "POST"),
-    ("/api/login/motion_pattern/validate", "POST"),
-    ("/api/login/face_recognition", "POST"),
-    ("/api/client/validate", "POST"),
-    ("/api/client/logout", "POST"),
-    ("/api/client/files/upload", "POST"),
-    ("/api/client/files/list", "GET"),
-    ("/api/client/files/download", "GET"),
-    ("/api/client/files/delete", "POST"),
-    ("/api/dashboard/login", "POST"),
-    ("/api/dashboard/login_sessions", "GET"),
-    ("/api/dashboard/failed_events", "GET"),
+@pytest.mark.parametrize("endpoint", [
+    "/api/signup",
+    "/api/login/email",
+    "/api/login/password",
+    "/api/login/motion_pattern/unique",
+    "/api/login/motion_pattern/initialize",
+    "/api/login/motion_pattern/validate",
+    "/api/login/face_recognition",
+    "/api/client/validate",
+    "/api/client/logout",
+    "/api/client/files/upload",
+    "/api/client/files/list",
+    "/api/client/files/download",
+    "/api/client/files/delete",
+    "/api/dashboard/login",
+    "/api/dashboard/login_sessions",
+    "/api/dashboard/failed_events",
 ])
-def test_not_json(test_client, endpoint, request_type):
+def test_not_json(test_client, endpoint):
     """
     Tests that the server returns a 400 error when the request is not the expected format (JSON or form data)
     """
-    if request_type == "POST":
-        response = test_client.post(endpoint, data={"data": "data"})
-    elif request_type == "GET":
-        response = test_client.get(endpoint, data={"data": "data"})
-    else:
-        raise ValueError("Invalid type")
+    response = test_client.post(endpoint, data={"data": "data"})
     assert response.status_code == 400

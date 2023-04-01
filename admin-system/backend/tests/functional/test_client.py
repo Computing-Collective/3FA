@@ -363,7 +363,7 @@ def test_get_files_list(test_client, users):
     """
     session = api.helpers.create_auth_session(users[0])
 
-    response = test_client.get("/api/client/files/list", json={
+    response = test_client.post("/api/client/files/list", json={
         "auth_session_id": str(session.session_id),
     })
     assert response.status_code == 200
@@ -385,7 +385,7 @@ def test_download_file(test_client, users, files, user, file, key, expected_resu
 
     file_id = isinstance(file, int) and str(files[file].id) or file
 
-    response = test_client.get("/api/client/files/download", json={
+    response = test_client.post("/api/client/files/download", json={
         "auth_session_id": str(session.session_id),
         key: file_id,
     })
