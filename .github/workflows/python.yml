@@ -105,9 +105,11 @@ jobs:
         context: ./admin-system/backend
         platforms: linux/amd64
         push: false
-        tags: admin-system-backend
+        tags: user/admin-system-backend
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
     - name: Run Tests
-      run: docker run --rm admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
+      run: |
+        docker image ls
+        docker run --rm user/admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
