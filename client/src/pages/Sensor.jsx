@@ -32,7 +32,7 @@ const picObj = {
  */
 export function Sensor() {
   const [moves, setMoves] = useState(
-    _.sample(possMoves, 3) // initialize sensor with randomized moves
+    _.sample(possMoves, 2) // initialize sensor with randomized moves
   );
   // generate random pico_id by paging API
   const [pico_id, setPico_id] = useState(getUniquePicoID(crypto.randomUUID()));

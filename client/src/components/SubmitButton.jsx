@@ -60,6 +60,7 @@ export function SubmitButton(props) {
         body: JSON.stringify({
           pico_id: pico_id,
         }),
+        headers: { "Content-Type": "application/json" },
       });
       console.log(response);
       console.log(response.status);

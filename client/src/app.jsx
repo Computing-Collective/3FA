@@ -47,15 +47,6 @@ const router = createHashRouter(
           <Vault />
           // <RequireAuth>
         }
-        loader={async () => {
-          const response = await fetch(`${api_endpoint}/api/client/files/list/`, {
-            method: "POST",
-            body: JSON.stringify({
-              auth_session_id: reactLocalStorage.get("auth_id", null),
-            }),
-          });
-          return await response.json();
-        }}
       />
     </Route>
   )

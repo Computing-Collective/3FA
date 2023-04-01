@@ -5,9 +5,10 @@ import { authContext } from "../app.jsx";
 import { logout } from "../functions/auth.js";
 import { Backdoor } from "./Backdoor.jsx";
 import { Button, Typography } from "@mui/material";
-import { Event } from "@mui/icons-material";
+import { Event, LocalConvenienceStoreOutlined } from "@mui/icons-material";
 import { UploadButton } from "../components/UploadButton.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
+import { useEffect } from "react";
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
@@ -20,8 +21,18 @@ export function Vault() {
   const [auth, setAuth] = useContext(authContext);
   const [error, setError] = useState("");
   // an array of preview objects
-  const [previews, setPreviews] = useState(mapPreview(useLoaderData().json, auth));
+  const [previews, setPreviews] = useState([]);
 
+  useEffect(() => {
+    async function fetchData() {
+      const previewJson = await getPreviewJson(auth);
+      const previewData = await mapPreview(previewJson, auth);
+      setPreviews(previewData);
+    }
+    fetchData();
+  }, []);
+
+  console.log(previews);
   return (
     <>
       {/* hardcoded code hf */}
@@ -144,7 +155,7 @@ function humanFileSize(bytes, si = false, dp = 1) {
  * }
  * @returns {array} an array of {Preview} elements to render
  */
-function mapPreview(json, auth) {
+async function mapPreview(json, auth) {
   const res = [];
 
   for (let file of json) {
@@ -161,4 +172,17 @@ function mapPreview(json, auth) {
     res.push(preview);
   }
   return res;
+}
+
+// function to get preview data from admin
+async function getPreviewJson(auth) {
+  const response = await fetch(`${api_endpoint}/api/client/files/list/`, {
+    method: "POST",
+    body: JSON.stringify({
+      auth_session_id: auth,
+    }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const json = await response.json();
+  return json.json;
 }
