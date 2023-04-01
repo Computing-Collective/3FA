@@ -71,7 +71,6 @@ export function Sensor() {
           pico_id={pico_id}
           text="Start the sequence"
         />
-        <Backdoor pico_id={pico_id} />
       </div>
     </>
   );

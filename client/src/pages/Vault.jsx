@@ -42,7 +42,6 @@ export function Vault() {
           <UploadButton auth={auth} setError={setError} />
         </div>
         {previews}
-        <Backdoor />
       </div>
     </>
   );

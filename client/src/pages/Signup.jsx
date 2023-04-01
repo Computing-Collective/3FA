@@ -133,7 +133,6 @@ export function Signup() {
             <Button type="submit">Submit</Button>
           </div>
         </form>
-        <Backdoor />
       </div>
     </>
   );
