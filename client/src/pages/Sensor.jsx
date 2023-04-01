@@ -12,6 +12,7 @@ import flip from "../../public/icons/flip.png";
 import { getUniquePicoID } from "../functions/auth.js";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
+import { LoadingButton } from "@mui/lab";
 
 const possMoves = ["Forward", "Backward", "Left", "Right", "Up", "Down", "Flip"];
 
@@ -37,7 +38,6 @@ export function Sensor() {
   const [pico_id, setPico_id] = useState(getUniquePicoID(crypto.randomUUID()));
   // text for displaying errors
   const [error, setError] = useState("");
-  // TODO send matt a pico_id
 
   /**
    *

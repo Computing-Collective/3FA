@@ -4,7 +4,8 @@ import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
 import { InputField } from "./InputField.jsx";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
@@ -27,6 +28,8 @@ export function SubmitButton(props) {
   const [auth, setAuth] = useContext(authContext); // auth for access to vault
   const [data, setData] = useState(""); // data sent to API
 
+  const [loading, setLoading] = useState(false); // sets if the button is loading
+
   // prop vars for handleSubmit
   const pico_id = props.pico_id;
   const setError = props.setError;
@@ -44,6 +47,7 @@ export function SubmitButton(props) {
   }, [auth]);
 
   async function handleSubmit(props) {
+    setLoading(true); // change to loading button
     let apiPayload;
     if (endpoint === "motion_pattern/initialize") {
       // full-capitalize every elem in array
@@ -89,6 +93,8 @@ export function SubmitButton(props) {
       setSession(json.session_id);
     }
 
+    setLoading(false);
+
     handleNextNavigation({ json, response, setError, setAuth, navigate });
   }
 
@@ -113,7 +119,17 @@ export function SubmitButton(props) {
               onChange={(e) => setData(e.target.value)}
             />
           ) : null}
-          <Button type="submit">{text}</Button>
+          {/* <Button type="submit">{text}</Button> */}
+          <LoadingButton
+            sx={{
+              ".MuiLoadingButton-loadingIndicator": {
+                color: "white",
+              },
+            }}
+            loading={loading}
+            type="submit">
+            {text}
+          </LoadingButton>
         </div>
       </form>
     </>
