@@ -82,6 +82,7 @@ async function handleDownload(id, auth) {
       auth_session_id: auth,
       file_id: id,
     }),
+    method: "POST",
   });
   const json = await response.json();
   // TODO fix field

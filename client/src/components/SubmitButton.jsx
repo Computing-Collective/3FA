@@ -8,7 +8,7 @@ import { Button } from "@mui/material";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
-const pico_api_endpoint = window.internal.getPicoEndpoint; // TODO
+const pico_api_endpoint = window.internal.getPicoEndpoint;
 
 /**
  *

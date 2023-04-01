@@ -48,34 +48,14 @@ const router = createHashRouter(
           // <RequireAuth>
         }
         loader={async () => {
-          return {
-            json: [
-              {
-                date: "2023-03-29 22:50:13",
-                file_name: "picture",
-                file_type: "image/jpeg",
-                id: "aa35b09c-ddec-425f-acf4-442ead625aeb",
-                size: 1859839,
-              },
-              {
-                date: "2023-03-29 22:50:24",
-                file_name: "picture2",
-                file_type: "image/jpeg",
-                id: "7093be37-dd7e-48e4-b0bd-33da2731eb4b",
-                size: 1397795,
-              },
-            ],
-            msg: "File fetch successful.",
-            success: 1,
-          };
           const response = await fetch(`${api_endpoint}/api/client/files/list/`, {
+            method: "POST",
             body: JSON.stringify({
-              auth_session_id: auth,
+              auth_session_id: reactLocalStorage.get("auth_id", null),
             }),
           });
           return await response.json();
         }}
-        errorElement={<ErrorPage />}
       />
     </Route>
   )
