@@ -15,6 +15,7 @@ gunicorn = "*"
 torch = "*"
 torchvision = "*"
 pillow = "*"
+werkzeug = "*"
 
 [dev-packages]
 pytest = "*"
