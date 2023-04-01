@@ -150,6 +150,7 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
           setPatterns(tempPatterns);
         }}
         value={patterns[index].direction}
+        autoWidth
         sx={{
           color: "white",
           ".MuiOutlinedInput-notchedOutline": {
@@ -162,13 +163,27 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
             fill: "white",
           },
         }}>
-        <MenuItem value="UP">Up</MenuItem>
-        <MenuItem value="DOWN">Down</MenuItem>
-        <MenuItem value="LEFT">Left</MenuItem>
-        <MenuItem value="RIGHT">Right</MenuItem>
-        <MenuItem value="FORWARD">Forward</MenuItem>
-        <MenuItem value="BACKWARD">Backward</MenuItem>
-        <MenuItem value="FLIP">Flip</MenuItem>
+        <MenuItem sx={{ color: "white" }} value="UP">
+          Up
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="DOWN">
+          Down
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="LEFT">
+          Left
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="RIGHT">
+          Right
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="FORWARD">
+          Forward
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="BACKWARD">
+          Backward
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="FLIP">
+          Flip
+        </MenuItem>
       </Select>
     </>
   );
@@ -211,7 +226,7 @@ function MotionPattern({ patterns, setPatterns }) {
         </div>
         {patterns.map((pattern, index) => {
           return (
-            <div key={pattern.id} className="self-center">
+            <div key={pattern.id} className="self-center text-white">
               <SelectMotionPattern
                 index={index}
                 patterns={patterns}
