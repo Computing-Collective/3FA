@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ml-model
-          path: ./instance/model.pth
+          path: admin-system/backend/instance/model.pth
 
   build:
     runs-on: ${{ matrix.os }}
