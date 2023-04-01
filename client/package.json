@@ -1,6 +1,6 @@
 {
-  "name": "3fa",
-  "productName": "3FA Client",
+  "name": "3FA",
+  "productName": "3FA",
   "version": "1.0.0",
   "description": "Multi-factor authentication system",
   "main": ".webpack/main",

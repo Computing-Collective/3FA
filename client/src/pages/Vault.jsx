@@ -32,7 +32,6 @@ export function Vault() {
     fetchData();
   }, []);
 
-  console.log(previews);
   return (
     <>
       {/* hardcoded code hf */}
@@ -87,7 +86,6 @@ function Preview({ fileName, date, size, id, auth }) {
 }
 
 async function handleDownload(id, auth) {
-  console.log("downloading");
   const response = await fetch(`${api_endpoint}/api/client/files/download/`, {
     body: JSON.stringify({
       auth_session_id: auth,
