@@ -116,8 +116,8 @@ def evaluate_images(user_image, login_image):
 
     # Image loading
 
-    eval_image = Image.open(login_image)
     anchor_image = Image.open(io.BytesIO(user_image))
+    eval_image = Image.open(login_image)
 
     # Resize images to 105x105 and convert to tensor
     img_transforms = Compose([
@@ -137,5 +137,5 @@ def evaluate_images(user_image, login_image):
     # Get prediction from model
     with torch.no_grad():
         pred = model(anchor_tensor, eval_tensor)
-        predicted = int(pred[0].argmax(0))
+        predicted = bool(pred[0].argmax(0))
         return predicted

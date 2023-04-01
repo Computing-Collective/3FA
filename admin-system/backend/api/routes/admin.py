@@ -56,7 +56,7 @@ def login():
     return jsonify(msg="Login successful.", success=1, auth_session_id=auth_session.session_id), 200
 
 
-@admin.route("/login_sessions", methods=["GET"], strict_slashes=False)
+@admin.route("/login_sessions", methods=["POST"], strict_slashes=False)
 def get_login_session():
     """
     Route for getting all past login sessions
@@ -85,7 +85,7 @@ def get_login_session():
     return jsonify(msg="Login sessions retrieved.", success=1, sessions=out), 200
 
 
-@admin.route("/failed_events", methods=["GET"], strict_slashes=False)
+@admin.route("/failed_events", methods=["POST"], strict_slashes=False)
 def get_failed_events():
     """
     Route for getting failed login events

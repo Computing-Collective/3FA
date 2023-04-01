@@ -154,7 +154,8 @@ def input_validate_auth(request: flask.Request, request_type: str = "json", expi
 #                 Users                #
 ########################################
 def get_user_from_email(email: str) -> models.User | None:
-    """Get a user from their email (if they exist)
+    """
+    Get a user from their email (if they exist)
 
     :param email: The email of the user to get
     :return: The user object
@@ -222,6 +223,18 @@ def create_user_from_dict(request_data: dict, file: werkzeug.datastructures.File
     db.session.add(user)
     db.session.commit()
 
+    return user
+
+
+def make_user_admin(user: models.User) -> models.User:
+    """
+    Make a user an admin
+
+    :param user: The user to make an admin
+    :return: The user object
+    """
+    user.admin = True
+    db.session.commit()
     return user
 
 
@@ -672,8 +685,8 @@ def get_latest_valid_auth_session(user: models.User) -> models.AuthSession | Non
                                                            .filter(models.AuthSession.id == user.id)
                                         .order_by(models.AuthSession.date.desc())).scalars().first())
 
-    if not auth_session.enabled or (datetime.now() - timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES))
-                                    > auth_session.date):
+    if auth_session is None or not auth_session.enabled or (
+            datetime.now() - timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES)) > auth_session.date):
         return None
     else:
         return auth_session

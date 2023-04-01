@@ -431,7 +431,7 @@ def client_file_upload():
     filename = request_data.get('file_name', None)
 
     # Check if the file name and type are valid
-    if not filename:
+    if filename is None:
         return jsonify(msg="Missing file_name.", success=0), 400
     elif not helpers.filename_unique(user, filename):
         return jsonify(msg="File name already exists.", success=0), 400
@@ -442,7 +442,7 @@ def client_file_upload():
     return jsonify(msg="File upload successful.", success=1), 200
 
 
-@client.route("/client/files/list", methods=["GET"], strict_slashes=False)
+@client.route("/client/files/list", methods=["POST"], strict_slashes=False)
 def client_file_fetch():
     """
     Route for a client to fetch all of their files as a list
@@ -467,7 +467,7 @@ def client_file_fetch():
     return jsonify(msg="File fetch successful.", json=files, success=1), 200
 
 
-@client.route("/client/files/download", methods=["GET"], strict_slashes=False)
+@client.route("/client/files/download", methods=["POST"], strict_slashes=False)
 def client_file_download():
     """
     Route for a client to download a file
@@ -497,7 +497,7 @@ def client_file_download():
     file = helpers.get_user_file(user, uuid.UUID(file_id))
 
     if file is None:
-        return jsonify(msg="File not found.", success=0), 404
+        return jsonify(msg="File not found.", success=0), 400
 
     return send_file(os.path.join(current_app.instance_path, file.file_path), mimetype=file.file_type), 200
 

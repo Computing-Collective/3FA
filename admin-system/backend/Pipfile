@@ -3,6 +3,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[[source]]
+url = "https://download.pytorch.org/whl/cpu/"
+verify_ssl = true
+name = "pytorch"
+
 [packages]
 flask = "*"
 flask-bcrypt = "*"
@@ -12,9 +17,10 @@ sqlalchemy = "*"
 flask-cors = "*"
 pyopenssl = "*"
 gunicorn = "*"
-torch = "*"
-torchvision = "*"
 pillow = "*"
+werkzeug = "*"
+torch = {version = "*", index = "pytorch"}
+torchvision = {version = "*", index = "pytorch"}
 
 [dev-packages]
 pytest = "*"
