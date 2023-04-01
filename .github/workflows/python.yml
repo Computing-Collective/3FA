@@ -73,7 +73,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: ml-model
-        path: ./instance/
+        path: admin-system/backend/instance/
 
     - name: Test with pytest
       run: pipenv run pytest --cov=api --cov-branch
@@ -97,12 +97,12 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: ml-model
-        path: ./instance/
+        path: admin-system/backend/instance/
     
     - name: Build and Push
       uses: docker/build-push-action@v4
       with:
-        context: .
+        context: ./admin-system/backend
         platforms: linux/amd64
         push: false
         tags: admin-system-backend
