@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "3fa",
   "productName": "3FA Client",
   "version": "1.0.0",
   "description": "Multi-factor authentication system",
@@ -37,6 +37,8 @@
     "node-loader": "^2.0.0",
     "postcss": "^8.4.21",
     "postcss-loader": "^7.1.0",
+    "prettier": "^2.8.7",
+    "prettier-plugin-tailwindcss": "^0.2.6",
     "style-loader": "^3.3.2",
     "tailwindcss": "^3.3.1",
     "url-loader": "^4.1.1"
@@ -45,8 +47,7 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/icons-material": "^5.11.11",
-    "@mui/material": "^5.11.15",
-    "camera-capture": "^0.0.11",
+    "@mui/material": "^5.11.14",
     "dotenv": "^16.0.3",
     "electron-squirrel-startup": "^1.0.0",
     "node-fetch": "^3.3.1",
