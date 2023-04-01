@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ml-model
-          path: instance/model.pth
+          path: ./instance/model.pth
 
   build:
     runs-on: ${{ matrix.os }}
@@ -73,7 +73,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: ml-model
-        path: instance/
+        path: ./instance/
 
     - name: Test with pytest
       run: pipenv run pytest --cov=api --cov-branch
@@ -97,7 +97,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: ml-model
-        path: instance/
+        path: ./instance/
     
     - name: Build and Push
       uses: docker/build-push-action@v4
