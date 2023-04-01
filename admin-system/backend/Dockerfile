@@ -31,9 +31,7 @@ COPY / /usr/src/
 WORKDIR /usr/src/
 
 # Change ownership of the files to the backend user so that the backend user can write to the files
-RUN chown -R backend:backend /usr/src/instance/
-RUN chown backend:backend /usr/src/
-RUN chown -R backend:backend /usr/src/.pytest_cache/
+RUN chown -R backend:backend /usr/src/
 
 USER backend
 EXPOSE 5000
