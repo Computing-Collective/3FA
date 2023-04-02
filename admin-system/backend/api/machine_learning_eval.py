@@ -105,7 +105,7 @@ model = SiameseNetwork()
 # ---------------------------------------------------------------- #
 # ----------------------- Image Evaluation ----------------------- #
 # ---------------------------------------------------------------- #
-def evaluate_images(user_image, login_image):
+def evaluate_images(user_image, login_image) -> bool:
     """
     Compare two images and return whether they are a match or not.
 
