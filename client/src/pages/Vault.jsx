@@ -62,7 +62,11 @@ export function Vault() {
             setRefresh={setRefresh}
           />
         </div>
-        {previews.length === 0 ? "No files uploaded" : previews}
+        {previews.length === 0 ? (
+          <div className="col-span-4 text-center">No files uploaded</div>
+        ) : (
+          previews
+        )}
       </div>
     </>
   );
@@ -88,7 +92,7 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
     const json = await response.json();
     setSuccess(json.success); // set the type of alert that pops up
     setError(json.msg); // display success / err msg
-    setRefresh(json.msg); // refresh the previews
+    setRefresh(crypto.randomUUID()); // refresh the previews
   }
   return (
     <>
