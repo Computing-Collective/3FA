@@ -11,6 +11,14 @@ import {
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
+/**
+ *
+ * @param {string} auth the auth_session_id
+ * @param {React.SetStateAction} setError handler to setText in the error message component
+ * @param {React.SetStateAction} setRefresh function to make a component refresh
+ * @param {React.SetStateAction} setSuccess changes the type of alert
+ * @returns a jsx upload button
+ */
 export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
   const [open, setOpen] = useState(false);
   const [filePath, setFilePath] = useState("");

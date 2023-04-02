@@ -21,6 +21,7 @@ const createWindow = () => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+    autoHideMenuBar: true, // hide menu bar
   });
 
   // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
@@ -30,7 +31,7 @@ const createWindow = () => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools(); // TODO rm
 };
 
 // This method will be called when Electron has finished
@@ -63,6 +64,11 @@ app.on("activate", () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
+/**
+ * @brief prompts the user to choose a directory
+ *
+ * @returns the file path (directory) that the user chose
+ */
 async function handleFileOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ["openDirectory"],
@@ -74,10 +80,26 @@ async function handleFileOpen() {
   }
 }
 
+/**
+ * @brief reads the file at filePath
+ *
+ * @param {*} event
+ * @param {string} filePath the filepath to read the file from
+ * @returns {Promise} the result of readFileSync on filePath
+ */
 function handleFileData(event, filePath) {
   return readFileSync(filePath);
 }
 
+/**
+ * @brief downloads fileName to path/file
+ *
+ * @param {*} event
+ * @param {ArrayBuffer} file the file to download
+ * @param {string} path the path to download the file to
+ * @param {string} fileName the file name
+ *
+ */
 async function handleSaveFile(event, file, path, fileName) {
   console.log("writing");
   console.log(file, path, fileName);

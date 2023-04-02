@@ -18,7 +18,9 @@ const api_endpoint = window.internal.getAPIEndpoint;
 export function Vault() {
   const navigate = useNavigate();
   const [auth, setAuth] = useContext(authContext);
+  // the error text
   const [error, setError] = useState("");
+  // whether to render the alert message as success or not
   const [success, setSuccess] = useState("");
   // an array of preview objects
   const [previews, setPreviews] = useState([]);
@@ -26,6 +28,7 @@ export function Vault() {
   // dummy variable to refresh the previews whenever something is uploaded (anti-pattern?)
   const [refresh, setRefresh] = useState();
 
+  // re-fetch the preview data whenever {refresh} updates
   useEffect(() => {
     async function fetchData() {
       const previewJson = await getPreviewJson(auth);
@@ -120,8 +123,14 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
   );
 }
 
+/**
+ *
+ * @param {string} id the file id to download
+ * @param {string} auth the auth session id
+ * @param {string} fileName the fileName for the file to download
+ */
 async function handleDownload(id, auth, fileName) {
-  const path = await window.internal.openFile();
+  const path = await window.internal.openFile(); // prompts the user to select a directory to place the donload in
   const response = await fetch(`${api_endpoint}/api/client/files/download/`, {
     body: JSON.stringify({
       auth_session_id: auth,
@@ -131,6 +140,7 @@ async function handleDownload(id, auth, fileName) {
     method: "POST",
   });
   const file = await response.arrayBuffer();
+  // saves the file to file/path with fileName
   window.internal.saveFile(file, path, fileName);
 }
 
@@ -211,7 +221,11 @@ function mapPreview(json, auth, setSuccess, setError, setRefresh) {
   return res;
 }
 
-// function to get preview data from admin
+/**
+ *
+ * @param {string} auth the auth_session_id token
+ * @returns a json return from the admin-dashboard. used in mapPreview
+ */
 async function getPreviewJson(auth) {
   const response = await fetch(`${api_endpoint}/api/client/files/list/`, {
     method: "POST",

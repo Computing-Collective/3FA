@@ -14,8 +14,10 @@ import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 import { LoadingButton } from "@mui/lab";
 
+// the possible moves that the pico can use
 const possMoves = ["Forward", "Backward", "Left", "Right", "Up", "Down", "Flip"];
 
+// object that holds pictures
 const picObj = {
   Up: up,
   Down: down,
