@@ -14,4 +14,5 @@ contextBridge.exposeInMainWorld("internal", {
   openFile: () => ipcRenderer.invoke("dialog:openFile"),
   getFileData: (filePath) => ipcRenderer.invoke("fs:readFile", filePath),
   getPicoEndpoint: process.env.PICO_API_ENDPOINT,
+  saveFile: (file, path, fileName) => ipcRenderer.send("save-file", file, path, fileName),
 });

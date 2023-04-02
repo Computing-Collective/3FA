@@ -11,7 +11,7 @@ import {
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
-export function UploadButton({ auth, setError }) {
+export function UploadButton({ auth, setError, setRefresh }) {  
   const [open, setOpen] = useState(false);
   const [filePath, setFilePath] = useState("");
   const [fileName, setFileName] = useState("");
@@ -24,15 +24,20 @@ export function UploadButton({ auth, setError }) {
     setOpen(false);
     setFilePath("");
     setFileName("");
+    // tell the frontend to refetch the previews
+    setRefresh(filePath);
   };
 
   async function handleUpload() {
     // fileName is required
-    const file = window.internal.getFileData(filePath);
+    const file = await window.internal.getFileData(filePath);
+    const blob = new Blob([file]);
+    console.log(filePath);
+    console.log(blob);
+    console.log(typeof blob);
 
-    // TODO fix admin
     let formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", blob);
     formData.append(
       "request",
       JSON.stringify({
@@ -40,7 +45,7 @@ export function UploadButton({ auth, setError }) {
         file_name: fileName,
       })
     );
-    const response = await fetch(`${api_endpoint}/api/dashboard/`, {
+    const response = await fetch(`${api_endpoint}/api/client/files/upload/`, {
       method: "POST",
       body: formData,
     });
@@ -51,7 +56,6 @@ export function UploadButton({ auth, setError }) {
   }
 
   const handleFilePath = (e) => {
-    // const filePath = await window.internal.openFile();
     const files = e.target.files;
     const file = files[0];
     setFileName(file.name);

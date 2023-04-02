@@ -1,10 +1,9 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
-const { readFileSync } = require("node:fs");
+const { readFileSync, writeFile } = require("node:fs");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
-// TODO make elio pay microsoft
 app.commandLine.appendSwitch("ignore-certificate-errors");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -40,6 +39,7 @@ const createWindow = () => {
 app.on("ready", () => {
   ipcMain.handle("dialog:openFile", handleFileOpen);
   ipcMain.handle("fs:readFile", handleFileData);
+  ipcMain.on("save-file", handleSaveFile);
   createWindow();
 });
 
@@ -65,7 +65,7 @@ app.on("activate", () => {
 
 async function handleFileOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ["openFile"],
+    properties: ["openDirectory"],
   });
   if (canceled) {
     return;
@@ -75,6 +75,15 @@ async function handleFileOpen() {
 }
 
 function handleFileData(event, filePath) {
-  console.log(filePath);
-  return readFileSync(filePath, "utf-8");
+  return readFileSync(filePath);
+}
+
+async function handleSaveFile(event, file, path, fileName) {
+  console.log("writing");
+  console.log(file, path, fileName);
+  const buffer = Buffer.from(file);
+
+  writeFile(`${path}/${fileName}`, buffer, (err) => {
+    if (err) console.log(err); // TODO change to win alert or something
+  });
 }

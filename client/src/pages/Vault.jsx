@@ -9,7 +9,6 @@ import { Event, LocalConvenienceStoreOutlined } from "@mui/icons-material";
 import { UploadButton } from "../components/UploadButton.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { useEffect } from "react";
-
 const api_endpoint = window.internal.getAPIEndpoint;
 
 /**
@@ -23,6 +22,9 @@ export function Vault() {
   // an array of preview objects
   const [previews, setPreviews] = useState([]);
 
+  // dummy variable to refresh the previews whenever something is uploaded (anti-pattern?)
+  const [refresh, setRefresh] = useState();
+
   useEffect(() => {
     async function fetchData() {
       const previewJson = await getPreviewJson(auth);
@@ -30,7 +32,7 @@ export function Vault() {
       setPreviews(previewData);
     }
     fetchData();
-  }, []);
+  }, [refresh]);
 
   return (
     <>
@@ -44,14 +46,14 @@ export function Vault() {
         </Button>
       </div>
       {error !== "" && <DisplayError text={error} />}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="m-2 grid grid-cols-4 gap-3">
         <div className="col-span-3">
           <h1>Welcome to your secure vault</h1>
         </div>
         <div className="justify-self-end">
-          <UploadButton auth={auth} setError={setError} />
+          <UploadButton auth={auth} setError={setError} setRefresh={setRefresh} />
         </div>
-        {previews}
+        {previews.length === 0 ? "No files uploaded" : previews}
       </div>
     </>
   );
@@ -78,24 +80,31 @@ function Preview({ fileName, date, size, id, auth }) {
         </div>
         <div className="flex-grow" />
         <div className="m-2 self-center">
-          <Button onClick={async () => await handleDownload(id, auth)}>Download</Button>
+          <Button
+            onClick={async (e) => {
+              e.preventDefault();
+              await handleDownload(id, auth, fileName);
+            }}>
+            Download
+          </Button>
         </div>
       </div>
     </>
   );
 }
 
-async function handleDownload(id, auth) {
+async function handleDownload(id, auth, fileName) {
+  const path = await window.internal.openFile();
   const response = await fetch(`${api_endpoint}/api/client/files/download/`, {
     body: JSON.stringify({
       auth_session_id: auth,
       file_id: id,
     }),
+    headers: { "Content-Type": "application/json" },
     method: "POST",
   });
-  const json = await response.json();
-  // TODO fix field
-  return json.file;
+  const file = await response.arrayBuffer();
+  window.internal.saveFile(file, path, fileName);
 }
 
 /**
