@@ -1,10 +1,10 @@
-import datetime
 import json
+import os
 import time
 import uuid
 
 import flask
-from flask import Response, jsonify, request, Blueprint
+from flask import Response, jsonify, request, Blueprint, current_app, send_file
 
 import constants
 from api import helpers, models
@@ -322,13 +322,16 @@ def login_face_recognition():
         helpers.create_failed_login_event(session, text="No photo submitted.")
         return jsonify(msg="No photo submitted, please try again.", success=0), 400
 
+    # Create a copy of the photo to save for the event
+    file_data = file.read()
+
     # Check if the facial recognition passes
     if not user.check_face_recognition(file):
         helpers.create_failed_login_event(session, text="Face recognition match failed.", photo=file)
         return jsonify(msg="Face recognition match failed, please try again.", success=0), 401
     else:
         # If the facial recognition passes, move to the next stage of the login sequence
-        helpers.save_face_recognition_photo(session, file)
+        helpers.save_face_recognition_photo(session, file_data)
         helpers.progress_to_next_auth_stage(session, "face_recognition")
         next_stage = helpers.get_next_auth_stage(session)
         auth_id = None
@@ -354,23 +357,10 @@ def client_validate():
 
     :return: Whether the ``auth_session_id`` is valid or not
     """
-    # Validate that the request is JSON
-    try:
-        request_data = helpers.json_validate(request)
-    except AssertionError as exception_message:
-        return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
-
-    if not request_data.get('auth_session_id', None):
-        return jsonify(msg="Missing auth_session_id in request.", success=0), 400
-
-    auth_session: models.AuthSession = helpers.get_auth_session_from_id(
-        uuid.UUID(request_data.get('auth_session_id', None)))
-
-    if auth_session is None:
-        return jsonify(msg="Invalid auth_session_id, please try again.", success=0), 401
-    elif (datetime.datetime.now() - datetime.timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES))
-          > auth_session.date) or not auth_session.enabled:
-        return jsonify(msg="Session expired, please start a new login session.", next="email", success=0), 401
+    # Perform standard validation on the request
+    validate_out = helpers.input_validate_auth(request)
+    if isinstance(validate_out[0], flask.Response):
+        return validate_out
 
     return jsonify(msg="Auth session ID is valid.", success=1), 200
 
@@ -391,20 +381,12 @@ def client_logout():
 
     :return: Whether the logout was successful or not
     """
-    # Validate that the request is JSON
-    try:
-        request_data = helpers.json_validate(request)
-    except AssertionError as exception_message:
-        return jsonify(msg='Error: {}.'.format(exception_message), success=0), 400
-
-    if not request_data.get('auth_session_id', None):
-        return jsonify(msg="Missing auth_session_id in request.", success=0), 400
-
-    auth_session: models.AuthSession = helpers.get_auth_session_from_id(
-        uuid.UUID(request_data.get('auth_session_id', None)))
-
-    if auth_session is None:
-        return jsonify(msg="Invalid auth_session_id, please try again.", success=0), 401
+    # Perform standard validation on the request
+    validate_out = helpers.input_validate_auth(request, expiry_check=False)
+    if isinstance(validate_out[0], flask.Response):
+        return validate_out
+    else:
+        auth_session: models.LoginSession = validate_out[1]
 
     helpers.disable_auth_session(auth_session)
 
@@ -414,6 +396,145 @@ def client_logout():
 ########################################
 #           File Interaction           #
 ########################################
-@client.route("/client/file", methods=["POST"], strict_slashes=False)
-def client_file():
-    pass
+@client.route("/client/files/upload", methods=["POST"], strict_slashes=False)
+def client_file_upload():
+    """
+    Route for a client to upload a file to the server
+
+    Form body:
+
+    - ``request``::
+
+        {
+            "auth_session_id": "uuid",
+            "file_name": "string",
+        }
+
+    - ``file``: The file to upload
+
+    :return: Whether the upload was successful or not
+    """
+    # Perform standard validation on the request
+    validate_out = helpers.input_validate_auth(request, "multipart/form-data")
+    if isinstance(validate_out[0], flask.Response):
+        return validate_out
+    else:
+        user: models.User = validate_out[0]
+        request_data: dict = validate_out[2]
+
+    # Check if a file was submitted
+    file = request.files.get('file', None)
+
+    if file is None:
+        return jsonify(msg="No file submitted, please try again.", success=0), 400
+
+    filename = request_data.get('file_name', None)
+
+    # Check if the file name and type are valid
+    if filename is None:
+        return jsonify(msg="Missing file_name.", success=0), 400
+    elif not helpers.filename_unique(user, filename):
+        return jsonify(msg="File name already exists.", success=0), 400
+
+    # Save the file
+    helpers.add_user_file(user, filename, file)
+
+    return jsonify(msg="File upload successful.", success=1), 200
+
+
+@client.route("/client/files/list", methods=["POST"], strict_slashes=False)
+def client_file_fetch():
+    """
+    Route for a client to fetch all of their files as a list
+
+    JSON body::
+
+        {
+            "auth_session_id": "uuid"
+        }
+
+    :return: A list of all user's files
+    """
+    # Perform standard validation on the request
+    validate_out = helpers.input_validate_auth(request)
+    if isinstance(validate_out[0], flask.Response):
+        return validate_out
+    else:
+        user: models.User = validate_out[0]
+
+    files = helpers.get_user_files_as_dict(user)
+
+    return jsonify(msg="File fetch successful.", json=files, success=1), 200
+
+
+@client.route("/client/files/download", methods=["POST"], strict_slashes=False)
+def client_file_download():
+    """
+    Route for a client to download a file
+
+    JSON body::
+
+        {
+            "auth_session_id": "uuid",
+            "file_id": "uuid"
+        }
+
+    - ``file_id``: The unique ID of the file found in the files list
+
+    :return: The requested file
+    """
+    validate_out = helpers.input_validate_auth(request)
+    if isinstance(validate_out[0], flask.Response):
+        return validate_out
+    else:
+        user: models.User = validate_out[0]
+        request_data: dict = validate_out[2]
+
+    file_id = request_data.get('file_id', None)
+    if not file_id:
+        return jsonify(msg="Missing file ID.", success=0), 400
+
+    file = helpers.get_user_file(user, uuid.UUID(file_id))
+
+    if file is None:
+        return jsonify(msg="File not found.", success=0), 400
+
+    return send_file(os.path.join(current_app.instance_path, file.file_path), mimetype=file.file_type), 200
+
+
+@client.route("/client/files/delete", methods=["POST"], strict_slashes=False)
+def client_file_delete():
+    """
+    Route for a client to delete a file
+
+    JSON body::
+
+        {
+            "auth_session_id": "uuid",
+            "file_id": "uuid"
+        }
+
+    - ``file_id``: The unique ID of the file found in the files list
+
+    :return: Whether the deletion was successful or not
+    """
+    # Perform standard validation on the request
+    validate_out = helpers.input_validate_auth(request)
+    if isinstance(validate_out[0], flask.Response):
+        return validate_out
+    else:
+        user: models.User = validate_out[0]
+        request_data: dict = validate_out[2]
+
+    file_id = request_data.get('file_id', None)
+    if not file_id:
+        return jsonify(msg="Missing file ID.", success=0), 400
+
+    file = helpers.get_user_file(user, uuid.UUID(file_id))
+
+    if file is None:
+        return jsonify(msg="File not found.", success=0), 404
+
+    helpers.delete_user_file(file.id)
+
+    return jsonify(msg="File deletion successful.", success=1), 200

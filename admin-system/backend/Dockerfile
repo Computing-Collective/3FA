@@ -12,13 +12,6 @@ ADD Pipfile.lock Pipfile /usr/src/
 
 WORKDIR /usr/src
 
-# Install packages required by pytorch
-RUN apt-get install libjpeg-dev libpng-dev
-
-# Install pytorch for Linux
-RUN python -m venv .venv
-RUN /usr/src/.venv/bin/python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-
 # Install pipenv packages
 RUN /root/.local/bin/pipenv sync --dev
 
@@ -32,7 +25,6 @@ COPY --from=builder /usr/src/.venv/ /usr/src/.venv/
 
 RUN /usr/src/.venv/bin/python -c "import requests; print(requests.__version__)"
 
-RUN apt-get install libjpeg-dev libpng-dev
 RUN adduser --uid 123123 backend
 COPY / /usr/src/
 

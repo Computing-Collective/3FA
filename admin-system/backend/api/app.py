@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import torch
 from dotenv import load_dotenv
@@ -37,6 +38,7 @@ def create_app(test_config=None):
     app.secret_key = os.getenv("SECRET_KEY")
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    app.config['DATA_FOLDER'] = "data"
 
     if test_config is not None:
         # Load the test config if passed in
@@ -45,15 +47,19 @@ def create_app(test_config=None):
     # Initialize the database and create the tables
     db.init_app(app)
     with app.app_context():
-        # Clear the test database if testing
+        # Clear the test database and data files if testing
         if test_config is not None:
             db.drop_all()
+            shutil.rmtree(os.path.join(app.instance_path, app.config['DATA_FOLDER']), ignore_errors=True)
 
         db.create_all()
         from api.machine_learning_eval import model
         model.load_state_dict(torch.load(os.path.join(app.instance_path, "model.pth"),
                                          map_location=torch.device('cpu')))
         model.eval()
+
+    # Create the data directory for user files
+    os.makedirs(os.path.join(app.instance_path, app.config['DATA_FOLDER']), exist_ok=True)
 
     # Initialize the encryption extension
     bcrypt.init_app(app)

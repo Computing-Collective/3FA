@@ -1,18 +1,25 @@
 import os
+import shutil
 
 import pytest
+from werkzeug.datastructures import FileStorage
 
 import api.helpers
+import api.models
 from api.app import create_app, db
 from constants import ValidMoves
 
 
 @pytest.fixture(scope='session', autouse=True)
 def test_client():
+    """
+    Creates and runs a test version of the Flask app
+    """
     app = create_app({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': "sqlite:///test-database.db",
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'DATA_FOLDER': "test-data",
     })
 
     # Establish an application context
@@ -21,9 +28,9 @@ def test_client():
         yield app.test_client()
         db.drop_all()
         db.session.remove()
+        shutil.rmtree(os.path.join(app.instance_path, app.config['DATA_FOLDER']), ignore_errors=True)
 
 
-@pytest.mark.database
 @pytest.fixture(scope='session', autouse=True)
 def list_of_users() -> list[list]:
     """
@@ -43,7 +50,7 @@ def list_of_users() -> list[list]:
 
 @pytest.mark.database
 @pytest.fixture(scope='session', autouse=True)
-def users(list_of_users):
+def users(list_of_users) -> list[api.models.User]:
     """
     Creates a list of users from a list of lists of valid user data
 
@@ -62,8 +69,41 @@ def users(list_of_users):
                 "face_recognition": request_data[5],
             }
         }
-        path = os.path.abspath(os.path.join(os.curdir, "tests", "images", request_data[6]))
+        path = os.path.abspath(os.path.join(os.curdir, "tests", "data", request_data[6]))
         with open(path, 'rb') as photo:
-            out.append(api.helpers.create_user_from_dict(data, photo))
+            file = FileStorage(photo, content_type="image/png", filename=request_data[6])
+            out.append(api.helpers.create_user_from_dict(data, file))
+
+    return out
+
+
+@pytest.fixture(scope='session')
+def list_of_files() -> list[list]:
+    """
+    Returns a list of lists with valid file data
+    """
+    return [
+        [0, "mock_data.txt", "file1.txt"],
+        [0, "mock_data.txt", "file2.txt"],
+        [1, "mock_data.txt", "file3.txt"],
+        [2, "mock_data.txt", "file4.txt"],
+        [3, "mock_data.txt", "file5.txt"],
+    ]
+
+
+@pytest.mark.database
+@pytest.fixture(scope='session')
+def files(users, list_of_files) -> list[api.models.UserFiles]:
+    """
+    Creates a list of files from a list of lists of valid file data
+
+    :return: A list of file objects
+    """
+    out = []
+    for request_data in list_of_files:
+        path = os.path.abspath(os.path.join(os.curdir, "tests", "data", request_data[1]))
+        with open(path, 'rb') as file:
+            file_storage = FileStorage(file, content_type="text/plain", filename=request_data[1])
+            out.append(api.helpers.add_user_file(users[request_data[0]], request_data[2], file_storage))
 
     return out

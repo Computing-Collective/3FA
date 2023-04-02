@@ -10,15 +10,52 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
-    runs-on: windows-latest
+  ml-model:
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: admin-system/backend
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+  
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Machine Learning Dependencies
+        run: pip install -r requirements.txt
+        working-directory: machine-learning
+
+      - name: Generate Machine Learning Model
+        run: |
+          python model.py
+          mv model.pth ../admin-system/backend/instance/model.pth
+        working-directory: machine-learning 
+
+      - name: Save Machine Learning Model
+        uses: actions/upload-artifact@v3
+        with:
+          name: ml-model
+          path: admin-system/backend/instance/model.pth
+
+  build:
+    runs-on: ${{ matrix.os }}
+    needs: ml-model
+    defaults:
+      run:
+        working-directory: admin-system/backend
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
@@ -32,15 +69,46 @@ jobs:
     - name: Install Backend Dependencies
       run: pipenv sync --dev
 
-    - name: Install Machine Learning Dependencies
-      run: pip install -r requirements.txt
-      working-directory: machine-learning
-
-    - name: Generate Machine Learning Model
-      run: |
-        python model.py
-        mv model.pth ../admin-system/backend/instance/model.pth
-      working-directory: machine-learning      
+    - name: Download Machine Learning Model
+      uses: actions/download-artifact@v3
+      with:
+        name: ml-model
+        path: admin-system/backend/instance/
 
     - name: Test with pytest
       run: pipenv run pytest --cov=api --cov-branch
+
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: ml-model
+    defaults:
+      run:
+        working-directory: admin-system/backend
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Download Machine Learning Model
+      uses: actions/download-artifact@v3
+      with:
+        name: ml-model
+        path: admin-system/backend/instance/
+    
+    - name: Build and Push
+      uses: docker/build-push-action@v4
+      with:
+        context: ./admin-system/backend
+        platforms: linux/amd64
+        load: true
+        push: false
+        tags: admin-system-backend
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run Tests
+      run: docker run --rm admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
