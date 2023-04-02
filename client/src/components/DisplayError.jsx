@@ -8,17 +8,17 @@ import { useNavigate } from "react-router-dom";
  * @param {string} props.text - the text to display
  * @param {boolean} props.refreshButton - whether or not to display the refresh button
  * @returns an MUI alert that displays the error message given
+ * @param {boolean} props.success - whether to display error icon or success
  */
-export function DisplayError(props) {
+export function DisplayError({ refreshButton, success, text }) {
   const navigate = useNavigate();
 
-  const handleRefresh = (event) => {};
   return (
     <>
-      <Alert severity="error">
-        {props.text}
+      <Alert severity={success ? "success" : "error"}>
+        {text}
         {/* load refresh button if props.refreshButton === true */}
-        {props.refreshButton && (
+        {refreshButton && (
           <Button variant="text" onClick={(e) => window.location.reload()}>
             Try again
           </Button>

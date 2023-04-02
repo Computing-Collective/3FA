@@ -68,7 +68,7 @@ export function SubmitButton(props) {
       console.log(json);
       const status = json.status;
       status === 1
-        ? setError("Success, waiting for your sensor   input")
+        ? setError("Success, waiting for your sensor input")
         : setError("Error please try again");
       console.log(json);
     } else {

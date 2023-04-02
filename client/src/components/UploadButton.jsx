@@ -11,7 +11,7 @@ import {
 
 const api_endpoint = window.internal.getAPIEndpoint;
 
-export function UploadButton({ auth, setError, setRefresh }) {  
+export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
   const [open, setOpen] = useState(false);
   const [filePath, setFilePath] = useState("");
   const [fileName, setFileName] = useState("");
@@ -32,9 +32,6 @@ export function UploadButton({ auth, setError, setRefresh }) {
     // fileName is required
     const file = await window.internal.getFileData(filePath);
     const blob = new Blob([file]);
-    console.log(filePath);
-    console.log(blob);
-    console.log(typeof blob);
 
     let formData = new FormData();
     formData.append("file", blob);
@@ -51,7 +48,8 @@ export function UploadButton({ auth, setError, setRefresh }) {
     });
     const json = await response.json();
     console.log(json);
-    setError(json.msg); // success :D
+    setError(json.msg);
+    setSuccess(json.success);
     handleClose();
   }
 

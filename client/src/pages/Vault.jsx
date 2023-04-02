@@ -19,6 +19,7 @@ export function Vault() {
   const navigate = useNavigate();
   const [auth, setAuth] = useContext(authContext);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   // an array of preview objects
   const [previews, setPreviews] = useState([]);
 
@@ -28,7 +29,7 @@ export function Vault() {
   useEffect(() => {
     async function fetchData() {
       const previewJson = await getPreviewJson(auth);
-      const previewData = await mapPreview(previewJson, auth);
+      const previewData = mapPreview(previewJson, auth, setSuccess, setError, setRefresh);
       setPreviews(previewData);
     }
     fetchData();
@@ -45,13 +46,18 @@ export function Vault() {
           Logout
         </Button>
       </div>
-      {error !== "" && <DisplayError text={error} />}
+      {error !== "" && <DisplayError text={error} success={success} />}
       <div className="m-2 grid grid-cols-4 gap-3">
         <div className="col-span-3">
           <h1>Welcome to your secure vault</h1>
         </div>
         <div className="justify-self-end">
-          <UploadButton auth={auth} setError={setError} setRefresh={setRefresh} />
+          <UploadButton
+            auth={auth}
+            setError={setError}
+            setSuccess={setSuccess}
+            setRefresh={setRefresh}
+          />
         </div>
         {previews.length === 0 ? "No files uploaded" : previews}
       </div>
@@ -66,7 +72,21 @@ export function Vault() {
  * @param {string} size the size of the file
  * @returns a jsx element for a file
  */
-function Preview({ fileName, date, size, id, auth }) {
+function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefresh }) {
+  async function handleDelete(id, auth) {
+    const response = await fetch(`${api_endpoint}/api/client/files/delete`, {
+      body: JSON.stringify({
+        auth_session_id: auth,
+        file_id: id,
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const json = await response.json();
+    setSuccess(json.success); // set the type of alert that pops up
+    setError(json.msg); // display success / err msg
+    setRefresh(json.msg); // refresh the previews
+  }
   return (
     <>
       <div className="col-span-4 flex flex-row bg-gray-600">
@@ -80,6 +100,13 @@ function Preview({ fileName, date, size, id, auth }) {
         </div>
         <div className="flex-grow" />
         <div className="m-2 self-center">
+          <Button
+            onClick={async (e) => {
+              e.preventDefault();
+              await handleDelete(id, auth);
+            }}>
+            Delete
+          </Button>
           <Button
             onClick={async (e) => {
               e.preventDefault();
@@ -162,7 +189,7 @@ function humanFileSize(bytes, si = false, dp = 1) {
  * }
  * @returns {array} an array of {Preview} elements to render
  */
-async function mapPreview(json, auth) {
+function mapPreview(json, auth, setSuccess, setError, setRefresh) {
   const res = [];
 
   for (let file of json) {
@@ -174,6 +201,9 @@ async function mapPreview(json, auth) {
         size={file.size}
         id={file.id}
         auth={auth}
+        setSuccess={setSuccess}
+        setError={setError}
+        setRefresh={setRefresh}
       />
     );
     res.push(preview);

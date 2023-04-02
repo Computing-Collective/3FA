@@ -61,7 +61,7 @@ export function Sensor() {
         <div className="grid grid-cols-2 gap-x-5 gap-y-2 py-2">
           <Picture index={0} />
           <Picture index={1} />
-          <Picture index={2} />
+          {/* <Picture index={2} /> */}
         </div>
         {error !== "" && <DisplayError text={error} refreshButton={true} />}
         <SubmitButton
