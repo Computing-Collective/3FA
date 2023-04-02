@@ -15,11 +15,20 @@ export function DisplayError({ refreshButton, success, text }) {
 
   return (
     <>
-      <Alert severity={success ? "success" : "error"}>
+      <Alert
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+        severity={success ? "success" : "error"}>
         {text}
         {/* load refresh button if props.refreshButton === true */}
         {refreshButton && (
-          <Button variant="text" onClick={(e) => window.location.reload()}>
+          <Button
+            color="secondary"
+            variant="text"
+            onClick={(e) => window.location.reload()}>
             Try again
           </Button>
         )}
