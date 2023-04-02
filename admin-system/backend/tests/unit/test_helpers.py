@@ -396,7 +396,7 @@ def test_fail_events(test_client, users, user):
     if user[2] is not None:
         path = os.path.abspath(os.path.join(os.curdir, "tests", "data", user[2]))
         with open(path, 'rb') as photo:
-            event = api.helpers.create_failed_login_event(session, text=text, exception=exception, photo=photo)
+            event = api.helpers.create_failed_login_event(session, text=text, exception=exception, photo=photo.read())
         with open(path, 'rb') as photo:
             assert event.photo == photo.read()
     else:
