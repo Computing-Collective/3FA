@@ -683,7 +683,7 @@ def get_latest_valid_auth_session(user: models.User) -> models.AuthSession | Non
     """
     auth_session: models.AuthSession = (db.session.execute(db.select(models.AuthSession)
                                                            .filter(models.AuthSession.id == user.id)
-                                        .order_by(models.AuthSession.date.desc())).scalars().first())
+                                                           .order_by(models.AuthSession.date.desc())).scalars().first())
 
     if auth_session is None or not auth_session.enabled or (
             datetime.now() - timedelta(minutes=float(constants.AUTH_SESSION_EXPIRY_MINUTES)) > auth_session.date):
@@ -732,7 +732,7 @@ def create_failed_login_event(session: models.LoginSession,
     if exception:
         fail_event.event = str(exception)
     if photo:
-        fail_event.photo = photo.read()
+        fail_event.photo = photo
 
     db.session.add(fail_event)
     db.session.commit()

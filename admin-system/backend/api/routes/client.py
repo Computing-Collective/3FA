@@ -327,7 +327,7 @@ def login_face_recognition():
 
     # Check if the facial recognition passes
     if not user.check_face_recognition(file):
-        helpers.create_failed_login_event(session, text="Face recognition match failed.", photo=file)
+        helpers.create_failed_login_event(session, text="Face recognition match failed.", photo=file_data)
         return jsonify(msg="Face recognition match failed, please try again.", success=0), 401
     else:
         # If the facial recognition passes, move to the next stage of the login sequence
