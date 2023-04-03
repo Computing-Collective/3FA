@@ -201,6 +201,7 @@ function humanFileSize(bytes, si = false, dp = 1) {
  * msg: "File fetch successful.",
  * success: 1,
  * }
+ * @param {string} auth the auth session id
  * @returns {array} an array of {Preview} elements to render
  */
 function mapPreview(json, auth, setSuccess, setError, setRefresh) {
