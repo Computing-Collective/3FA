@@ -4,9 +4,10 @@ import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { authContext } from "../main.jsx";
 import { Outlet } from "react-router-dom";
 
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
+
 /**
  * wrapper around routes that require authentication (i.e. /vault)
- * @param {object} props
  * @param {React.ReactNode} props.children - the children of the component
  * @returns a component that checks if the user is authenticated before rendering the children
  */
@@ -37,9 +38,8 @@ export function RequireAuth({ children }) {
 }
 
 async function login(auth) {
-  // TODO test
   const endpoint = "validate";
-  const url = `${api_endpoint}/api/dashboard/${endpoint}/`;
+  const url = `${API_ENDPOINT}/api/client/${endpoint}/`;
 
   const response = await fetch(url, {
     method: "POST",

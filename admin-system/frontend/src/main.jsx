@@ -39,39 +39,10 @@ const router = createBrowserRouter(
       <Route
         path="/home"
         element={
-          // <RequireAuth>
-          <Home />
-          // </RequireAuth>
+          <RequireAuth>
+            <Home />
+          </RequireAuth>
         }
-        loader={async ({ params }) => {
-          console.log("loading home");
-          return [
-            {
-              id: 1234,
-              name: "Bob",
-              methods: {
-                password: true,
-                face_recognition: true,
-                motion_pattern: false,
-              },
-              time: Date(),
-              success: true,
-              email: "bob@email.com",
-            },
-            {
-              id: 123,
-            },
-            {
-              id: 6,
-            },
-          ];
-          // return;
-          const response = await fetch(
-            // TODO endpoint url
-            `${import.meta.env.VITE_API_ENDPOINT}/api/dashboard/`
-          );
-          return await response.json();
-        }}
         errorElement={<ErrorPage />}
       />
     </>

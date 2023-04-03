@@ -1,29 +1,37 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { TextField, Button } from "@mui/material";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { useNavigate } from "react-router-dom";
 import { Backdoor } from "../components/Backdoor.jsx";
+import { authContext } from "../main.jsx";
 
 const API_ENDPOINT = `${import.meta.env.VITE_API_ENDPOINT}/api/dashboard`;
 
 export function Login() {
+  // the auth session token
+  const [auth, setAuth] = useContext(authContext);
+  // display err msg
   const [error, setError] = useState("");
+  // the email field
   const [email, setEmail] = useState("");
+  // the password field
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  /**
+   * @returns handler for the submit button 
+   */
   async function handleSubmit() {
-    // TODO endpoint url
     const response = await fetch(`${API_ENDPOINT}/login`, {
       method: "POST",
       body: JSON.stringify({
         email: email,
         password: password,
       }),
+      headers: { "Content-Type": "application/json" },
     });
     const json = await response.json();
-    console.log(json);
-    setError(json.msg); // TODO
+    json.success ? setAuth(json.auth_session_id) : setError(json.msg);
     navigate("/home");
   }
 
@@ -63,38 +71,3 @@ export function Login() {
   );
 }
 
-function InputField({ autoFocus, label, placeholder, type, onChange, value }) {
-  return (
-    <>
-      <TextField
-        autoFocus={autoFocus}
-        color="primary"
-        disabled={false}
-        label={label}
-        placeholder={placeholder}
-        variant="outlined"
-        size="md"
-        required
-        value={value}
-        sx={{
-          input: {
-            color: "white",
-          },
-          "& label": {
-            color: "white",
-          },
-          "&.MuiTextField-root": {
-            fieldset: {
-              borderColor: "white",
-            },
-            "&:hover fieldset": {
-              borderColor: "primary.main",
-            },
-          },
-        }}
-        type={type}
-        onChange={onChange}
-      />
-    </>
-  );
-}
