@@ -65,11 +65,11 @@ Run the server (development mode):
 > **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
 ```shell
-pipenv run flask -A api.app.py --debug run -h 192.168.137.1 --cert=adhoc
+pipenv run flask -A api.app.py --debug run -h 192.168.137.1
 ```
 With `localhost`:
 ```shell
-pipenv run flask -A api.app.py --debug run -h 0.0.0.0 --cert=adhoc
+pipenv run flask -A api.app.py --debug run -h 0.0.0.0
 ```
 
 Run tests with coverage:

@@ -1,3 +1,4 @@
+datasets/
 data/*
 !data/dummy1
 !data/dummy2
@@ -5,5 +6,7 @@ lfw.tgz
 lfw/
 model.pth
 model-divy95.pth
+model-all3-99.pth
+model-bc-data-97.pth
 negative/*
 .venv

@@ -1,7 +1,9 @@
 import os
 import uuid
+from unittest.mock import patch
 
 import pytest
+from werkzeug.datastructures import FileStorage
 
 import api.helpers
 import api.models
@@ -38,7 +40,8 @@ from constants import ValidMoves
     (["slawo@lva.alc", "lkjA2fsfsd", [ValidMoves.UP.value, "not_a_move"], True, True, True, "user1.png"],
      AssertionError),  # Invalid motion pattern (invalid move)
 ])
-def test_user_create_fetch(test_client, request_data, expected_result):
+@patch("api.models.User.check_face_recognition")
+def test_user_create_fetch(mock_face, test_client, request_data, expected_result):
     """
     Tests creating a user and fetching it from the database.
 
@@ -54,8 +57,9 @@ def test_user_create_fetch(test_client, request_data, expected_result):
             "face_recognition": request_data[5],
         }
     }
-    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", request_data[6]))
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", request_data[6]))
 
+    mock_face.return_value = True
     if expected_result is True:
         with open(path, 'rb') as photo:
             user = api.helpers.create_user_from_dict(data, photo)
@@ -125,6 +129,23 @@ def test_login_session_create_fetch(test_client, users, user, expected_result):
     session = api.helpers.create_login_session(users[user])
     assert isinstance(session, expected_result)
     assert api.helpers.get_login_session_from_id(session.session_id) == session
+
+
+@pytest.mark.database
+def test_fetch_login_sessions(test_client, users):
+    """
+    Tests fetching all login sessions from the database
+    """
+    sessions = api.helpers.get_login_sessions(20)
+    sessions_dict = api.helpers.get_login_sessions_as_dict(20)
+    assert len(sessions) == 20
+    for i in range(20):
+        assert isinstance(sessions[i], api.models.LoginSession)
+        assert str(sessions[i].session_id) == sessions_dict[i].get("session_id", None)
+        assert str(sessions[i].id) == sessions_dict[i].get("user_id", None)
+
+    sessions = api.helpers.get_login_sessions(2)
+    assert len(sessions) == 2
 
 
 @pytest.mark.database
@@ -216,10 +237,10 @@ def test_save_face_recognition_photo(test_client, users):
     user = users[0]
     session = api.helpers.create_login_session(user)
 
-    path = os.path.abspath(os.path.join(os.curdir, "tests", "images", "user1.png"))
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", "user1.png"))
 
     with open(path, 'rb') as photo:
-        session = api.helpers.save_face_recognition_photo(session, photo)
+        session = api.helpers.save_face_recognition_photo(session, photo.read())
     with open(path, 'rb') as photo:
         assert session.login_photo == photo.read()
 
@@ -254,12 +275,101 @@ def test_auth_session_create_fetch(test_client, users, user, expected_result):
     Tests creating an auth session and fetching it from the database
     """
     session = api.helpers.create_auth_session(users[user])
+    latest = api.helpers.get_latest_valid_auth_session(users[user])
+    assert session == latest
     assert isinstance(session, expected_result)
     assert api.helpers.get_auth_session_from_id(session.session_id) == session
 
     session = api.helpers.disable_auth_session(session)
     assert session.enabled is False
+    latest = api.helpers.get_latest_valid_auth_session(users[user])
+    assert latest is None
     assert api.helpers.get_auth_session_from_id(session.session_id) == session
+
+
+@pytest.mark.database
+@pytest.mark.parametrize("user, file_name, expected_result", [
+    (0, "secret_file", api.models.AuthSession),
+    (0, "secret_file2", api.models.AuthSession),
+    (1, "secret_file", api.models.AuthSession),
+    (2, "secret_file", api.models.AuthSession),
+    (3, "secret_file", api.models.AuthSession),
+])
+def test_add_user_files(test_client, users, user, file_name, expected_result):
+    """
+    Test adding files to different users
+    """
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", "mock_data.txt"))
+
+    with open(path, 'rb') as file:
+        file_storage = FileStorage(file, content_type="text/plain", filename="mock_data.txt")
+        user_file = api.helpers.add_user_file(users[user], file_name, file_storage)
+
+    assert isinstance(user_file, api.models.UserFiles)
+
+
+@pytest.mark.database
+@pytest.mark.parametrize("user, file_name, expected_result", [
+    (0, "secret_file", False),
+    (0, "secret_file2", False),
+    (1, "secret_file2", True),
+])
+def test_unique_filename(test_client, users, user, file_name, expected_result):
+    """
+    Test that the filename is unique
+    """
+    val = api.helpers.filename_unique(users[user], file_name)
+    assert val == expected_result
+
+
+@pytest.mark.database
+@pytest.mark.parametrize("user, file", [
+    (0, 0),
+    (0, 1),
+    (1, 2),
+    (2, 3),
+    (3, 4),
+])
+def test_fetching_user_files(test_client, users, files, user, file):
+    """
+    Test fetching files for different users
+    """
+    user_file = api.helpers.get_user_file(users[user], files[file].id)
+    assert user_file == files[file]
+
+
+@pytest.mark.database
+def test_fetching_all_user_files(test_client, users, files):
+    """
+    Test fetching all files for a user
+    """
+    all_files = api.helpers.get_user_files(users[0])
+    all_files_dict = api.helpers.get_user_files_as_dict(users[0])
+
+    assert len(all_files) == len(all_files_dict)
+
+    for i in range(2):
+        assert all_files_dict[i]["id"] == str(files[i].id)
+        assert all_files_dict[i]["file_name"] == files[i].file_name
+        assert all_files_dict[i]["file_type"] == files[i].file_type
+
+
+@pytest.mark.database
+def test_deleting_user_files(test_client, users, files):
+    # Add a file to the user first
+    path = os.path.abspath(os.path.join(os.curdir, "tests", "data", "mock_data.txt"))
+
+    with open(path, 'rb') as file:
+        file_storage = FileStorage(file, content_type="text/plain", filename="mock_data.txt")
+        user_file = api.helpers.add_user_file(users[0], "to_delete", file_storage)
+
+    num_files = len(api.helpers.get_user_files(users[0]))
+
+    # Delete the file
+    api.helpers.delete_user_file(user_file.id)
+
+    # Check that the file was deleted
+    assert len(api.helpers.get_user_files(users[0])) == num_files - 1
 
 
 @pytest.mark.database
@@ -284,9 +394,9 @@ def test_fail_events(test_client, users, user):
         text = None
 
     if user[2] is not None:
-        path = os.path.abspath(os.path.join(os.curdir, "tests", "images", user[2]))
+        path = os.path.abspath(os.path.join(os.curdir, "tests", "data", user[2]))
         with open(path, 'rb') as photo:
-            event = api.helpers.create_failed_login_event(session, text=text, exception=exception, photo=photo)
+            event = api.helpers.create_failed_login_event(session, text=text, exception=exception, photo=photo.read())
         with open(path, 'rb') as photo:
             assert event.photo == photo.read()
     else:
@@ -305,7 +415,7 @@ def test_fail_events(test_client, users, user):
     assert event_dict[0]["event"] == str(user[1])
     assert event_dict[0]["session_id"] == str(session.session_id)
     if user[2] is not None:
-        path = os.path.abspath(os.path.join(os.curdir, "tests", "images", user[2]))
+        path = os.path.abspath(os.path.join(os.curdir, "tests", "data", user[2]))
         with open(path, 'rb') as photo:
             assert event_dict[0]["photo"] == str(photo.read())
     else:
