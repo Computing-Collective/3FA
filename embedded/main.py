@@ -4,21 +4,21 @@
 
 '''
                              USB
-                         +----------+                        
-                         |    +Y    |                        
+                         +----------+
+                         |    +Y    |
                          |          | Button: Start Recording
-                         |          |                        
-                         |          | Button: Stop Recording 
-                         |          |                        
-                         | -X    +X |                        
-                         |          |                        
-                         |          |                        
- LED: READY TO RECORD    |          | LED: Sequence Status   
-                         |          |                        
-      LED: RECORDING     |          |                        
-                         |          |                        
-                         |    -Y    |                        
-                         +----------+     
+                         |          |
+                         |          | Button: Stop Recording
+                         |          |
+                         | -X    +X |
+                         |          |
+                         |          |
+ LED: READY TO RECORD    |          | LED: Sequence Status
+                         |          |
+      LED: RECORDING     |          |
+                         |          |
+                         |    -Y    |
+                         +----------+
 
 '''
 
@@ -85,8 +85,8 @@ sensor = LSM6DS33(i2c)
 
 
 # Global parameters
-sensitivity = 18
-buffer_offset = 4 # there are typically 3 elements of feedback 
+sensitivity = 4
+buffer_offset = 4 # there are typically 3 elements of feedback
                   # for example forward move is [20, -20, -18, -12, -4, 0, 0, 0]
 z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 to detect flips as the sign of the number)
 
@@ -107,6 +107,9 @@ wifi.radio.connect(os.getenv('CIRCUITPY_WIFI_SSID'),
                    os.getenv('CIRCUITPY_WIFI_PASSWORD'))
 pool = socketpool.SocketPool(wifi.radio)
 
+# ssl_context = ssl.create_default_context()
+# ssl_context.check_hostname = False
+# ssl_context.load_verify_locations(None)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
 server = HTTPServer(pool)
@@ -161,24 +164,24 @@ def init_hardware():
         correct_led.value = False
         onboard_led.value = False
         time.sleep(0.1)
-    
+
     init = True
 
 
 
 def sequence_correct_led():
     for i in range(5):
-        correct_led.value = True    
+        correct_led.value = True
         time.sleep(0.05)
         correct_led.value = False
         time.sleep(0.05)
-    
+
     # Reset the correct LED after blinking
     correct_led.value = False
 
 def sign(num):
-    if num == 0: 
-        return 1 
+    if num == 0:
+        return 1
     return num / abs(num)
 
 def add_all_sensor_data(sequence):
@@ -235,7 +238,7 @@ def check_sequence(sequence):
     # List of pairs (index, move)
     valid_moves_indexed = []
 
-    # Check that the imu was flipped over at some 
+    # Check that the imu was flipped over at some
     started_up = False
 
     for i, z in enumerate(sequence["AZ"]):
@@ -279,7 +282,7 @@ def check_sequence(sequence):
             # this is because we want to ignore more noise even if that means missing some correct signals
             # for debugging, it's easier to have a small amount of correct signals
             # than having many all the correct signals and a lot of bad signals
-            if x < (-1 * sensitivity) / 2:
+            if x < (-1 * sensitivity):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif x > sensitivity :
@@ -294,9 +297,9 @@ def check_sequence(sequence):
             buffer = 0
         elif buffer > 0:
             buffer = buffer - 1
-        
+
         if buffer == 0:
-            if y < (-1 * sensitivity) / 2:
+            if y < (-1 * sensitivity):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif y > sensitivity:
@@ -316,7 +319,7 @@ def check_sequence(sequence):
         # if z < 0 then ADD 9.8m/s^s
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if z - z_offset < (-1 * sensitivity) / 2:
+            if z - z_offset < (-1 * sensitivity):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif z - z_offset > sensitivity:
@@ -332,7 +335,7 @@ def check_sequence(sequence):
             buffer = buffer - 1
 
         if buffer == 0:
-            if x > sensitivity / 2:
+            if x > sensitivity:
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif x < -1 * sensitivity :
@@ -346,12 +349,12 @@ def check_sequence(sequence):
             buffer = 0
         elif buffer > 0:
             buffer = buffer - 1
-        
+
         if buffer == 0:
-            if y > sensitivity / 2:
+            if y > sensitivity:
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
-            elif y < -1 * sensitivity - 2:  # manually increase by 2 because -Y seems to be sensitive
+            elif y < -1 * sensitivity:
                 valid_moves_indexed.append(("BACKWARD", i))
                 buffer = buffer + buffer_offset
 
@@ -365,11 +368,11 @@ def check_sequence(sequence):
 
         if buffer == 0:
             # if see a negative acceleration motion first, not +Z motion
-            if (z - z_offset) > (sensitivity / 2):
+            if (z - z_offset) > (sensitivity):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif (z - z_offset) < (-1 * sensitivity):
-                valid_moves_indexed.append(("DOWN", i))  
+                valid_moves_indexed.append(("DOWN", i))
                 buffer = buffer + buffer_offset
 
     # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -491,7 +494,7 @@ def check_sequence(sequence):
 # Route for uploading a pico_id
 def set_pico_id(request: HTTPRequest):
     # Must use global to specify we want to modify the pico_id variable that was defined outside
-    global pico_id 
+    global pico_id
     #  Get the raw text
     raw_text = request.raw_request.decode("utf-8")
     print("Raw Text received: ", raw_text)
@@ -509,9 +512,12 @@ def set_pico_id(request: HTTPRequest):
 
     print("Pico ID received: " + pico_id)
 
-    output = "Pico ID received: " + pico_id
+    output = {
+        "status": 0,
+        "msg": "Pico ID received successfully"
+    }
     with HTTPResponse(request) as response:
-        response.send(output)
+        response.send(json.dumps(output),  content_type="application/json")
 
 def transmit_wireless_message(sequence):
     # Transmit the sequence which is a list of strings
@@ -584,24 +590,24 @@ while True:
 
             # Transmit the final sequence
             transmit_wireless_message(final_sequence)
-            
-            # Reset the sequence for next recording    
-            sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }        
+
+            # Reset the sequence for next recording
+            sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }
             final_sequence = []
             pico_id = None
             print("\nWaiting for pico_id from client")
-            
+
 
         # Recording
         if (is_recording):
 
-            # Prevent overflow (sequence terminates if trying to record for more than 10 seconds)    
+            # Prevent overflow (sequence terminates if trying to record for more than 10 seconds)
             if len(sequence["AX"]) > 1000:
                 print("\n\n\n\n\n\n\n\nRestarting, overflowed 10s\n\n")
                 sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }
 
             add_all_sensor_data(sequence)
-            
+
             print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
 
         time.sleep(0.1)
