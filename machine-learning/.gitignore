@@ -6,3 +6,4 @@ lfw/
 model.pth
 model-divy95.pth
 negative/*
+.venv
