@@ -5,13 +5,13 @@ import { Backdoor } from "./Backdoor.jsx";
 
 /**
  *
-* @returns the root elem, contains the Home Button
+ * @returns the root elem, contains the Home Button
  */
 export function Root() {
   return (
     <>
       <HomeButton />
-      <div className="flex flex-col h-full min-h-screen justify-center p-2">
+      <div className="flex h-full min-h-screen flex-col items-center justify-center p-2">
         <Outlet />
         {/* <Backdoor /> */}
       </div>

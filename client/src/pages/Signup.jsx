@@ -178,10 +178,10 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
           Right
         </MenuItem>
         <MenuItem sx={{ color: "white" }} value="FORWARD">
-          Forward
+          Front
         </MenuItem>
         <MenuItem sx={{ color: "white" }} value="BACKWARD">
-          Backward
+          Back
         </MenuItem>
         <MenuItem sx={{ color: "white" }} value="FLIP">
           Flip
@@ -205,29 +205,33 @@ function MotionPattern({ patterns, setPatterns }) {
   // the dropdown for user selection (jsx component)
 
   return (
-    <div className="flex max-w-md flex-row w-full">
-      <div>
-        <NumberButton
-          disabled={patterns.length < 2}
-          onClick={() => {
-            const tempPatterns = [...patterns];
-            tempPatterns.pop();
-            setPatterns(tempPatterns);
-          }}>
-          <Remove />
-        </NumberButton>
-        <Typography fontWeight="md">{patterns.length}</Typography>
-        <NumberButton
-          disabled={patterns.length > 3}
-          onClick={() => {
-            setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
-          }}>
-          <Add />
-        </NumberButton>
+    <div className="flex w-full max-w-lg flex-row">
+      <div className="flex items-center">
+        <div className="flex flex-row justify-center align-middle">
+          <NumberButton
+            disabled={patterns.length < 2}
+            onClick={() => {
+              const tempPatterns = [...patterns];
+              tempPatterns.pop();
+              setPatterns(tempPatterns);
+            }}>
+            <Remove />
+          </NumberButton>
+          <span className="self-center">
+            <Typography fontWeight="md">{patterns.length}</Typography>
+          </span>
+          <NumberButton
+            disabled={patterns.length > 3}
+            onClick={() => {
+              setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
+            }}>
+            <Add />
+          </NumberButton>
+        </div>
       </div>
-      <div className="grid flex-1 auto-cols-fr grid-flow-col">
+      <div className="grid flex-1 grid-cols-1 gap-2 lg:grid-cols-4">
         {patterns.map((pattern, index) => {
-          return (  
+          return (
             <div key={pattern.id} className="self-center text-white">
               <SelectMotionPattern
                 index={index}

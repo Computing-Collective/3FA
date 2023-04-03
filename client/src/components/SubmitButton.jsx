@@ -22,7 +22,7 @@ const pico_api_endpoint = window.internal.getPicoEndpoint;
  * @returns a submit button that sends data to the API
  */
 export function SubmitButton(props) {
-  const navigate = useNavigate(); // TODO change to useNavigation() to provide loading screens (primarily sensor?)
+  const navigate = useNavigate();
   // https://reactrouter.com/en/main/hooks/use-navigation
   const [session, setSession] = useContext(sessionContext); // session_id for admin
   const [auth, setAuth] = useContext(authContext); // auth for access to vault
@@ -54,6 +54,7 @@ export function SubmitButton(props) {
       apiPayload = props.data.map((item) => {
         return item.toUpperCase();
       });
+      // send pico_id to pico
       const response = await fetch(`${pico_api_endpoint}/pico_id`, {
         mode: "no-cors",
         method: "POST",
@@ -70,7 +71,6 @@ export function SubmitButton(props) {
       status === 1
         ? setError("Success, waiting for your sensor input")
         : setError("Error please try again");
-      console.log(json);
     } else {
       apiPayload = props.data;
     }

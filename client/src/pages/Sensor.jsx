@@ -39,7 +39,6 @@ export function Sensor() {
   );
   // generate random pico_id by paging API
   const [pico_id, setPico_id] = useState();
-  console.log(pico_id);
   // text for displaying errors
   const [error, setError] = useState("");
 
@@ -68,7 +67,10 @@ export function Sensor() {
       <div className="flex flex-col text-center align-middle">
         {(error !== "" && <DisplayError text={error} refreshButton={true} />) ||
           (pico_id === null && (
-            <DisplayError text="Unable to connect with Pico" refreshButton={true} />
+            <DisplayError
+              text="Unable to connect your motion sensor"
+              refreshButton={true}
+            />
           ))}
         <h1>Move your sensor!</h1>
         <h3>Additionally, add these moves to the end of your sequence: </h3>
