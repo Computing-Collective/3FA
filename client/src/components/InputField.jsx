@@ -2,15 +2,23 @@ import { Input } from "@mui/material";
 import { TextField } from "@mui/material";
 import React from "react";
 
-export function InputField(props) {
+/**
+ *
+ * @param {boolean} autoFocus turn autoFocus on
+ * @param {string} placeHolder the default text in the text field
+ * @param {string} type the type of inputfield (adhere to html standards)
+ * @param {React.SetStateAction} onChange onclick handler for the input field
+ * @returns a jsx mui input field that is for dark mode
+ */
+export function InputField({ autoFocus, placeholder, type, onChange }) {
   return (
     <>
       <TextField
-        autoFocus={props.autoFocus}
+        autoFocus={autoFocus}
         color="primary"
         disabled={false}
-        label={props.placeholder}
-        placeholder={props.placeholder}
+        label={placeholder}
+        placeholder={placeholder}
         variant="outlined"
         size="md"
         required
@@ -30,8 +38,8 @@ export function InputField(props) {
             },
           },
         }}
-        type={props.type}
-        onChange={props.onChange}
+        type={type}
+        onChange={onChange}
       />
     </>
   );
