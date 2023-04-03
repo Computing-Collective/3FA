@@ -64,86 +64,79 @@ export function Signup() {
     console.log(json);
   }
   return (
-    <>
-      <div className="relative">
-        <div className="flex max-w-screen-md flex-col justify-center text-center">
-          {error !== "" && <DisplayError text={error} />}
-          <h1>Enter your email, password, and other information</h1>
-          <form
-            onSubmit={async (event) => {
-              event.preventDefault();
-              handleSignup();
-              navigate("/");
-            }}>
-            <div className="m-2 gap-y-2">
-              <InputField
-                autoFocus
-                placeholder="Email"
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value);
-                }}
-                type="email"
-              />
-            </div>
-            <div className="m-2 gap-y-2">
-              <InputField
-                placeholder="Password"
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                }}
-                type="password"
-              />
-            </div>
-            <div className="">
-              <HoverCheckbox
-                label="Sensor"
-                onChange={(event) => {
-                  setAuthMethods({
-                    ...authMethods,
-                    motion_pattern: event.target.checked,
-                  });
-                }}
-              />
-
-              {/* render sensor dropdowns if needed */}
-              {authMethods.motion_pattern && (
-                <MotionPattern patterns={patterns} setPatterns={setPatterns} />
-              )}
-            </div>
-            <div className="">
-              <HoverCheckbox
-                label="Facial Recognition"
-                onChange={(event) => {
-                  setAuthMethods({
-                    ...authMethods,
-                    face_recognition: event.target.checked,
-                  });
-                }}
-              />
-              {/* render camera if needed */}
-              {authMethods.face_recognition && (
-                <>
-                  <Video
-                    setText={setError}
-                    onCapture={(blob) => {
-                      setPhoto(blob);
-                    }}
-                    onClear={() => {
-                      setPhoto(null);
-                    }}
-                  />
-                </>
-              )}
-              <div className="m-2 gap-y-2">
-                <Button type="submit">Submit</Button>
-              </div>
-            </div>
-          </form>
+    <div className="flex flex-col text-center">
+      {error !== "" && <DisplayError text={error} />}
+      <h1>Enter your email, password, and other information</h1>
+      <form
+        className="flex flex-col items-center"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          handleSignup();
+          navigate("/");
+        }}>
+        <div className="m-2 gap-y-2">
+          <InputField
+            autoFocus
+            placeholder="Email"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
+            }}
+            type="email"
+          />
         </div>
-      </div>
-    </>
+        <div className="m-2 gap-y-2">
+          <InputField
+            placeholder="Password"
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+            }}
+            type="password"
+          />
+        </div>
+        <HoverCheckbox
+          label="Sensor"
+          onChange={(event) => {
+            setAuthMethods({
+              ...authMethods,
+              motion_pattern: event.target.checked,
+            });
+          }}
+        />
+
+        {/* render sensor dropdowns if needed */}
+        {authMethods.motion_pattern && (
+          <MotionPattern patterns={patterns} setPatterns={setPatterns} />
+        )}
+        <HoverCheckbox
+          label="Facial Recognition"
+          onChange={(event) => {
+            setAuthMethods({
+              ...authMethods,
+              face_recognition: event.target.checked,
+            });
+          }}
+        />
+        {/* render camera if needed */}
+        {authMethods.face_recognition && (
+          <>
+            <Video
+              setText={setError}
+              onCapture={(blob) => {
+                setPhoto(blob);
+              }}
+              onClear={() => {
+                setPhoto(null);
+              }}
+            />
+          </>
+        )}
+        <div className="m-2 gap-y-2">
+          <Button type="submit">Submit</Button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -212,29 +205,29 @@ function MotionPattern({ patterns, setPatterns }) {
   // the dropdown for user selection (jsx component)
 
   return (
-    <>
-      <div className="grid grid-flow-col grid-cols-5 gap-x-5">
-        <div className="">
-          <NumberButton
-            disabled={patterns.length < 2}
-            onClick={() => {
-              const tempPatterns = [...patterns];
-              tempPatterns.pop();
-              setPatterns(tempPatterns);
-            }}>
-            <Remove />
-          </NumberButton>
-          <Typography fontWeight="md">{patterns.length}</Typography>
-          <NumberButton
-            disabled={patterns.length > 3}
-            onClick={() => {
-              setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
-            }}>
-            <Add />
-          </NumberButton>
-        </div>
+    <div className="flex max-w-md flex-row w-full">
+      <div>
+        <NumberButton
+          disabled={patterns.length < 2}
+          onClick={() => {
+            const tempPatterns = [...patterns];
+            tempPatterns.pop();
+            setPatterns(tempPatterns);
+          }}>
+          <Remove />
+        </NumberButton>
+        <Typography fontWeight="md">{patterns.length}</Typography>
+        <NumberButton
+          disabled={patterns.length > 3}
+          onClick={() => {
+            setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
+          }}>
+          <Add />
+        </NumberButton>
+      </div>
+      <div className="grid flex-1 auto-cols-fr grid-flow-col">
         {patterns.map((pattern, index) => {
-          return (
+          return (  
             <div key={pattern.id} className="self-center text-white">
               <SelectMotionPattern
                 index={index}
@@ -245,7 +238,7 @@ function MotionPattern({ patterns, setPatterns }) {
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 
