@@ -37,8 +37,8 @@ export async function logout(auth, setAuth, navigate) {
     }),
     headers: { "Content-Type": "application/json" },
   });
-
-  navigate("/");
+  const json = await response.json();
+  console.log(json);
 }
 
 // pages api and returns a unique pico_id in ref to the admin

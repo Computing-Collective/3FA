@@ -42,6 +42,8 @@ export function Sensor() {
   // text for displaying errors
   const [error, setError] = useState("");
 
+  const [severity, setSeverity] = useState("success"); // severity for the alert
+
   useEffect(() => {
     getUniquePicoID(crypto.randomUUID()).then((res) => {
       setPico_id(res);
@@ -65,11 +67,17 @@ export function Sensor() {
   return (
     <>
       <div className="flex flex-col text-center align-middle">
-        {(error !== "" && <DisplayError text={error} refreshButton={true} />) ||
+        {(error !== "" && (
+          <DisplayError
+            text={error}
+            refreshButton={severity === "info" ? false : true}
+            severity={severity}
+          />
+        )) ||
           (pico_id === null && (
             <DisplayError
               text="Unable to connect your motion sensor"
-              refreshButton={true}
+              refreshButton={severity === "info" ? false : true}
             />
           ))}
         <h1>Move your sensor!</h1>
@@ -85,6 +93,7 @@ export function Sensor() {
           setError={setError}
           pico_id={pico_id}
           text="Start the sequence"
+          setSeverity={setSeverity}
         />
       </div>
     </>
