@@ -78,8 +78,8 @@ export function SubmitButton(props) {
       console.log(response.status);
       const json = await response.json();
       console.log(json);
-      const status = json.status;
-      if (status === 1) {
+      const success = json.success;
+      if (success === 1) {
         setError("Success, waiting for your sensor input");
         setSeverity("success");
       } else {
