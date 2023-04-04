@@ -36,6 +36,8 @@ export function SubmitButton(props) {
   const endpoint = props.endpoint;
   const text = props.text;
 
+  const setSeverity = props.setSeverity;
+
   // if we want an input field (email or password)
   const inputField = props.endpoint === "email" || props.endpoint === "password";
 
@@ -54,23 +56,36 @@ export function SubmitButton(props) {
       apiPayload = props.data.map((item) => {
         return item.toUpperCase();
       });
+      setError("Trying to connect to your sensor");
+      setSeverity("info");
       // send pico_id to pico
-      const response = await fetch(`${pico_api_endpoint}/pico_id`, {
-        mode: "no-cors",
-        method: "POST",
-        body: JSON.stringify({
-          pico_id: pico_id,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      let response;
+      try {
+        response = await fetch(`${pico_api_endpoint}/pico_id`, {
+          mode: "no-cors",
+          method: "POST",
+          body: JSON.stringify({
+            pico_id: pico_id,
+          }),
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (e) {
+        // unable to connect
+        setError("Error please try again");
+        setSeverity("error");
+      }
       console.log(response);
       console.log(response.status);
       const json = await response.json();
       console.log(json);
       const status = json.status;
-      status === 1
-        ? setError("Success, waiting for your sensor input")
-        : setError("Error please try again");
+      if (status === 1) {
+        setError("Success, waiting for your sensor input");
+        setSeverity("success");
+      } else {
+        setError("Error please try again");
+        setSeverity("error");
+      }
     } else {
       apiPayload = props.data;
     }

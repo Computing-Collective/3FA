@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
  * @returns an MUI alert that displays the error message given
  * @param {boolean} props.success - whether to display error icon or success
  */
-export function DisplayError({ refreshButton, success, text }) {
+export function DisplayError({ refreshButton, severity, text }) {
   const navigate = useNavigate();
 
   return (
@@ -21,17 +21,20 @@ export function DisplayError({ refreshButton, success, text }) {
           alignItems: "center",
           flexWrap: "wrap",
         }}
-        severity={success ? "success" : "error"}>
+        severity={severity ? severity : "error"}
+        action={
+          refreshButton && (
+            <Button
+              color="secondary"
+              variant="text"
+              onClick={(e) => window.location.reload()}>
+              Try again
+            </Button>
+          )
+        }>
         {text}
         {/* load refresh button if props.refreshButton === true */}
-        {refreshButton && (
-          <Button
-            color="secondary"
-            variant="text"
-            onClick={(e) => window.location.reload()}>
-            Try again
-          </Button>
-        )}
+        <div className=""></div>
       </Alert>
     </>
   );
