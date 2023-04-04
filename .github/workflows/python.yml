@@ -33,6 +33,7 @@ jobs:
       - name: Generate Machine Learning Model
         run: |
           python model.py
+          mkdir ../admin-system/backend/instance/
           mv model.pth ../admin-system/backend/instance/model.pth
         working-directory: machine-learning 
 
