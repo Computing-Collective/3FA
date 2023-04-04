@@ -64,7 +64,7 @@ export function Signup() {
     console.log(json);
   }
   return (
-    <div className="flex flex-col text-center">
+    <div className="flex flex-col pt-36 text-center">
       {error !== "" && <DisplayError text={error} />}
       <h1>Enter your email, password, and other information</h1>
       <form
@@ -104,7 +104,6 @@ export function Signup() {
             });
           }}
         />
-
         {/* render sensor dropdowns if needed */}
         {authMethods.motion_pattern && (
           <MotionPattern patterns={patterns} setPatterns={setPatterns} />
@@ -205,31 +204,29 @@ function MotionPattern({ patterns, setPatterns }) {
   // the dropdown for user selection (jsx component)
 
   return (
-    <div className="flex w-full max-w-lg flex-row">
-      <div className="flex items-center">
-        <div className="flex flex-row justify-center align-middle">
-          <NumberButton
-            disabled={patterns.length < 2}
-            onClick={() => {
-              const tempPatterns = [...patterns];
-              tempPatterns.pop();
-              setPatterns(tempPatterns);
-            }}>
-            <Remove />
-          </NumberButton>
-          <span className="self-center">
-            <Typography fontWeight="md">{patterns.length}</Typography>
-          </span>
-          <NumberButton
-            disabled={patterns.length > 3}
-            onClick={() => {
-              setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
-            }}>
-            <Add />
-          </NumberButton>
-        </div>
+    <div className="flex w-full max-w-lg flex-row py-3">
+      <div className="flex flex-row items-center justify-center align-middle">
+        <NumberButton
+          disabled={patterns.length < 2}
+          onClick={() => {
+            const tempPatterns = [...patterns];
+            tempPatterns.pop();
+            setPatterns(tempPatterns);
+          }}>
+          <Remove />
+        </NumberButton>
+        <span className="self-center">
+          <Typography fontWeight="md">{patterns.length}</Typography>
+        </span>
+        <NumberButton
+          disabled={patterns.length > 3}
+          onClick={() => {
+            setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
+          }}>
+          <Add />
+        </NumberButton>
       </div>
-      <div className="grid flex-1 grid-cols-1 gap-2 lg:grid-cols-4">
+      <div className="grid flex-1 grid-cols-4 gap-4 lg:grid-cols-4">
         {patterns.map((pattern, index) => {
           return (
             <div key={pattern.id} className="self-center text-white">
