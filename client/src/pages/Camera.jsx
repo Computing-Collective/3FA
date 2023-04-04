@@ -27,7 +27,7 @@ export function Camera() {
 
   return (
     <>
-      <div className="wid flex w-2/3 flex-col items-center text-center">
+      <div className="wid flex w-2/3 flex-col items-center pt-8 text-center">
         {error !== "" && <DisplayError text={error} />}
         <h1 className="m-2">Smile for the camera</h1>
         <Video

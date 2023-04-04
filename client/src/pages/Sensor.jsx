@@ -12,7 +12,6 @@ import flip from "../../public/icons/flip.png";
 import { getUniquePicoID } from "../functions/auth.js";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
-import { LoadingButton } from "@mui/lab";
 import { useEffect } from "react";
 
 // the possible moves that the pico can use
