@@ -36,7 +36,7 @@
     "file-loader": "^6.2.0",
     "node-loader": "^2.0.0",
     "postcss": "^8.4.21",
-    "postcss-loader": "^7.1.0",
+    "postcss-loader": "^7.2.3",
     "prettier": "^2.8.7",
     "prettier-plugin-tailwindcss": "^0.2.6",
     "style-loader": "^3.3.2",
