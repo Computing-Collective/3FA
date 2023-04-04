@@ -9,6 +9,7 @@ import { Event, LocalConvenienceStoreOutlined } from "@mui/icons-material";
 import { UploadButton } from "../components/UploadButton.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { useEffect } from "react";
+
 const api_endpoint = window.internal.getAPIEndpoint;
 
 /**
@@ -134,7 +135,7 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
  * @param {string} fileName the fileName for the file to download
  */
 async function handleDownload(id, auth, fileName) {
-  const path = await window.internal.openFile(); // prompts the user to select a directory to place the donload in
+  const path = await window.internal.openFile(); // prompts the user to select a directory to place the download in
   const response = await fetch(`${api_endpoint}/api/client/files/download/`, {
     body: JSON.stringify({
       auth_session_id: auth,
@@ -143,9 +144,14 @@ async function handleDownload(id, auth, fileName) {
     headers: { "Content-Type": "application/json" },
     method: "POST",
   });
-  const file = await response.arrayBuffer();
-  // saves the file to file/path with fileName
-  window.internal.saveFile(file, path, fileName);
+  const file_blob = await response.blob();
+
+  const mime = require('mime')
+  const extension = mime.getExtension(file_blob.type);
+
+  const file = await file_blob.arrayBuffer();
+  
+  window.internal.saveFile(file, path, fileName + "." + extension);
 }
 
 /**

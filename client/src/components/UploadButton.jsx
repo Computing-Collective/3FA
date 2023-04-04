@@ -23,6 +23,7 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
   const [open, setOpen] = useState(false);
   const [filePath, setFilePath] = useState("");
   const [fileName, setFileName] = useState("");
+  const [file, setFile] = useState(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -32,17 +33,14 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
     setOpen(false);
     setFilePath("");
     setFileName("");
+    setFile(null);
     // tell the frontend to refetch the previews
     setRefresh(filePath);
   };
 
   async function handleUpload() {
-    // fileName is required
-    const file = await window.internal.getFileData(filePath);
-    const blob = new Blob([file]);
-
     let formData = new FormData();
-    formData.append("file", blob);
+    formData.append("file", file);
     formData.append(
       "request",
       JSON.stringify({
@@ -66,6 +64,7 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
     const file = files[0];
     setFileName(file.name);
     setFilePath(file.path);
+    setFile(file);
   };
 
   return (
