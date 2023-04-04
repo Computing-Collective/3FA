@@ -62,7 +62,6 @@ export function SubmitButton(props) {
       let response;
       try {
         response = await fetch(`${pico_api_endpoint}/pico_id`, {
-          mode: "no-cors",
           method: "POST",
           body: JSON.stringify({
             pico_id: pico_id,
