@@ -9,7 +9,7 @@ import { Event, LocalConvenienceStoreOutlined } from "@mui/icons-material";
 import { UploadButton } from "../components/UploadButton.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { useEffect } from "react";
-
+import { LogoutButton } from "../components/LogoutButton.jsx";
 const api_endpoint = window.internal.getAPIEndpoint;
 
 /**
@@ -42,15 +42,10 @@ export function Vault() {
   return (
     <>
       {/* hardcoded code hf */}
-      <div className="absolute left-8 top-8 h-16 w-16">
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => logout(auth, setAuth, navigate)}>
-          Logout
-        </Button>
-      </div>
-      {error !== "" && <DisplayError text={error} success={success} />}
+      <LogoutButton />
+      {error !== "" && (
+        <DisplayError text={error} severity={success ? "success" : "error"} />
+      )}
       <div className="m-2 grid grid-cols-4 gap-3">
         <div className="col-span-3">
           <h1>Welcome to your secure vault</h1>
@@ -107,7 +102,7 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
           <div className="col-span-2">{humanFileSize(size)}</div>
         </div>
         <div className="flex-grow" />
-        <div className="m-2 self-center">
+        <div className="m-2 flex flex-col items-end self-center">
           <Button
             onClick={async (e) => {
               e.preventDefault();
