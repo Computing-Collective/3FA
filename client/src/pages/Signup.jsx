@@ -61,8 +61,14 @@ export function Signup() {
       body: formData,
     });
     const json = await response.json();
-    console.log(json);
+    if (json.success == 0) {
+      setError(json.msg);
+      
+    } else {
+      navigate("/");
+    }
   }
+
   return (
     <div className="flex flex-col pt-36 text-center">
       {error !== "" && <DisplayError text={error} />}
@@ -71,8 +77,7 @@ export function Signup() {
         className="flex flex-col items-center"
         onSubmit={async (event) => {
           event.preventDefault();
-          handleSignup();
-          navigate("/");
+          handleSignup(); // also navigates
         }}>
         <div className="m-2 gap-y-2">
           <InputField
