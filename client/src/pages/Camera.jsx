@@ -47,7 +47,6 @@ export function Camera() {
           }}>
           Submit
         </Button>
-        <Backdoor />
       </div>
     </>
   );

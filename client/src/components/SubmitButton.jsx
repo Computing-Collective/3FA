@@ -4,11 +4,12 @@ import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
 import { InputField } from "./InputField.jsx";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
 const api_endpoint = window.internal.getAPIEndpoint;
-const pico_api_endpoint = ""; // TODO
+const pico_api_endpoint = window.internal.getPicoEndpoint;
 
 /**
  *
@@ -21,11 +22,13 @@ const pico_api_endpoint = ""; // TODO
  * @returns a submit button that sends data to the API
  */
 export function SubmitButton(props) {
-  const navigate = useNavigate(); // TODO change to useNavigation() to provide loading screens (primarily sensor?)
+  const navigate = useNavigate();
   // https://reactrouter.com/en/main/hooks/use-navigation
   const [session, setSession] = useContext(sessionContext); // session_id for admin
   const [auth, setAuth] = useContext(authContext); // auth for access to vault
   const [data, setData] = useState(""); // data sent to API
+
+  const [loading, setLoading] = useState(false); // sets if the button is loading
 
   // prop vars for handleSubmit
   const pico_id = props.pico_id;
@@ -44,20 +47,30 @@ export function SubmitButton(props) {
   }, [auth]);
 
   async function handleSubmit(props) {
+    setLoading(true); // change to loading button
     let apiPayload;
     if (endpoint === "motion_pattern/initialize") {
       // full-capitalize every elem in array
       apiPayload = props.data.map((item) => {
         return item.toUpperCase();
       });
-      // TODO send api request to matt
-      // const response = await fetch(`${pico_api_endpoint}`, {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     pico_id: pico_id,
-      //   }),
-      // });
-      // const json = await response.json();
+      // send pico_id to pico
+      const response = await fetch(`${pico_api_endpoint}/pico_id`, {
+        mode: "no-cors",
+        method: "POST",
+        body: JSON.stringify({
+          pico_id: pico_id,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log(response);
+      console.log(response.status);
+      const json = await response.json();
+      console.log(json);
+      const status = json.status;
+      status === 1
+        ? setError("Success, waiting for your sensor input")
+        : setError("Error please try again");
     } else {
       apiPayload = props.data;
     }
@@ -80,6 +93,8 @@ export function SubmitButton(props) {
     if (endpoint === "email") {
       setSession(json.session_id);
     }
+
+    setLoading(false);
 
     handleNextNavigation({ json, response, setError, setAuth, navigate });
   }
@@ -105,7 +120,17 @@ export function SubmitButton(props) {
               onChange={(e) => setData(e.target.value)}
             />
           ) : null}
-          <Button type="submit">{text}</Button>
+          {/* <Button type="submit">{text}</Button> */}
+          <LoadingButton
+            sx={{
+              ".MuiLoadingButton-loadingIndicator": {
+                color: "white",
+              },
+            }}
+            loading={loading}
+            type="submit">
+            {text}
+          </LoadingButton>
         </div>
       </form>
     </>

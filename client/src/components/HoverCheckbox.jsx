@@ -2,6 +2,12 @@ import React from "react";
 import { Checkbox, FormControl, FormControlLabel } from "@mui/material";
 import { Done } from "@mui/icons-material";
 
+/**
+ *
+ * @param {string} label the label for the checkbox
+ * @param {React.SetStateAction} onChange the onChange handler for the checkbox
+ * @returns an mui checkbox with additional styling and features
+ */
 export function HoverCheckbox({ label, onChange }) {
   return (
     <FormControlLabel
@@ -24,7 +30,6 @@ export function HoverCheckbox({ label, onChange }) {
         "&.MuiFormControlLabel-root": {
           color: "white",
         },
-      }}>
-    </FormControlLabel>
+      }}></FormControlLabel>
   );
 }
