@@ -73,12 +73,6 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
         Upload
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle
-          sx={{
-            color: "white",
-          }}>
-          Upload
-        </DialogTitle>
         <DialogContent>
           <DialogContentText
             sx={{

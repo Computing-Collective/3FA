@@ -61,7 +61,6 @@ export function Signup() {
       body: formData,
     });
     const json = await response.json();
-    console.log(json);
   }
   return (
     <div className="flex flex-col pt-36 text-center">

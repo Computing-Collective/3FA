@@ -37,8 +37,6 @@ export async function logout(auth, setAuth, navigate) {
     }),
     headers: { "Content-Type": "application/json" },
   });
-  const json = await response.json();
-  console.log(json);
   navigate("/");
 }
 
