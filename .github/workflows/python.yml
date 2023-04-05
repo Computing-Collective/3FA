@@ -10,6 +10,54 @@ permissions:
   contents: read
 
 jobs:
+  ml-model:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: machine-learning
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+  
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Machine Learning Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate Machine Learning Model
+        run: python model.py
+        
+      - name: Delete Old Artifacts
+        uses: actions/github-script@v6
+        id: artifact
+        with:
+          script: |
+            const res = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            res.data.artifacts
+              .forEach(({ id }) => {
+                github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: id,
+                })
+              })
+
+      - name: Save Machine Learning Model
+        uses: actions/upload-artifact@v3
+        with:
+          name: ml-model
+          path: machine-learning/model.pth
+          
+          
   build:
     runs-on: ${{ matrix.os }}
     defaults:
