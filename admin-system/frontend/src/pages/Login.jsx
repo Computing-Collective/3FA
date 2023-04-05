@@ -49,40 +49,42 @@ export function Login() {
 
   return (
     <>
-      <h1 className="text-xl">Admin Dashboard</h1>
-      <form
-        onSubmit={async (event) => {
-          event.preventDefault();
-          handleSubmit();
-        }}>
-        <div className="gap-y-2 m-2 flex p-2 flex-col">
-          {error !== "" && (
-            <div className="m-2">
-              <DisplayError text={error} />
-            </div>
-          )}
-          <InputField
-            label="Email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-            type="email"
-          />
-          <InputField
-            placeholder="Enter your password"
-            label="Password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-            type="password"
-          />
-          <Button type="submit">Submit</Button>
-        </div>
-      </form>
-      {import.meta.env.DEV && <Backdoor />}
+      <div className="flex h-full min-h-screen flex-col items-center justify-center p-2">
+        <h1 className="text-xl">Admin Dashboard</h1>
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault();
+            handleSubmit();
+          }}>
+          <div className="gap-y-2 m-2 flex p-2 flex-col">
+            {error !== "" && (
+              <div className="m-2">
+                <DisplayError text={error} />
+              </div>
+            )}
+            <InputField
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              type="email"
+            />
+            <InputField
+              placeholder="Enter your password"
+              label="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              type="password"
+            />
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+        {import.meta.env.DEV && <Backdoor />}
+      </div>
     </>
   );
 }

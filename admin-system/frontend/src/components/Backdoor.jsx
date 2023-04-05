@@ -17,6 +17,12 @@ export function Backdoor() {
           }}>
           Home
         </button>
+        <button
+          onClick={() => {
+            navigate("/error");
+          }}>
+          Error
+        </button>
       </div>
     </>
   );

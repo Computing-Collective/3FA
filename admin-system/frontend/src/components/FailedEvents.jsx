@@ -1,24 +1,55 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
+import { authContext } from "../main";
+import { EventsAccordion } from "./EventsAccordion";
 
-export function FailedEvents() {
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
+
+export function FailedEvents({ session }) {
   const [open, setOpen] = useState(false);
-  const [photo, setPhoto] = useState();
+  const [auth, setAuth] = useContext(authContext);
+  const [events, setEvents] = useState(null);
 
-  const handleClickOpen = () => {
+  const handleClickOpen = async () => {
     setOpen(true);
+    // get data
+    const response = await fetch(
+      `${API_ENDPOINT}/api/dashboard/failed_events/?session_id=${session.session_id}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          auth_session_id: auth,
+        }),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const json = await response.json();
+    if (json.events.length === 0) {
+      setEvents("No failed events");
+    } else {
+      setEvents(mapEvents(json.events));
+    }
   };
 
   const handleClose = () => {
     setOpen(false);
+    setEvents(null);
   };
-
-  useEffect(() => {
-    
-  }, [])
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Button
+        variant="contained"
+        onClick={async () => {
+          await handleClickOpen();
+        }}>
         Show Failed Events
       </Button>
       <Dialog
@@ -26,22 +57,24 @@ export function FailedEvents() {
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description">
-        <DialogTitle id="alert-dialog-title">
-          {"Use Google's location service?"}
-        </DialogTitle>
+        <DialogTitle id="alert-dialog-title">{"Failed Events"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Let Google help apps determine location. This means sending anonymous location
-            data to Google, even when no apps are running.
+            {events !== null ? events : "Loading data..."}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
-            Agree
-          </Button>
+          <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>
     </div>
   );
+}
+
+function mapEvents(events) {
+  const res = [];
+  for (let event of events) {
+    res.push(<EventsAccordion session={event} failedEvents={false} />);
+  }
+  return res;
 }

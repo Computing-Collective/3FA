@@ -24,7 +24,7 @@ export function ErrorPage() {
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex h-full min-h-screen flex-col items-center justify-center p-2">
         {text}
         <Button color="primary" variant="contained" onClick={() => navigate("/")}>
           Go back to home
