@@ -11,9 +11,22 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CPEN-291/P2_L2A_G24.git"
+  },
+  "build": {
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "CPEN-291",
+        "repo": "P2_L2A_G24"
+      }
+    ]
+  },
   "keywords": [],
   "author": {
-    "name": "im-calvin",
+    "name": "Kelvin Wong",
     "email": "kelvinwong0519@gmail.com"
   },
   "license": "MIT",
@@ -26,6 +39,7 @@
     "@electron-forge/maker-squirrel": "^6.1.1",
     "@electron-forge/maker-zip": "^6.1.1",
     "@electron-forge/plugin-webpack": "^6.1.1",
+    "@electron-forge/publisher-github": "^6.1.1",
     "@vercel/webpack-asset-relocator-loader": "1.7.3",
     "autoprefixer": "^10.4.14",
     "babel-loader": "^9.1.2",
