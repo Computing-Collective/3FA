@@ -43,6 +43,7 @@ import socketpool
 import ipaddress
 import microcontroller
 import adafruit_requests
+
 from adafruit_httpserver.server import HTTPServer
 from adafruit_httpserver.request import HTTPRequest
 from adafruit_httpserver.response import HTTPResponse
@@ -51,41 +52,38 @@ from adafruit_httpserver.mime_type import MIMEType
 from adafruit_httpserver.headers import HTTPHeaders
 from adafruit_httpserver.status import CommonHTTPStatus
 
-
 import json
-
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # INIT
 # --------------------------------------------------------------------------------------------------------------------------------------------
 
 # Push button start stop
-start_btn = DigitalInOut(board.GP28)    # upper
+start_btn = DigitalInOut(board.GP28)    # upper: start recording
 start_btn.direction = Direction.INPUT
 start_btn.pull = Pull.DOWN
 
-stop_btn = DigitalInOut(board.GP22)     # lower
+stop_btn = DigitalInOut(board.GP22)     # lower: stop recording
 stop_btn.direction = Direction.INPUT
 stop_btn.pull = Pull.DOWN
 
 # Status LED setup
-ready_led = DigitalInOut(board.GP12)       # left upper
+ready_led = DigitalInOut(board.GP12)       # left upper: ready to record
 ready_led.direction = Direction.OUTPUT
 
-recording_led = DigitalInOut(board.GP11)   # left lower
+recording_led = DigitalInOut(board.GP11)   # left lower: currently recording
 recording_led.direction = Direction.OUTPUT
 
-correct_led = DigitalInOut(board.GP16)    # bottom right
+correct_led = DigitalInOut(board.GP16)    # bottom right: sequence validation status
 correct_led.direction = Direction.OUTPUT
-
 
 #  Onboard LED setup
 onboard_led = DigitalInOut(board.LED)
 onboard_led.direction = Direction.OUTPUT
 
+# Communicate with IMU using I2C communication
 i2c = busio.I2C(scl=board.GP1, sda=board.GP0)
 sensor = LSM6DS33(i2c)
-
 
 # Global parameters
 sensitivity = 4
@@ -111,9 +109,6 @@ wifi.radio.connect(os.getenv('CIRCUITPY_WIFI_SSID'),
                    os.getenv('CIRCUITPY_WIFI_PASSWORD'))
 pool = socketpool.SocketPool(wifi.radio)
 
-# ssl_context = ssl.create_default_context()
-# ssl_context.check_hostname = False
-# ssl_context.load_verify_locations(None)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
 # Set CORS headers
@@ -141,6 +136,7 @@ ping_address = ipaddress.ip_address("8.8.4.4")
 # ADDITIONAL FUNCTIONS
 # --------------------------------------------------------------------------------------------------------------------------------------------
 
+# Function for debugging IMU sensor raw outputs
 def print_all_imu():
     # \x1b[2J clear the screen
     # \x1b[0;0H move the cursor to the top left corner
@@ -177,8 +173,7 @@ def init_hardware():
 
     init = True
 
-
-
+# Status LED output function
 def sequence_correct_led():
     for i in range(5):
         correct_led.value = True
@@ -189,11 +184,13 @@ def sequence_correct_led():
     # Reset the correct LED after blinking
     correct_led.value = False
 
+# Returns the sign of a number
 def sign(num):
     if num == 0:
         return 1
     return num / abs(num)
 
+# Add each of the IMU sensor raw data points to a given list
 def add_all_sensor_data(sequence):
     sequence["AX"].append(round(sensor.acceleration[0], 1))
     sequence["AY"].append(round(sensor.acceleration[1], 1))
@@ -244,10 +241,10 @@ def add_moves_to_sequence(valid_moves):
 def check_sequence(sequence):
     buffer = 0
 
-
     # List of pairs (index, move)
     valid_moves_indexed = []
 
+    # Flip
     # Check that the imu was flipped over at some
     started_up = False
 
@@ -275,7 +272,7 @@ def check_sequence(sequence):
                         buffer = buffer + buffer_offset
                         started_up = False
 
-    # X: check move forward and ignore move backward
+    # X/Right: check move forward and ignore move backward
     # To deal with inverse acceleration feedback, add a buffer whenever the IMU is moved backward
     # For example, moving backward will spike -sensitivitym/s^2 back then sensitivitym/s^2 forward withing a short period after
     # We need to ignore that sensitivitym/s^2 signal since it will detect as forward motion (when really we moved the IMU backward)
@@ -300,7 +297,7 @@ def check_sequence(sequence):
                 buffer = buffer + buffer_offset
                 started_up = False
 
-    # Y
+    # Y/Forward
     for i, y in enumerate(sequence["AY"]):
         # Update buffer
         if buffer < 0:
@@ -316,7 +313,7 @@ def check_sequence(sequence):
                 valid_moves_indexed.append(("FORWARD", i, y))
                 buffer = buffer + buffer_offset
 
-    # Z
+    # Z/Up
     for i, z in enumerate(sequence["AZ"]):
         # Update buffer
         if buffer < 0:
@@ -336,7 +333,7 @@ def check_sequence(sequence):
                 valid_moves_indexed.append(("UP", i, (z - z_offset)))
                 buffer = buffer + buffer_offset
 
-    # -X
+    # -X/Left
     for i, x in enumerate(sequence["AX"]):
         # Update buffer
         if buffer < 0:
@@ -352,7 +349,7 @@ def check_sequence(sequence):
                 valid_moves_indexed.append(("LEFT", i, -1 * x))
                 buffer = buffer + buffer_offset
 
-    # -Y
+    # -Y/Backward
     for i, y in enumerate(sequence["AY"]):
         # Update buffer
         if buffer < 0:
@@ -368,7 +365,7 @@ def check_sequence(sequence):
                 valid_moves_indexed.append(("BACKWARD", i, -1 * y))
                 buffer = buffer + buffer_offset
 
-    # -Z
+    # -Z/Down
     for i, z in enumerate(sequence["AZ"]):
         # Update buffer
         if buffer < 0:
@@ -432,6 +429,7 @@ def check_sequence(sequence):
 
     print("flip filtered:", valid_moves_indexed, "\n\n")
 
+    # Filter neighbouring data points to remove elements surrounding a local maxima
     print("local max filter begin")
     sorted_moves = []
     if len(valid_moves_indexed) > 1:
@@ -467,6 +465,7 @@ def check_sequence(sequence):
     else:
         sorted_moves.append(valid_moves_indexed[0])
         
+    # Final list of tuples in the format of ()"MOVE", time index, forcing strength)
     print("final sequence:", sorted_moves)
     # print()
     final_moves = []
@@ -475,7 +474,6 @@ def check_sequence(sequence):
     print("\n")
 
     return final_moves
-
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # Wireless Functions
@@ -550,6 +548,7 @@ sequence = {"AX" : [],
 
 final_sequence = []
 
+# Main superloop code
 while True:
     if not init:
         init_hardware()
@@ -607,6 +606,7 @@ while True:
 
             add_all_sensor_data(sequence)
 
+            # Print as tuple for Mu plotter formatting
             print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
 
         time.sleep(0.1)
