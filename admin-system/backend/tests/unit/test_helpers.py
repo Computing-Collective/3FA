@@ -1,3 +1,4 @@
+import base64
 import os
 import uuid
 from unittest.mock import patch
@@ -417,7 +418,7 @@ def test_fail_events(test_client, users, user):
     if user[2] is not None:
         path = os.path.abspath(os.path.join(os.curdir, "tests", "data", user[2]))
         with open(path, 'rb') as photo:
-            assert event_dict[0]["photo"] == str(photo.read())
+            assert event_dict[0]["photo"] == base64.b64encode(photo.read()).decode("utf-8")
     else:
         assert event_dict[0]["photo"] == str(str(user[2]))
 
