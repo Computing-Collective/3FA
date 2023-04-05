@@ -51,7 +51,7 @@ def login():
 
     if auth_session is None:
         return jsonify(msg="No active authentication session found. Please first login on the client app.",
-                       success=1), 401
+                       success=0), 401
 
     return jsonify(msg="Login successful.", success=1, auth_session_id=auth_session.session_id), 200
 
