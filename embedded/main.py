@@ -48,6 +48,9 @@ from adafruit_httpserver.request import HTTPRequest
 from adafruit_httpserver.response import HTTPResponse
 from adafruit_httpserver.methods import HTTPMethod
 from adafruit_httpserver.mime_type import MIMEType
+from adafruit_httpserver.headers import HTTPHeaders
+from adafruit_httpserver.status import CommonHTTPStatus
+
 
 import json
 
@@ -112,6 +115,11 @@ pool = socketpool.SocketPool(wifi.radio)
 # ssl_context.check_hostname = False
 # ssl_context.load_verify_locations(None)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
+
+headers = HTTPHeaders()
+headers.setdefault("Access-Control-Allow-Headers", "*")
+headers.setdefault("Access-Control-Allow-Origin", "*")
+headers.setdefault("Access-Control-Allow-Methods", "*")
 
 server = HTTPServer(pool)
 
@@ -473,7 +481,7 @@ def check_sequence(sequence):
         print("\tremoving", valid_moves_indexed[index])
         del valid_moves_indexed[index]
 
-    print("left/right filtered:", valid_moves_indexed, "\n\n")
+    print("left/right filtered:", valid_moves_indexed, "\n\n") 
 
 
 
@@ -490,6 +498,13 @@ def check_sequence(sequence):
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # Wireless Functions
 # --------------------------------------------------------------------------------------------------------------------------------------------
+@server.route("/pico_id", method=HTTPMethod.OPTIONS)
+def options_handler(request: HTTPRequest):
+    print("Options request received")
+    print("Request headers: ", request.headers)
+    response = HTTPResponse(request, status=CommonHTTPStatus.OK_200, headers=headers)
+    with response:
+        response.send(json.dumps({"status": "ok"}), content_type="application/json")
 
 @server.route("/pico_id", method=HTTPMethod.POST)
 # Route for uploading a pico_id
@@ -499,6 +514,7 @@ def set_pico_id(request: HTTPRequest):
     #  Get the raw text
     raw_text = request.raw_request.decode("utf-8")
     print("Raw Text received: ", raw_text)
+    print("Request headers: ", request.headers)
 
     # Get "pico_id" value out of the request and save it to the pico_id variable
 
@@ -514,10 +530,11 @@ def set_pico_id(request: HTTPRequest):
     print("Pico ID received: " + pico_id)
 
     output = {
-        "status": 0,
+        "success": 1,
         "msg": "Pico ID received successfully"
     }
-    with HTTPResponse(request) as response:
+    
+    with HTTPResponse(request, headers=headers) as response:
         response.send(json.dumps(output),  content_type="application/json")
 
 def transmit_wireless_message(sequence):
