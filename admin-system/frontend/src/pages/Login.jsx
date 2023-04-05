@@ -83,7 +83,6 @@ export function Login() {
             <Button type="submit">Submit</Button>
           </div>
         </form>
-        {import.meta.env.DEV && <Backdoor />}
       </div>
     </>
   );

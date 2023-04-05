@@ -1,5 +1,7 @@
 import React from "react";
 
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
+
 /**
  *
  * @param {string} auth the auth token
@@ -7,8 +9,8 @@ import React from "react";
  * @param {function} navigate used to navigate the browser
  */
 export async function logout(auth, setAuth, navigate) {
-  setAuth(null);
-  const url = `${api_endpoint}/api/client/logout`;
+  setAuth(undefined);
+  const url = `${API_ENDPOINT}/api/client/logout`;
 
   await fetch(url, {
     method: "POST",

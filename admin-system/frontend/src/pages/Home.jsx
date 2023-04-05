@@ -69,7 +69,6 @@ export function Home() {
           {/* render the accordions */}
           {accordions !== null ? accordions : "Loading data..."}
         </div>
-        {import.meta.env.DEV && <Backdoor />}
       </div>
     </>
   );

@@ -35,6 +35,11 @@ export function RequireAuth({ children }) {
   return authed.current === true ? children : navigate("/");
 }
 
+/**
+ *
+ * @param {string} auth the auth session id to authenticate with
+ * @returns {boolean} if the auth session token was successfully authenticated with the backend
+ */
 async function login(auth) {
   const endpoint = "validate";
   const url = `${API_ENDPOINT}/api/client/${endpoint}/`;

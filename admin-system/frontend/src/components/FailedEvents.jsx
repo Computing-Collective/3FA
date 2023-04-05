@@ -12,6 +12,11 @@ import { EventsAccordion } from "./EventsAccordion";
 
 const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
 
+/**
+ *
+ * @param {object} session the session to display failed events from (follows format as specified in EventsAccordion)
+ * @returns failed events accordion fetched from the admin backend
+ */
 export function FailedEvents({ session }) {
   const [open, setOpen] = useState(false);
   const [auth, setAuth] = useContext(authContext);

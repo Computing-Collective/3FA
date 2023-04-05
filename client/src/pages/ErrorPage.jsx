@@ -2,6 +2,10 @@ import { Button } from "@mui/material";
 import React from "react";
 import { useNavigate, useRouteError, isRouteErrorResponse } from "react-router-dom";
 
+/**
+ *
+ * @returns the error page which redirects the user to home
+ */
 export function ErrorPage() {
   let text = "Something went wrong";
   const navigate = useNavigate();

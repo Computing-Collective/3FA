@@ -16,6 +16,34 @@ import _ from "underscore";
 import { FailedEvents } from "../components/FailedEvents.jsx";
 import fs from "vite-plugin-fs/browser";
 
+/**
+ * 
+ * @param {array} session the session returned from the admin backend follows this format:
+    "sessions": [
+        {
+            "auth_stages": "{\"password\": true, \"motion_pattern\": true, \"face_recognition\": true}",
+            "date": "29/03/2023 23:18:10",
+            "login_photo": "b''",
+            "motion_added_sequence": "[\"UP\", \"DOWN\", \"RIGHT\"]",
+            "motion_completed": true,
+            "session_id": "72fe10be-dead-4011-b61b-d44b1496974a",
+            "user_email": "user@email.com",
+            "user_id": "693e2954-6eb8-4ec6-8906-7b984e06e32e"
+        },
+        {
+            "auth_stages": "{\"password\": true, \"motion_pattern\": true, \"face_recognition\": true}",
+            "date": "29/03/2023 22:14:11",
+            "login_photo": "b''",
+            "motion_added_sequence": "[\"UP\", \"DOWN\", \"RIGHT\"]",
+            "motion_completed": true,
+            "session_id": "868643d8-cc42-425b-92dc-a17ad11ffd37",
+            "user_email": "user@email.com",
+            "user_id": "693e2954-6eb8-4ec6-8906-7b984e06e32e"
+        },
+      ]
+  * @param {boolean} failedEvents whether to display the failed events button or not
+ * @returns an mui accordion for events which displays information
+ */
 export function EventsAccordion({ session, failedEvents }) {
   const auth_methods = JSON.parse(session.auth_stages);
   const all_true = _.values(auth_methods).every((elem) => elem === true);
@@ -79,6 +107,11 @@ function binaryToBase64(binary) {
   return dataURL;
 }
 
+/**
+ *
+ * @param {string} method the method to map
+ * @returns the string with _'s replaced with ' ' and the first letter capitalized
+ */
 function mapMethod(method) {
   const no_space = method.replace("_", " ");
   const cap = no_space[0].toUpperCase() + no_space.substr(1);
