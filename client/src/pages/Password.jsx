@@ -10,13 +10,7 @@ import { SubmitButton } from "../components/SubmitButton.jsx";
  * @returns the password page
  */
 export function Password() {
-  const [text, setText] = useState("");
   const [error, setError] = useState("");
-  const submitButton = document.getElementById("submitButton");
-
-  useEffect(() => {
-    setText(""); // clear text on input on submit
-  }, [submitButton]);
 
   return (
     <>

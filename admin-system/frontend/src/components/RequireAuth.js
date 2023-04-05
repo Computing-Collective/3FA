@@ -28,12 +28,10 @@ export function RequireAuth({ children }) {
     getAuthedStatus();
   }, []);
 
-  //
   if (!authChecked) {
     return null;
   }
 
-  authed.current = true;
   return authed.current === true ? children : navigate("/");
 }
 

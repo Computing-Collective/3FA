@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export function AlertDialog() {
+export function FailedEvents() {
   const [open, setOpen] = useState(false);
   const [photo, setPhoto] = useState();
 
