@@ -36,7 +36,7 @@ export function SubmitButton(props) {
   const text = props.text;
 
   const setSeverity = props.setSeverity;
-  
+
   // if we want an input field (email or password)
   const inputField = props.endpoint === "email" || props.endpoint === "password";
 

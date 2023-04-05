@@ -28,7 +28,9 @@ export function Camera() {
   return (
     <>
       <div className="wid flex w-2/3 flex-col items-center pt-8 text-center">
-        {error !== "" && <DisplayError text={error} severity={severity}/>}
+        {error !== "" && (
+          <DisplayError text={error} setText={setError} severity={severity} />
+        )}
         <h1 className="m-2">Smile for the camera</h1>
         <Video
           setText={setError}
@@ -43,7 +45,14 @@ export function Camera() {
           endpoint={"camera"}
           onClick={(event) => {
             event.preventDefault();
-            handleCameraSubmit({ data, session, setError, setAuth, navigate, setSeverity });
+            handleCameraSubmit({
+              data,
+              session,
+              setError,
+              setAuth,
+              navigate,
+              setSeverity,
+            });
           }}>
           Submit
         </Button>

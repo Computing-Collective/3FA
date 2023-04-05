@@ -35,6 +35,7 @@ export function Sensor() {
   const [moves, setMoves] = useState(
     _.sample(possMoves, 2) // initialize sensor with randomized moves
   );
+
   // generate random pico_id by paging API
   const [pico_id, setPico_id] = useState();
   // text for displaying errors
@@ -57,7 +58,12 @@ export function Sensor() {
     return (
       <>
         <div className="self-center justify-self-end">{moves[index]}</div>
-        <img alt={moves[index]} src={_.get(picObj, moves[index])} width="35" height="35" />
+        <img
+          alt={moves[index]}
+          src={_.get(picObj, moves[index])}
+          width="35"
+          height="35"
+        />
       </>
     );
   }
@@ -70,12 +76,17 @@ export function Sensor() {
             text={error}
             refreshButton={severity !== "info"}
             severity={severity}
+            snackbar={severity === "info"}
+            setText={setError}
           />
         )) ||
           (pico_id === null && (
             <DisplayError
               text="Unable to connect your motion sensor"
               refreshButton={severity !== "info"}
+              severity={severity}
+              snackbar={severity === "info"}
+              setText={setError}
             />
           ))}
         <h1>Move your sensor!</h1>

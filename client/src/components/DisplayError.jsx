@@ -1,6 +1,7 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { Alert, Button, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function Wrapper(props) {
   if (props.showModal) {
@@ -18,34 +19,42 @@ function Wrapper(props) {
  * @param {boolean} props.success - whether to display error icon or success
  * @param {boolean} props.snackbar - whether to display as a snackbar or not
  */
-export function DisplayError({ refreshButton, severity, text, snackbar }) {
-  const [open, setOpen] = React.useState(true);
+export function DisplayError({ refreshButton, severity, text, setText, snackbar }) {
+  const [open, setOpen] = useState(true);
 
   const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
-
+    setText("");
     setOpen(false);
   };
 
   if (snackbar === undefined) snackbar = false;
 
-  const ConditionalWrapper = ({condition, wrapper, children}) => condition ? wrapper(children) : <>{children}</>;
+  const ConditionalWrapper = ({ condition, wrapper, children }) =>
+    condition ? wrapper(children) : <>{children}</>;
 
   return (
     <>
       <ConditionalWrapper
         condition={snackbar}
-        wrapper={children => <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>{children}</Snackbar>}
-      >
+        wrapper={(children) => (
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            open={open}
+            autoHideDuration={6000}
+            onClose={handleClose}>
+            {children}
+          </Snackbar>
+        )}>
         <Alert
           sx={{
             display: "flex",
             alignItems: "center",
             flexWrap: "wrap",
           }}
-          severity={severity ? severity : "error"}
+          severity={severity ? severity : "error"} // set default severity to error
           action={
             refreshButton && (
               <Button

@@ -1,6 +1,6 @@
 import { TextField, InputAdornment, IconButton } from "@mui/material";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import React, { useState } from "react";
 
 /**
@@ -47,21 +47,20 @@ export function InputField({ autoFocus, placeholder, type, onChange, value }) {
         }}
         onChange={onChange}
         InputProps={{
-          endAdornment: (
-            type === "password" ? 
-            (
+          endAdornment:
+            type === "password" ? (
               <InputAdornment position="end">
                 <IconButton
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
                   onMouseDown={handleMouseDownPassword}
-                  sx={{ color: "white" }}
-                >
+                  sx={{
+                    color: "white",
+                  }}>
                   {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
               </InputAdornment>
-            ) : null
-          )
+            ) : null,
         }}
       />
     </>

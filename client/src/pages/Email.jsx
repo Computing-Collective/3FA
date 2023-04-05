@@ -4,6 +4,7 @@ import { SubmitButton } from "../components/SubmitButton.jsx";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { HomeButton } from "../components/HomeButton.jsx";
+import { useEffect } from "react";
 
 /**
  *
@@ -11,14 +12,22 @@ import { HomeButton } from "../components/HomeButton.jsx";
  */
 export function Email() {
   const [error, setError] = useState("");
-  const [severity, setSeverity] = useState('error');
+  const [severity, setSeverity] = useState("error");
 
   return (
     <>
       <HomeButton />
-      <div className="m-2 flex w-full max-w-md flex-col items-center  text-center">
+      <div className="m-2 flex w-full max-w-md flex-col items-center text-center">
         <h1>Log in or create a new account to access your secure vault.</h1>
-        {error !== "" && <DisplayError className="text-center" text={error} severity={severity} snackbar={true} />}
+        {error !== "" && (
+          <DisplayError
+            className="text-center"
+            text={error}
+            setText={setError}
+            severity={severity}
+            snackbar={true}
+          />
+        )}
         <SubmitButton
           placeholder="Email"
           type={"email"}

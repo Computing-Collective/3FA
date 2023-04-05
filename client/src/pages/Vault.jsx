@@ -40,7 +40,11 @@ export function Vault() {
       {/* hardcoded code hf */}
       <LogoutButton />
       {error !== "" && (
-        <DisplayError text={error} severity={success ? "success" : "error"} />
+        <DisplayError
+          text={error}
+          severity={success ? "success" : "error"}
+          snackbar={true}
+        />
       )}
       <div className="m-2 grid grid-cols-4 gap-3">
         <div className="col-span-3">
@@ -94,7 +98,11 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
         </div>
         <div className="m-2 grid grid-rows-2 gap-2 text-sm">
           <Event />
-          {date.toDateString() + ", " + date.toTimeString().split(":")[0] + ":" + date.toTimeString().split(":")[0]}
+          {date.toDateString() +
+            ", " +
+            date.toTimeString().split(":")[0] +
+            ":" +
+            date.toTimeString().split(":")[0]}
           <div className="col-span-2">{humanFileSize(size)}</div>
         </div>
         <div className="flex-grow" />
@@ -137,7 +145,7 @@ async function handleDownload(id, auth, fileName) {
   });
   const file_blob = await response.blob();
 
-  const mime = require('mime')
+  const mime = require("mime");
   const extension = mime.getExtension(file_blob.type);
 
   const file = await file_blob.arrayBuffer();
@@ -145,10 +153,13 @@ async function handleDownload(id, auth, fileName) {
   let saveName = fileName;
   let fileNameSplit = fileName.split(".");
 
-  if (fileNameSplit.length === 1 || mime.getType(fileNameSplit[fileNameSplit.length - 1]) === null) {
+  if (
+    fileNameSplit.length === 1 ||
+    mime.getType(fileNameSplit[fileNameSplit.length - 1]) === null
+  ) {
     saveName += "." + extension;
   }
-  
+
   window.internal.saveFile(file, path, saveName);
 }
 

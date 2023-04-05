@@ -79,7 +79,7 @@ export function Signup() {
           event.preventDefault();
           await handleSignup(); // also navigates
         }}>
-        <div className="m-2 gap-y-2">
+        <div className="m-2 w-7/10 gap-y-2">
           <InputField
             autoFocus
             placeholder="Email"
@@ -90,7 +90,7 @@ export function Signup() {
             type="email"
           />
         </div>
-        <div className="m-2 gap-y-2">
+        <div className="m-2 w-3/5 gap-y-2">
           <InputField
             placeholder="Password"
             value={password}
