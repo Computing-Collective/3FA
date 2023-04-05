@@ -10,42 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  ml-model:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: admin-system/backend
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-  
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      
-      - name: Install Machine Learning Dependencies
-        run: pip install -r requirements.txt
-        working-directory: machine-learning
-
-      - name: Generate Machine Learning Model
-        run: |
-          python model.py
-          mkdir ../admin-system/backend/instance/
-          mv model.pth ../admin-system/backend/instance/model.pth
-        working-directory: machine-learning 
-
-      - name: Save Machine Learning Model
-        uses: actions/upload-artifact@v3
-        with:
-          name: ml-model
-          path: admin-system/backend/instance/model.pth
-
   build:
     runs-on: ${{ matrix.os }}
-    needs: ml-model
     defaults:
       run:
         working-directory: admin-system/backend
@@ -82,7 +48,6 @@ jobs:
 
   build-docker:
     runs-on: ubuntu-latest
-    needs: ml-model
     defaults:
       run:
         working-directory: admin-system/backend
