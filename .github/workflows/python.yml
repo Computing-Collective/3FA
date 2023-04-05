@@ -57,6 +57,7 @@ jobs:
         with:
           name: ml-model
           path: machine-learning/model.pth
+          retention-days: 1
           
           
   build:
