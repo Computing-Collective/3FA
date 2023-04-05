@@ -106,7 +106,7 @@ export function SubmitButton(props) {
       setSession(json.session_id);
     }
 
-    setLoading(false);
+    endpoint === "motion_pattern/initialize" ? null : setLoading(false);
     setData("");
 
     handleNextNavigation({ json, response, setError, setAuth, navigate, setSeverity });
