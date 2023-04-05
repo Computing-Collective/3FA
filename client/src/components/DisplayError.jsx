@@ -2,6 +2,13 @@ import * as React from "react";
 import { Alert, Button, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
+function Wrapper(props) {
+  if (props.showModal) {
+    return <Modal>{props.children}</Modal>;
+  }
+  return props.children;
+}
+
 /**
  *
  * @param {object} props
@@ -12,7 +19,7 @@ import { useNavigate } from "react-router-dom";
  * @param {boolean} props.snackbar - whether to display as a snackbar or not
  */
 export function DisplayError({ refreshButton, severity, text, snackbar }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -24,56 +31,34 @@ export function DisplayError({ refreshButton, severity, text, snackbar }) {
 
   if (snackbar === undefined) snackbar = false;
 
+  const ConditionalWrapper = ({condition, wrapper, children}) => condition ? wrapper(children) : <>{children}</>;
+
   return (
     <>
-      {snackbar ? (
-        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-          <Alert
-            onClose={handleClose}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-            severity={severity ? severity : "error"}
-            action={
-              refreshButton && (
-                <Button
-                  color="secondary"
-                  variant="text"
-                  onClick={(e) => window.location.reload()}>
-                  Try again
-                </Button>
-              )
-            }>
-            {text}
-            {/* load refresh button if props.refreshButton === true */}
-            <div className=""></div>
-          </Alert>
-        </Snackbar>
-      ) : (
+      <ConditionalWrapper
+        condition={snackbar}
+        wrapper={children => <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>{children}</Snackbar>}
+      >
         <Alert
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-        severity={severity ? severity : "error"}
-        action={
-          refreshButton && (
-            <Button
-              color="secondary"
-              variant="text"
-              onClick={(e) => window.location.reload()}>
-              Try again
-            </Button>
-          )
-        }>
-        {text}
-        {/* load refresh button if props.refreshButton === true */}
-        <div className=""></div>
-      </Alert>
-      )}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+          severity={severity ? severity : "error"}
+          action={
+            refreshButton && (
+              <Button
+                color="secondary"
+                variant="text"
+                onClick={(e) => window.location.reload()}>
+                Try again
+              </Button>
+            )
+          }>
+          {text}
+        </Alert>
+      </ConditionalWrapper>
     </>
   );
 }
