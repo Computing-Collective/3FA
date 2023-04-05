@@ -341,7 +341,8 @@ def check_sequence(sequence):
     # --------------------------------------------------------------------------------------------------------------------------------------------
     # SEQUENCE PROCESSING
     # --------------------------------------------------------------------------------------------------------------------------------------------
-
+    if len(valid_moves_indexed) == 0:
+        return valid_moves_indexed
     # Processing sequence
     # Sort based on time -> filter moves caused by feedback -> put in list of moves
 
