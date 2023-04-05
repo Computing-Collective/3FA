@@ -16,6 +16,7 @@ export function Camera() {
   const [data, setData] = useState(""); // camera input (base64?)
   const [auth, setAuth] = useContext(authContext);
   const [session, setSession] = useContext(sessionContext);
+  const [severity, setSeverity] = useState("error"); // severity of the alert message [error, success]
   const navigate = useNavigate();
 
   const { initNav } = useNavToVault(auth);
@@ -27,7 +28,7 @@ export function Camera() {
   return (
     <>
       <div className="wid flex w-2/3 flex-col items-center pt-8 text-center">
-        {error !== "" && <DisplayError text={error} />}
+        {error !== "" && <DisplayError text={error} severity={severity}/>}
         <h1 className="m-2">Smile for the camera</h1>
         <Video
           setText={setError}
@@ -42,7 +43,7 @@ export function Camera() {
           endpoint={"camera"}
           onClick={(event) => {
             event.preventDefault();
-            handleCameraSubmit({ data, session, setError, setAuth, navigate });
+            handleCameraSubmit({ data, session, setError, setAuth, navigate, setSeverity });
           }}>
           Submit
         </Button>

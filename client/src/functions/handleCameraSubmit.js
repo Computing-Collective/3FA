@@ -6,7 +6,7 @@ const api_endpoint = window.internal.getAPIEndpoint;
 /**
  * handler for submit button on camera page, sends API request to admin
  */
-export async function handleCameraSubmit({ data, session, setError, setAuth, navigate }) {
+export async function handleCameraSubmit({ data, session, setError, setAuth, navigate, setSeverity }) {
   // the endpoint for face
   const endpoint = "face_recognition";
   // form because need to include img
@@ -24,5 +24,5 @@ export async function handleCameraSubmit({ data, session, setError, setAuth, nav
     body: formData,
   });
   const json = await response.json();
-  handleNextNavigation({ json, response, setError, setAuth, navigate });
+  handleNextNavigation({ json, response, setError, setAuth, navigate, setSeverity });
 }

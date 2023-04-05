@@ -94,7 +94,7 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
         </div>
         <div className="m-2 grid grid-rows-2 gap-2 text-sm">
           <Event />
-          {date}
+          {date.toDateString() + ", " + date.toTimeString().split(":")[0] + ":" + date.toTimeString().split(":")[0]}
           <div className="col-span-2">{humanFileSize(size)}</div>
         </div>
         <div className="flex-grow" />
@@ -216,7 +216,7 @@ function mapPreview(json, auth, setSuccess, setError, setRefresh) {
       <Preview
         key={file.id}
         fileName={file.file_name}
-        date={file.date}
+        date={new Date(file.date)}
         size={file.size}
         id={file.id}
         auth={auth}
