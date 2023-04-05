@@ -1,11 +1,12 @@
 import React from "react";
 
-export function handleNextNavigation({ json, response, setError, setAuth, navigate }) {
+export function handleNextNavigation({ json, response, setError, setAuth, navigate, setSeverity }) {
   const next = json.next;
   const success = json.success;
   // retry api request
   if (success === 0 && next === undefined) {
     setError(json.msg); // change text for frontend
+    setSeverity("error");
     return;
   }
 

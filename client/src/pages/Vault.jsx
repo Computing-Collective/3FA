@@ -1,11 +1,8 @@
 import * as React from "react";
 import { useContext, useState } from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
-import { logout } from "../functions/auth.js";
-import { Backdoor } from "./Backdoor.jsx";
 import { Button, Typography } from "@mui/material";
-import { Event, LocalConvenienceStoreOutlined } from "@mui/icons-material";
+import { Event } from "@mui/icons-material";
 import { UploadButton } from "../components/UploadButton.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { useEffect } from "react";
@@ -17,7 +14,6 @@ const api_endpoint = window.internal.getAPIEndpoint;
  * @returns the vault page
  */
 export function Vault() {
-  const navigate = useNavigate();
   const [auth, setAuth] = useContext(authContext);
   // the error text
   const [error, setError] = useState("");
@@ -44,7 +40,11 @@ export function Vault() {
       {/* hardcoded code hf */}
       <LogoutButton />
       {error !== "" && (
-        <DisplayError text={error} severity={success ? "success" : "error"} />
+        <DisplayError
+          text={error}
+          severity={success ? "success" : "error"}
+          snackbar={true}
+        />
       )}
       <div className="m-2 grid grid-cols-4 gap-3">
         <div className="col-span-3">
@@ -98,7 +98,11 @@ function Preview({ fileName, date, size, id, auth, setSuccess, setError, setRefr
         </div>
         <div className="m-2 grid grid-rows-2 gap-2 text-sm">
           <Event />
-          {date}
+          {date.toDateString() +
+            ", " +
+            date.toTimeString().split(":")[0] +
+            ":" +
+            date.toTimeString().split(":")[0]}
           <div className="col-span-2">{humanFileSize(size)}</div>
         </div>
         <div className="flex-grow" />
@@ -141,12 +145,22 @@ async function handleDownload(id, auth, fileName) {
   });
   const file_blob = await response.blob();
 
-  const mime = require('mime')
+  const mime = require("mime");
   const extension = mime.getExtension(file_blob.type);
 
   const file = await file_blob.arrayBuffer();
-  
-  window.internal.saveFile(file, path, fileName + "." + extension);
+
+  let saveName = fileName;
+  let fileNameSplit = fileName.split(".");
+
+  if (
+    fileNameSplit.length === 1 ||
+    mime.getType(fileNameSplit[fileNameSplit.length - 1]) === null
+  ) {
+    saveName += "." + extension;
+  }
+
+  window.internal.saveFile(file, path, saveName);
 }
 
 /**
@@ -213,7 +227,7 @@ function mapPreview(json, auth, setSuccess, setError, setRefresh) {
       <Preview
         key={file.id}
         fileName={file.file_name}
-        date={file.date}
+        date={new Date(file.date)}
         size={file.size}
         id={file.id}
         auth={auth}

@@ -34,7 +34,7 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
     setFilePath("");
     setFileName("");
     setFile(null);
-    // tell the frontend to refetch the previews
+    // tell the frontend to re-fetch the previews
     setRefresh(filePath);
   };
 
@@ -53,7 +53,6 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
       body: formData,
     });
     const json = await response.json();
-    console.log(json);
     setError(json.msg);
     setSuccess(json.success);
     handleClose();
@@ -124,9 +123,9 @@ export function UploadButton({ auth, setError, setRefresh, setSuccess }) {
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button
-            disabled={filePath === "" ? true : false}
+            disabled={filePath === ""}
             onClick={async () => {
-              handleUpload();
+              await handleUpload();
             }}>
             Upload
           </Button>

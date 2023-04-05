@@ -1,7 +1,5 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Backdoor } from "./Backdoor.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
@@ -11,18 +9,27 @@ import { SubmitButton } from "../components/SubmitButton.jsx";
  */
 export function Password() {
   const [error, setError] = useState("");
+  const [severity, setSeverity] = useState("error");
 
   return (
     <>
       <div className="flex flex-col text-center">
         <h1>Enter your password</h1>
-        {error !== "" && <DisplayError text={error} />}
+        {error !== "" && (
+          <DisplayError
+            text={error}
+            severity={severity}
+            snackbar={true}
+            setText={setError}
+          />
+        )}
         <SubmitButton
           text="Submit"
           placeholder="Password"
           endpoint={"password"}
           type={"password"}
           setError={setError}
+          setSeverity={setSeverity}
         />
       </div>
     </>

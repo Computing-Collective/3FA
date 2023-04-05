@@ -1,24 +1,20 @@
 import * as React from "react";
 import { useState, createContext, useEffect } from "react";
-import * as ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 import { reactLocalStorage } from "reactjs-localstorage";
 import { purple } from "@mui/material/colors";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
-  Routes,
   Route,
-  Router,
-  HashRouter,
   createHashRouter,
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
+import { RequireAuth } from "./components/RequireAuth.js";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
 import { Password } from "./pages/Password.jsx";
 import { Email } from "./pages/Email.jsx";
 import { Vault } from "./pages/Vault.jsx";
-import { RequireAuth } from "./components/RequireAuth.js";
 import { Sensor } from "./pages/Sensor.jsx";
 import { Camera } from "./pages/Camera.jsx";
 import { Signup } from "./pages/Signup.jsx";

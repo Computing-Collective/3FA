@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useLocation, useNavigate, useNavigation } from "react-router-dom";
-import { Backdoor } from "./Backdoor.jsx";
+import { useNavigate } from "react-router-dom";
 import { sessionContext, authContext } from "../app.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { Video } from "../components/Video.jsx";
@@ -17,9 +16,10 @@ export function Camera() {
   const [data, setData] = useState(""); // camera input (base64?)
   const [auth, setAuth] = useContext(authContext);
   const [session, setSession] = useContext(sessionContext);
+  const [severity, setSeverity] = useState("error"); // severity of the alert message [error, success]
   const navigate = useNavigate();
 
-  const { initNav } = useNavToVault();
+  const { initNav } = useNavToVault(auth);
 
   useEffect(() => {
     initNav();
@@ -27,8 +27,10 @@ export function Camera() {
 
   return (
     <>
-      <div className="flex w-2/3 flex-col items-center text-center">
-        {error !== "" && <DisplayError text={error} />}
+      <div className="wid flex w-2/3 flex-col items-center pt-8 text-center">
+        {error !== "" && (
+          <DisplayError text={error} setText={setError} severity={severity} snackbar={true} />
+        )}
         <h1 className="m-2">Smile for the camera</h1>
         <Video
           setText={setError}
@@ -43,7 +45,14 @@ export function Camera() {
           endpoint={"camera"}
           onClick={(event) => {
             event.preventDefault();
-            handleCameraSubmit({ data, session, setError, setAuth, navigate });
+            handleCameraSubmit({
+              data,
+              session,
+              setError,
+              setAuth,
+              navigate,
+              setSeverity,
+            });
           }}>
           Submit
         </Button>

@@ -22,8 +22,9 @@ export async function login(auth) {
 
 /**
  * deactivates your auth key and navigates you to '/' (home)
- * @param {} auth auth key to deactivate
+ * @param {*} auth auth key to deactivate
  * @param {*} setAuth function required to rm
+ * @param {*} navigate used to navigate to pages
  */
 export async function logout(auth, setAuth, navigate) {
   setAuth(null);

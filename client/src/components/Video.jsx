@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Measure from "react-measure";
 import { useUserMedia } from "../hooks/useUserMedia";
 import styled, { css, keyframes } from "styled-components";
@@ -77,7 +77,7 @@ export function Video({ setText, onCapture, onClear }) {
     onClear();
   }
 
-  // autoplays the camera footage
+  // autoplay the camera footage
   function handleCanPlay() {
     setIsVideoPlaying(true);
     videoRef.current.play();
@@ -90,7 +90,7 @@ export function Video({ setText, onCapture, onClear }) {
           <>
             <Container
               ref={measureRef}
-              maxWidth={videoRef.current && videoRef.current.videoHeight} // by removing height, we allow the video to finish renderering and be cropped 1:1
+              maxWidth={videoRef.current && videoRef.current.videoHeight} // by removing height, we allow the video to finish rendering and be cropped 1:1
               style={{
                 height: `${container.height}px`,
               }}>

@@ -12,7 +12,6 @@ import flip from "../../public/sensor/flip.png";
 import { getUniquePicoID } from "../functions/auth.js";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
-import { LoadingButton } from "@mui/lab";
 import { useEffect } from "react";
 
 // the possible moves that the pico can use
@@ -37,6 +36,7 @@ export function Sensor() {
   const [moves, setMoves] = useState(
     _.sample(possMoves, 2) // initialize sensor with randomized moves
   );
+
   // generate random pico_id by paging API
   const [pico_id, setPico_id] = useState();
   // text for displaying errors
@@ -59,7 +59,12 @@ export function Sensor() {
     return (
       <>
         <div className="self-center justify-self-end">{moves[index]}</div>
-        <img src={_.get(picObj, moves[index])} width="35" height="35" />
+        <img
+          alt={moves[index]}
+          src={_.get(picObj, moves[index])}
+          width="35"
+          height="35"
+        />
       </>
     );
   }
@@ -70,14 +75,19 @@ export function Sensor() {
         {(error !== "" && (
           <DisplayError
             text={error}
-            refreshButton={severity === "info" ? false : true}
+            refreshButton={severity !== "info"}
             severity={severity}
+            snackbar={severity === "info"}
+            setText={setError}
           />
         )) ||
           (pico_id === null && (
             <DisplayError
               text="Unable to connect your motion sensor"
-              refreshButton={severity === "info" ? false : true}
+              refreshButton={severity !== "info"}
+              severity={severity}
+              snackbar={severity === "info"}
+              setText={setError}
             />
           ))}
         <h1>Move your sensor!</h1>

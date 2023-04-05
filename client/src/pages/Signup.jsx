@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Backdoor } from "./Backdoor.jsx";
 import { Select, MenuItem, Button, IconButton, Typography } from "@mui/material";
 import { InputField } from "../components/InputField.jsx";
@@ -61,7 +61,14 @@ export function Signup() {
       body: formData,
     });
     const json = await response.json();
+    if (json.success === 0) {
+      setError(json.msg);
+      
+    } else {
+      navigate("/");
+    }
   }
+
   return (
     <div className="flex flex-col pt-36 text-center">
       {error !== "" && <DisplayError text={error} />}
@@ -70,10 +77,9 @@ export function Signup() {
         className="flex flex-col items-center"
         onSubmit={async (event) => {
           event.preventDefault();
-          handleSignup();
-          navigate("/");
+          await handleSignup(); // also navigates
         }}>
-        <div className="m-2 gap-y-2">
+        <div className="m-2 w-7/10 gap-y-2">
           <InputField
             autoFocus
             placeholder="Email"
@@ -84,7 +90,7 @@ export function Signup() {
             type="email"
           />
         </div>
-        <div className="m-2 gap-y-2">
+        <div className="m-2 w-3/5 gap-y-2">
           <InputField
             placeholder="Password"
             value={password}
@@ -196,7 +202,7 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
  *  id: crypto.randomUUID(),
  *  direction: "UP" | "DOWN" | "LEFT" | "RIGHT" | "FORWARD" | "BACKWARD" | "FLIP"
  * }
- * @param {function} setPatterns the state updator for the state above ^
+ * @param {function} setPatterns the state updater for the state above ^
  * @returns a list of dropdowns for the user to select their motion pattern
  */
 function MotionPattern({ patterns, setPatterns }) {

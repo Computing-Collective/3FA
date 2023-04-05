@@ -1,10 +1,9 @@
 import * as React from "react";
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
 import { InputField } from "./InputField.jsx";
-import { Button, CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
@@ -62,7 +61,6 @@ export function SubmitButton(props) {
       let response;
       try {
         response = await fetch(`${pico_api_endpoint}/pico_id`, {
-          mode: "no-cors",
           method: "POST",
           body: JSON.stringify({
             pico_id: pico_id,
@@ -74,12 +72,11 @@ export function SubmitButton(props) {
         setError("Error please try again");
         setSeverity("error");
       }
-      console.log(response);
-      console.log(response.status);
+
       const json = await response.json();
-      console.log(json);
-      const status = json.status;
-      if (status === 1) {
+
+      const success = json.success;
+      if (success === 1) {
         setError("Success, waiting for your sensor input");
         setSeverity("success");
       } else {
@@ -109,9 +106,10 @@ export function SubmitButton(props) {
       setSession(json.session_id);
     }
 
-    setLoading(false);
+    endpoint === "motion_pattern/initialize" ? null : setLoading(false);
+    setData("");
 
-    handleNextNavigation({ json, response, setError, setAuth, navigate });
+    handleNextNavigation({ json, response, setError, setAuth, navigate, setSeverity });
   }
 
   return (
@@ -135,7 +133,6 @@ export function SubmitButton(props) {
               onChange={(e) => setData(e.target.value)}
             />
           ) : null}
-          {/* <Button type="submit">{text}</Button> */}
           <LoadingButton
             sx={{
               ".MuiLoadingButton-loadingIndicator": {

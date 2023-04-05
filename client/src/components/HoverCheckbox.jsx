@@ -1,5 +1,5 @@
 import React from "react";
-import { Checkbox, FormControl, FormControlLabel } from "@mui/material";
+import { Checkbox, FormControlLabel } from "@mui/material";
 import { Done } from "@mui/icons-material";
 
 /**
