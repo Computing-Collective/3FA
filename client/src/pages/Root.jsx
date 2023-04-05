@@ -13,7 +13,7 @@ export function Root() {
       <HomeButton />
       <div className="flex h-full min-h-screen flex-col items-center justify-center p-2">
         <Outlet />
-        <Backdoor />
+        {/* <Backdoor /> */}
       </div>
     </>
   );
