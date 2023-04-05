@@ -92,6 +92,7 @@ z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 
 
 # The URL to send the sequence to for validation
 VALIDATE_URL = "http://192.168.137.1:5000/api/login/motion_pattern/validate/"
+# VALIDATE_URL = "http://cpen291-24.ece.ubc.ca:5000/api/login/motion_pattern/validate/"
 
 # The pico ID (empty between each request to the server)
 pico_id = None
