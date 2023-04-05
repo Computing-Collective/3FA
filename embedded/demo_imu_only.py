@@ -48,9 +48,6 @@ from adafruit_httpserver.request import HTTPRequest
 from adafruit_httpserver.response import HTTPResponse
 from adafruit_httpserver.methods import HTTPMethod
 from adafruit_httpserver.mime_type import MIMEType
-from adafruit_httpserver.headers import HTTPHeaders
-from adafruit_httpserver.status import CommonHTTPStatus
-
 
 import json
 
@@ -92,50 +89,6 @@ sensitivity = 4
 buffer_offset = 4 # there are typically 3 elements of feedback
                   # for example forward move is [20, -20, -18, -12, -4, 0, 0, 0]
 z_offset = 10 # don't use z_offset on raw data (flip z needs to be not around 0 to detect flips as the sign of the number)
-
-# The URL to send the sequence to for validation
-VALIDATE_URL = "http://192.168.137.1:5000/api/login/motion_pattern/validate/"
-# VALIDATE_URL = "http://cpen291-24.ece.ubc.ca:5000/api/login/motion_pattern/validate/"
-
-# The pico ID (empty between each request to the server)
-pico_id = None
-
-# Wifi and server setup
-ipv4 = ipaddress.IPv4Address(os.getenv('PICO_W_HOTSPOT_IPV4_ADDRESS'))
-netmask = ipaddress.IPv4Address("255.255.255.0")
-gateway = ipaddress.IPv4Address("192.168.137.1")
-wifi.radio.set_ipv4_address(ipv4=ipv4, netmask=netmask, gateway=gateway)
-
-#  Connect to laptop SSID
-wifi.radio.connect(os.getenv('CIRCUITPY_WIFI_SSID'),
-                   os.getenv('CIRCUITPY_WIFI_PASSWORD'))
-pool = socketpool.SocketPool(wifi.radio)
-
-# ssl_context = ssl.create_default_context()
-# ssl_context.check_hostname = False
-# ssl_context.load_verify_locations(None)
-requests = adafruit_requests.Session(pool, ssl.create_default_context())
-
-# Set CORS headers
-headers = HTTPHeaders()
-headers.setdefault("Access-Control-Allow-Headers", "*")
-headers.setdefault("Access-Control-Allow-Origin", "*")
-headers.setdefault("Access-Control-Allow-Methods", "*")
-
-server = HTTPServer(pool)
-
-print("\nStarting server...")
-# Startup the server
-try:
-    server.start(str(wifi.radio.ipv4_address))
-    print("Listening on http://%s\n" % wifi.radio.ipv4_address)
-
-#  If the server fails to begin, restart the Pico W
-except OSError:
-    time.sleep(5)
-    print("Restarting..")
-    microcontroller.reset()
-ping_address = ipaddress.ip_address("8.8.4.4")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ADDITIONAL FUNCTIONS
@@ -180,11 +133,11 @@ def init_hardware():
 
 
 def sequence_correct_led():
-    for i in range(5):
+    for i in range(1):
         correct_led.value = True
-        time.sleep(0.05)
+        time.sleep(0.1)
         correct_led.value = False
-        time.sleep(0.05)
+        time.sleep(0.1)
 
     # Reset the correct LED after blinking
     correct_led.value = False
@@ -385,7 +338,6 @@ def check_sequence(sequence):
                 valid_moves_indexed.append(("DOWN", i, (z - z_offset) * -1))
                 buffer = buffer + buffer_offset
 
-
     # --------------------------------------------------------------------------------------------------------------------------------------------
     # SEQUENCE PROCESSING
     # --------------------------------------------------------------------------------------------------------------------------------------------
@@ -478,64 +430,6 @@ def check_sequence(sequence):
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
-# Wireless Functions
-# --------------------------------------------------------------------------------------------------------------------------------------------
-@server.route("/pico_id", method=HTTPMethod.OPTIONS)
-# Route for complying with CORS
-def options_handler(request: HTTPRequest):
-    print("Options request received")
-    response = HTTPResponse(request, status=CommonHTTPStatus.OK_200, headers=headers)
-    with response:
-        response.send(json.dumps({"status": "ok"}), content_type="application/json")
-
-@server.route("/pico_id", method=HTTPMethod.POST)
-# Route for uploading a pico_id
-def set_pico_id(request: HTTPRequest):
-    # Must use global to specify we want to modify the pico_id variable that was defined outside
-    global pico_id
-    #  Get the raw text
-    raw_text = request.raw_request.decode("utf-8")
-    print("Raw Text received: ", raw_text)
-
-    # Get "pico_id" value out of the request and save it to the pico_id variable
-
-    # Find the JSON data within the string
-    start_index = raw_text.find('{')
-    end_index = raw_text.find('}', start_index) + 1
-    json_data = raw_text[start_index:end_index]
-
-    # Parse the JSON data and extract the value of "a" key
-    parsed_data = json.loads(json_data)
-    pico_id = parsed_data['pico_id']
-
-    print("Pico ID received: " + pico_id)
-
-    output = {
-        "success": 1,
-        "msg": "Pico ID received successfully"
-    }
-    
-    with HTTPResponse(request, headers=headers) as response:
-        response.send(json.dumps(output),  content_type="application/json")
-
-def transmit_wireless_message(sequence):
-    # Transmit the sequence which is a list of strings
-    # in the format needed by admin side
-    print("\n\nTransmitting: ", sequence)
-
-    json = {
-        "pico_id" : pico_id,
-        "data" : sequence
-    }
-
-    response = requests.post(VALIDATE_URL, json=json)
-    output = response.text
-    print("\nResponse from server: ", output)
-    response.close()
-    print("Transmission Complete")
-
-
-# --------------------------------------------------------------------------------------------------------------------------------------------
 # MAIN LOGIC
 # --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -561,15 +455,16 @@ while True:
         recording_led.value = False
         is_recording = False
 
-        print("\nSetup Complete. Waiting for pico_id from client")
+        # print("\nSetup Complete. Waiting for pico_id from client")
 
     # Wait to receive pico_id from client
-    if pico_id is None:
-        try:
-            server.poll()
-        except Exception as e:
-            print("Error polling server", e)
-            break
+    if False:
+        # try:
+        #     server.poll()
+        # except Exception as e:
+             print("Error polling server", e)
+        #     break
+        
 
     else:
         # Update states for stop/start buttons
@@ -588,7 +483,7 @@ while True:
             add_moves_to_sequence(valid_moves)
 
             # Transmit the final sequence
-            transmit_wireless_message(final_sequence)
+            # transmit_wireless_message(final_sequence)
 
             # Reset the sequence for next recording
             sequence = {"AX" : [], "AY" : [], "AZ" : [], "GX" : [], "GY" : [], "GZ" : [], }
@@ -610,3 +505,4 @@ while True:
             print((round(sensor.acceleration[0],1), round(sensor.acceleration[1],1), round(sensor.acceleration[2] - z_offset, 1), sensitivity, -1 * sensitivity))
 
         time.sleep(0.1)
+
