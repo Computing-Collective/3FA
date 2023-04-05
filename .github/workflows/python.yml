@@ -7,11 +7,12 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: write-all
+  contents: read
 
 jobs:
   ml-model:
     runs-on: ubuntu-latest
+    permissions: write-all
     defaults:
       run:
         working-directory: machine-learning
