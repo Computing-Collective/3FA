@@ -1,3 +1,4 @@
+import base64
 import json
 import mimetypes
 import os
@@ -453,7 +454,7 @@ def get_login_sessions_as_dict(count: int) -> list[dict]:
             "auth_stages": login_session.auth_stage,
             "motion_added_sequence": login_session.motion_added_sequence,
             "motion_completed": login_session.motion_pattern_completed,
-            "login_photo": str(login_session.login_photo),
+            "photo": base64.b64encode(login_session.login_photo).decode("utf-8") if login_session.login_photo else str(None),
         })
     return out
 
@@ -761,7 +762,8 @@ def get_failed_login_events_as_dict(user: models.User = None, session: models.Lo
             "session_id": str(event.session_id),
             "date": event.date.strftime("%d/%m/%Y %H:%M:%S"),
             "event": event.event,
-            "photo": str(event.photo)
+            "photo": base64.b64encode(event.photo).decode("utf-8") if event.photo else str(None),
+            "auth_stages": json.dumps({"face_recognition": True if event.photo is not None else False}),
         })
 
     return output

@@ -38,9 +38,9 @@ const router = createHashRouter(
       <Route
         path="vault"
         element={
-          // <RequireAuth>
-          <Vault />
-          // <RequireAuth>
+          <RequireAuth>
+            <Vault />
+          </RequireAuth>
         }
       />
     </Route>
@@ -50,7 +50,7 @@ const router = createHashRouter(
 const theme = createTheme({
   palette: {
     primary: {
-      // This is green.A700 as hex.
+    // This is green.A700 as hex.
       main: "#11cb5f",
     },
     secondary: {
