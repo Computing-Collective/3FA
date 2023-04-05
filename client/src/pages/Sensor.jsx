@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { Backdoor } from "./Backdoor.jsx";
-import _, { map } from "underscore";
+import _ from "underscore";
 import up from "../../public/icons/up.png";
 import down from "../../public/icons/down.png";
 import left from "../../public/icons/left.png";
@@ -58,7 +57,7 @@ export function Sensor() {
     return (
       <>
         <div className="self-center justify-self-end">{moves[index]}</div>
-        <img src={_.get(picObj, moves[index])} width="35" height="35" />
+        <img alt={moves[index]} src={_.get(picObj, moves[index])} width="35" height="35" />
       </>
     );
   }
@@ -69,14 +68,14 @@ export function Sensor() {
         {(error !== "" && (
           <DisplayError
             text={error}
-            refreshButton={severity === "info" ? false : true}
+            refreshButton={severity !== "info"}
             severity={severity}
           />
         )) ||
           (pico_id === null && (
             <DisplayError
               text="Unable to connect your motion sensor"
-              refreshButton={severity === "info" ? false : true}
+              refreshButton={severity !== "info"}
             />
           ))}
         <h1>Move your sensor!</h1>

@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useLocation, useNavigate, useNavigation } from "react-router-dom";
-import { Backdoor } from "./Backdoor.jsx";
+import { useNavigate } from "react-router-dom";
 import { sessionContext, authContext } from "../app.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { Video } from "../components/Video.jsx";
@@ -19,7 +18,7 @@ export function Camera() {
   const [session, setSession] = useContext(sessionContext);
   const navigate = useNavigate();
 
-  const { initNav } = useNavToVault();
+  const { initNav } = useNavToVault(auth);
 
   useEffect(() => {
     initNav();

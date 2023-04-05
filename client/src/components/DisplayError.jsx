@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
  *
  * @param {object} props
  * @param {string} props.text - the text to display
- * @param {boolean} props.refreshButton - whether or not to display the refresh button
+ * @param {boolean} props.refreshButton - whether to display the refresh button
  * @returns an MUI alert that displays the error message given
  * @param {boolean} props.success - whether to display error icon or success
  */

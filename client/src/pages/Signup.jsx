@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Backdoor } from "./Backdoor.jsx";
 import { Select, MenuItem, Button, IconButton, Typography } from "@mui/material";
 import { InputField } from "../components/InputField.jsx";
@@ -61,7 +61,7 @@ export function Signup() {
       body: formData,
     });
     const json = await response.json();
-    if (json.success == 0) {
+    if (json.success === 0) {
       setError(json.msg);
       
     } else {
@@ -77,7 +77,7 @@ export function Signup() {
         className="flex flex-col items-center"
         onSubmit={async (event) => {
           event.preventDefault();
-          handleSignup(); // also navigates
+          await handleSignup(); // also navigates
         }}>
         <div className="m-2 gap-y-2">
           <InputField
@@ -202,7 +202,7 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
  *  id: crypto.randomUUID(),
  *  direction: "UP" | "DOWN" | "LEFT" | "RIGHT" | "FORWARD" | "BACKWARD" | "FLIP"
  * }
- * @param {function} setPatterns the state updator for the state above ^
+ * @param {function} setPatterns the state updater for the state above ^
  * @returns a list of dropdowns for the user to select their motion pattern
  */
 function MotionPattern({ patterns, setPatterns }) {

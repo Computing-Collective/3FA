@@ -1,11 +1,8 @@
 import * as React from "react";
 import { useContext, useState } from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
-import { logout } from "../functions/auth.js";
-import { Backdoor } from "./Backdoor.jsx";
 import { Button, Typography } from "@mui/material";
-import { Event, LocalConvenienceStoreOutlined } from "@mui/icons-material";
+import { Event } from "@mui/icons-material";
 import { UploadButton } from "../components/UploadButton.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { useEffect } from "react";
@@ -17,7 +14,6 @@ const api_endpoint = window.internal.getAPIEndpoint;
  * @returns the vault page
  */
 export function Vault() {
-  const navigate = useNavigate();
   const [auth, setAuth] = useContext(authContext);
   // the error text
   const [error, setError] = useState("");

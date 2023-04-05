@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useContext, useRef, useState, useEffect } from "react";
-import { useLocation, Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { authContext } from "../app.jsx";
 import { login } from "../functions/auth.js";
 

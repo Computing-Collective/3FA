@@ -1,7 +1,5 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Backdoor } from "./Backdoor.jsx";
 import { DisplayError } from "../components/DisplayError.jsx";
 import { SubmitButton } from "../components/SubmitButton.jsx";
 
@@ -13,6 +11,7 @@ export function Password() {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const submitButton = document.getElementById("submitButton");
+  const [severity, setSeverity] = useState("error");
 
   useEffect(() => {
     setText(""); // clear text on input on submit
@@ -29,6 +28,7 @@ export function Password() {
           endpoint={"password"}
           type={"password"}
           setError={setError}
+          setSeverity={setSeverity}
         />
       </div>
     </>
