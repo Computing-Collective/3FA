@@ -141,8 +141,15 @@ async function handleDownload(id, auth, fileName) {
   const extension = mime.getExtension(file_blob.type);
 
   const file = await file_blob.arrayBuffer();
+
+  let saveName = fileName;
+  let fileNameSplit = fileName.split(".");
+
+  if (fileNameSplit.length === 1 || mime.getType(fileNameSplit[fileNameSplit.length - 1]) === null) {
+    saveName += "." + extension;
+  }
   
-  window.internal.saveFile(file, path, fileName + "." + extension);
+  window.internal.saveFile(file, path, saveName);
 }
 
 /**
