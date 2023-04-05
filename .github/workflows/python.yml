@@ -12,9 +12,10 @@ permissions:
 jobs:
   ml-model:
     runs-on: ubuntu-latest
+    permissions: write-all
     defaults:
       run:
-        working-directory: admin-system/backend
+        working-directory: machine-learning
 
     steps:
       - name: Checkout
@@ -28,21 +29,37 @@ jobs:
       
       - name: Install Machine Learning Dependencies
         run: pip install -r requirements.txt
-        working-directory: machine-learning
 
       - name: Generate Machine Learning Model
-        run: |
-          python model.py
-          mkdir ../admin-system/backend/instance/
-          mv model.pth ../admin-system/backend/instance/model.pth
-        working-directory: machine-learning 
+        run: python model.py
+        
+      - name: Delete Old Artifacts
+        uses: actions/github-script@v6
+        id: artifact
+        with:
+          script: |
+            const res = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            res.data.artifacts
+              .forEach(({ id }) => {
+                github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: id,
+                })
+              })
 
       - name: Save Machine Learning Model
         uses: actions/upload-artifact@v3
         with:
           name: ml-model
-          path: admin-system/backend/instance/model.pth
-
+          path: machine-learning/model.pth
+          retention-days: 1
+          
+          
   build:
     runs-on: ${{ matrix.os }}
     needs: ml-model
