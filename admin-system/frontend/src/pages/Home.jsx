@@ -10,8 +10,9 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { authContext } from "../main.jsx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { CheckBox, ErrorIcon } from "@mui/icons-material";
-import { logout } from "../functions/auth.js";
+import { AccessTime, CheckBox, Error, Event } from "@mui/icons-material";
+import { LogoutButton } from "../components/LogoutButton.jsx";
+import _ from "underscore";
 
 const api_endpoint = import.meta.env.VITE_API_ENDPOINT;
 
@@ -33,7 +34,7 @@ export function Home() {
     email: "bob@email.com"
   }
   */
-  const [accordions, setAccordions] = useState();
+  const [accordions, setAccordions] = useState(null);
 
   // fetch data and store in accordions on page load
   useEffect(() => {
@@ -46,26 +47,19 @@ export function Home() {
         headers: { "Content-Type": "application/json" },
       });
       const json = await response.json();
-      console.log(json);
-      setAccordions(mapAccordions(json.sessions));
+      const accords = mapAccordions(json.sessions);
+      setAccordions(accords);
     }
     getLoginSessions();
   }, []);
 
   return (
     <>
-      <div className="absolute left-8 top-8 h-16 w-16">
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => logout(auth, setAuth, navigate)}>
-          Logout
-        </Button>
-      </div>
+      <LogoutButton />
       <h1>Welcome to the admin dashboard</h1>
       <div className="flex flex-col">
         {/* render the accordions */}
-        {accordions ? accordions : "Loading data..."}
+        {accordions !== null ? accordions : "Loading data..."}
       </div>
       {import.meta.env.DEV && <Backdoor />}
     </>
@@ -82,36 +76,53 @@ function mapAccordions(sessions) {
   for (let session of sessions) {
     const auth_methods = JSON.parse(session.auth_stages);
     res.push(
-      <div key={session.id}>
-        <Accordion>
+      <Accordion key={session.session_id}>
+        <div className="items-center flex flex-row justify-center">
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography sx={{ width: "33%", flexShrink: 0 }}>{session.date}</Typography>
-            <Typography sx={{ color: "text.secondary" }}>{session.user_email}</Typography>
+            <span className="px-2">
+              <Event />
+            </span>
+            {session.date.split(" ")[0]}
+            <span className="px-2">
+              <AccessTime />
+            </span>
+            {session.date.split(" ")[1]}
+            <div className="mx-5">{session.user_email}</div>
             {session.motion_completed ? (
               <CheckBox color="success" />
             ) : (
-              <ErrorIcon color="error" />
+              <Error color="error" />
             )}
           </AccordionSummary>
-          <AccordionDetails>
-            <Typography>
-              {"Authentication Methods:"} {auth_methods}
-              auth_methods.motion_pattern ? ( {"Additional Motion Sequence:"})
-              {session.motion_added_sequence}: {null}
-              auth_methods.face_recognition ? ({"Login Photo:"} {session.login_photo}) :
-              {null}
-            </Typography>
-            <Button
-              onClick={async (e) => {
-                e.preventDefault();
-                handleShowFailed(auth, session.session_id);
-              }}>
-              Show Failed Events
-            </Button>
-          </AccordionDetails>
-        </Accordion>
-      </div>
+        </div>
+        <AccordionDetails>
+          <div className="grid grid-cols-1">
+            {_.map(auth_methods, (passed, method) => {
+              return (
+                <div key={method} className="text-black flex flex-row">
+                  {method.replace("_", " ")} {":"}
+                  <div className="flex-grow" />
+                  {passed ? <CheckBox color="success" /> : <Error color="error" />}
+                </div>
+              );
+            })}
+          </div>
+          {auth_methods.face_recognition ? (
+            <div className="w-1/2">
+              <img src={binaryToBase64(session.login_photo)} />
+            </div>
+          ) : null}
+          <Button
+            onClick={async (e) => {
+              e.preventDefault();
+              handleShowFailed(auth, session.session_id);
+            }}>
+            Show Failed Events
+          </Button>
+        </AccordionDetails>
+      </Accordion>
     );
+    if (res.length === 5) break;
   }
   return res;
 }
@@ -129,3 +140,22 @@ async function getFailedEvents() {
 }
 
 async function handleShowFailed(auth, session_id) {}
+
+function binaryToBase64(binary) {
+  console.log(binary);
+  let byteArray = new Uint8Array(
+    binary
+      .split("\\x")
+      .slice(1)
+      .map((hex) => parseInt(hex, 16))
+  );
+
+  let blob = new Blob([byteArray], { type: "image/jpeg" });
+  console.log(blob);
+  return URL.createObjectURL(blob);
+  const jpegString = binary.substring(2, binary.length - 1);
+  let base64String = btoa(jpegString);
+  let dataURL = "data:image/jpeg;base64," + base64String;
+  console.log(dataURL);
+  return dataURL;
+}
