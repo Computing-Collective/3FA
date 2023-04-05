@@ -53,7 +53,6 @@ export function Home() {
         }
       );
       const json = await response.json();
-      console.log(json);
       const accords = mapAccordions(json.sessions);
       setAccordions(accords);
     }
