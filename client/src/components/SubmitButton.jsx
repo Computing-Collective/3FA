@@ -1,10 +1,9 @@
 import * as React from "react";
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState } from "react";
 import { authContext, sessionContext } from "../app.jsx";
 import { useNavigate } from "react-router-dom";
 import { useNavToVault } from "../hooks/useNavToVault.js";
 import { InputField } from "./InputField.jsx";
-import { Button, CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { handleNextNavigation } from "../functions/handleNextNavigation.js";
 
@@ -37,7 +36,7 @@ export function SubmitButton(props) {
   const text = props.text;
 
   const setSeverity = props.setSeverity;
-
+  
   // if we want an input field (email or password)
   const inputField = props.endpoint === "email" || props.endpoint === "password";
 
@@ -73,10 +72,9 @@ export function SubmitButton(props) {
         setError("Error please try again");
         setSeverity("error");
       }
-      console.log(response);
-      console.log(response.status);
+
       const json = await response.json();
-      console.log(json);
+
       const success = json.success;
       if (success === 1) {
         setError("Success, waiting for your sensor input");
@@ -109,8 +107,9 @@ export function SubmitButton(props) {
     }
 
     setLoading(false);
+    setData("");
 
-    handleNextNavigation({ json, response, setError, setAuth, navigate });
+    handleNextNavigation({ json, response, setError, setAuth, navigate, setSeverity });
   }
 
   return (
@@ -134,7 +133,6 @@ export function SubmitButton(props) {
               onChange={(e) => setData(e.target.value)}
             />
           ) : null}
-          {/* <Button type="submit">{text}</Button> */}
           <LoadingButton
             sx={{
               ".MuiLoadingButton-loadingIndicator": {
