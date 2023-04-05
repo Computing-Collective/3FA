@@ -43,4 +43,16 @@ module.exports = {
       },
     },
   ],
+  publishers: [
+    {
+      name: "@electron-forge/publisher-github",
+      config: {
+        repository: {
+          owner: "CPEN-291",
+          name: "P2_L2A_G24",
+        },
+        prerelease: true,
+      },
+    },
+  ],
 };
