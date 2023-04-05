@@ -116,6 +116,7 @@ pool = socketpool.SocketPool(wifi.radio)
 # ssl_context.load_verify_locations(None)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
+# Set CORS headers
 headers = HTTPHeaders()
 headers.setdefault("Access-Control-Allow-Headers", "*")
 headers.setdefault("Access-Control-Allow-Origin", "*")
@@ -270,7 +271,7 @@ def check_sequence(sequence):
                         if sequence["AZ"][j] > 0:
                             flip = False
                     if flip == True:
-                        valid_moves_indexed.append(("FLIP", i))
+                        valid_moves_indexed.append(("FLIP", i, 0))
                         buffer = buffer + buffer_offset
                         started_up = False
 
@@ -295,7 +296,7 @@ def check_sequence(sequence):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif x > sensitivity :
-                valid_moves_indexed.append(("RIGHT", i))
+                valid_moves_indexed.append(("RIGHT", i, x))
                 buffer = buffer + buffer_offset
                 started_up = False
 
@@ -312,7 +313,7 @@ def check_sequence(sequence):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif y > sensitivity:
-                valid_moves_indexed.append(("FORWARD", i))
+                valid_moves_indexed.append(("FORWARD", i, y))
                 buffer = buffer + buffer_offset
 
     # Z
@@ -332,7 +333,7 @@ def check_sequence(sequence):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif z - z_offset > sensitivity:
-                valid_moves_indexed.append(("UP", i))
+                valid_moves_indexed.append(("UP", i, (z - z_offset)))
                 buffer = buffer + buffer_offset
 
     # -X
@@ -348,7 +349,7 @@ def check_sequence(sequence):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif x < -1 * sensitivity :
-                valid_moves_indexed.append(("LEFT", i))
+                valid_moves_indexed.append(("LEFT", i, -1 * x))
                 buffer = buffer + buffer_offset
 
     # -Y
@@ -364,7 +365,7 @@ def check_sequence(sequence):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif y < -1 * sensitivity:
-                valid_moves_indexed.append(("BACKWARD", i))
+                valid_moves_indexed.append(("BACKWARD", i, -1 * y))
                 buffer = buffer + buffer_offset
 
     # -Z
@@ -381,13 +382,15 @@ def check_sequence(sequence):
                 # ignore the next buffer_offset elements in list
                 buffer = buffer + buffer_offset
             elif (z - z_offset) < (-1 * sensitivity):
-                valid_moves_indexed.append(("DOWN", i))
+                valid_moves_indexed.append(("DOWN", i, (z - z_offset) * -1))
                 buffer = buffer + buffer_offset
+
 
     # --------------------------------------------------------------------------------------------------------------------------------------------
     # SEQUENCE PROCESSING
     # --------------------------------------------------------------------------------------------------------------------------------------------
-
+    if len(valid_moves_indexed) == 0:
+        return valid_moves_indexed
     # Processing sequence
     # Sort based on time -> filter moves caused by feedback -> put in list of moves
 
@@ -429,79 +432,58 @@ def check_sequence(sequence):
 
     print("flip filtered:", valid_moves_indexed, "\n\n")
 
-
-    # Filter so that up down takes precedence over other moves ----------------------------------------------------------
-    print("up/down filter begin")
-    up_down_occurence_indices = []
-    for pair in valid_moves_indexed:
-        if pair[0] == "UP" or pair[0] == "DOWN":
-            up_down_occurence_indices.append(pair[1])
-
-    # print("flip indices", flip_occurence_indices)
-
-    # Remove moves from list based on filter
-    moves_to_remove = []
-    for index in up_down_occurence_indices:
-        for move_index, pair in enumerate(valid_moves_indexed):
-            # first condition checks if move is within tolerance * 0.1ms of the flip
-            if abs(pair[1] - index) < tolerance  and pair[0] != "UP" and pair[0] != "DOWN":
-                # print("try to remove", pair, "at move index", move_index)
-                # print("removing", pair)
-                moves_to_remove.append(move_index)
-
-
-    moves_to_remove.sort(reverse=True)  # Remove elements from end of list to prevent index errors
-    for index in moves_to_remove:
-        print("\tremoving", valid_moves_indexed[index])
-        del valid_moves_indexed[index]
-
-    print("up/down filtered:", valid_moves_indexed, "\n\n")
-
-    # Filter so that left right takes precedence over front back (more coupled baesd on analysis of data) -----------------------------------
-    print("left/right filter begin")
-    left_right_occurence_indices = []
-    for pair in valid_moves_indexed:
-        if pair[0] == "LEFT" or pair[0] == "RIGHT":
-            left_right_occurence_indices.append(pair[1])
-
-    # print("flip indices", flip_occurence_indices)
-
-    # Remove moves from list based on filter
-    moves_to_remove = []
-    for index in left_right_occurence_indices:
-        for move_index, pair in enumerate(valid_moves_indexed):
-            # first condition checks if move is within tolerance * 0.1ms of the flip
-            if abs(pair[1] - index) < tolerance  and pair[0] != "LEFT" and pair[0] != "RIGHT":
-                # print("try to remove", pair, "at move index", move_index)
-                print("removing", pair)
-                moves_to_remove.append(move_index)
-
-    moves_to_remove.sort(reverse=True)  # Remove elements from end of list to prevent index errors
-    for index in moves_to_remove:
-        print("\tremoving", valid_moves_indexed[index])
-        del valid_moves_indexed[index]
-
-    print("left/right filtered:", valid_moves_indexed, "\n\n") 
-
-
-
+    print("local max filter begin")
     sorted_moves = []
-    for move in valid_moves_indexed:
-        sorted_moves.append(move[0])
-
+    if len(valid_moves_indexed) > 1:
+        '''
+        valid_moves_indexed[0][0] move string
+        valid_moves_indexed[0][1] time occurrence value of move
+        valid_moves_indexed[0][2] strength value of move
+        '''
+        i = 0   # current index
+        starting_range_index = valid_moves_indexed[0][1]    # index for neighbour comparison
+        current_max_val = valid_moves_indexed[0][2]         # value of max between neighbours
+        current_max_index = 0                               # index of max neighbour in valid_moves_indexed
+        while i < len(valid_moves_indexed):
+            # outside neighbour compare region, update new starting comparison element
+            if valid_moves_indexed[i][1] > starting_range_index + 3:
+                # add the previous max to sorted_moves
+                print("Appending Max", valid_moves_indexed[current_max_index])
+                sorted_moves.append(valid_moves_indexed[current_max_index])
+                # update variables to find next max
+                starting_range_index = valid_moves_indexed[i][1]   
+                current_max_val = valid_moves_indexed[i][2]       
+                current_max_index = i                      
+            # inside neighbour compare region, compare and update current max element
+            else:
+                if valid_moves_indexed[i][2] > current_max_val:
+                    current_max_val = valid_moves_indexed[i][2]
+                    current_max_index = i  
+            # traverse
+            i = i + 1
+        
+        print("Appending Max", valid_moves_indexed[current_max_index])
+        sorted_moves.append(valid_moves_indexed[current_max_index])
+    else:
+        sorted_moves.append(valid_moves_indexed[0])
+        
     print("final sequence:", sorted_moves)
-    print()
+    # print()
+    final_moves = []
+    for move in sorted_moves:
+        final_moves.append(move[0])
+    print("\n")
 
-    return sorted_moves
+    return final_moves
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # Wireless Functions
 # --------------------------------------------------------------------------------------------------------------------------------------------
 @server.route("/pico_id", method=HTTPMethod.OPTIONS)
+# Route for complying with CORS
 def options_handler(request: HTTPRequest):
     print("Options request received")
-    print("Request headers: ", request.headers)
     response = HTTPResponse(request, status=CommonHTTPStatus.OK_200, headers=headers)
     with response:
         response.send(json.dumps({"status": "ok"}), content_type="application/json")
@@ -514,7 +496,6 @@ def set_pico_id(request: HTTPRequest):
     #  Get the raw text
     raw_text = request.raw_request.decode("utf-8")
     print("Raw Text received: ", raw_text)
-    print("Request headers: ", request.headers)
 
     # Get "pico_id" value out of the request and save it to the pico_id variable
 
