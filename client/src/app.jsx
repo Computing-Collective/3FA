@@ -10,6 +10,7 @@ import {
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
+import { RequireAuth } from "./components/RequireAuth.js";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
 import { Password } from "./pages/Password.jsx";
 import { Email } from "./pages/Email.jsx";
