@@ -10,6 +10,7 @@ import {
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
+import { RequireAuth } from "./components/RequireAuth.js";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
 import { Password } from "./pages/Password.jsx";
 import { Email } from "./pages/Email.jsx";
@@ -38,9 +39,9 @@ const router = createHashRouter(
       <Route
         path="vault"
         element={
-          // <RequireAuth>
-          <Vault />
-          // <RequireAuth>
+          <RequireAuth>
+            <Vault />
+          </RequireAuth>
         }
       />
     </Route>
@@ -50,7 +51,7 @@ const router = createHashRouter(
 const theme = createTheme({
   palette: {
     primary: {
-      // This is green.A700 as hex.
+    // This is green.A700 as hex.
       main: "#11cb5f",
     },
     secondary: {
