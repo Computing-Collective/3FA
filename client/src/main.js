@@ -1,9 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
+const { readFileSync, writeFile } = require("node:fs");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
-// TODO make elio pay microsoft
 app.commandLine.appendSwitch("ignore-certificate-errors");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -21,6 +21,7 @@ const createWindow = () => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+    autoHideMenuBar: true, // hide menu bar
   });
 
   // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
@@ -29,14 +30,15 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", () => {
+  ipcMain.handle("dialog:openFile", handleFileOpen);
+  ipcMain.handle("fs:readFile", handleFileData);
+  ipcMain.on("save-file", handleSaveFile);
   createWindow();
 });
 
@@ -59,3 +61,49 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+/**
+ * @brief prompts the user to choose a directory
+ *
+ * @returns the file path (directory) that the user chose
+ */
+async function handleFileOpen() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ["openDirectory"],
+  });
+  if (canceled) {
+    return;
+  } else {
+    return filePaths[0];
+  }
+}
+
+/**
+ * @brief reads the file at filePath
+ *
+ * @param {*} event
+ * @param {string} filePath the filepath to read the file from
+ * @returns {Promise} the result of readFileSync on filePath
+ */
+function handleFileData(event, filePath) {
+  return readFileSync(filePath);
+}
+
+/**
+ * @brief downloads fileName to path/file
+ *
+ * @param {*} event
+ * @param {ArrayBuffer} file the file to download
+ * @param {string} path the path to download the file to
+ * @param {string} fileName the file name
+ *
+ */
+async function handleSaveFile(event, file, path, fileName) {
+  console.log("writing");
+  console.log(file, path, fileName);
+  const buffer = Buffer.from(file);
+
+  writeFile(`${path}/${fileName}`, buffer, (err) => {
+    if (err) console.log(err); // TODO change to win alert or something
+  });
+}

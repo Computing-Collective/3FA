@@ -22,31 +22,33 @@ import { RequireAuth } from "./components/RequireAuth.js";
 import { Sensor } from "./pages/Sensor.jsx";
 import { Camera } from "./pages/Camera.jsx";
 import { Signup } from "./pages/Signup.jsx";
+import { Root } from "./pages/Root.jsx";
 import "./index.css";
 
 // variables for authentication with admin
 export const authContext = createContext(null);
 export const sessionContext = createContext(null);
 
+const api_endpoint = window.internal.getAPIEndpoint;
+
 // routes used in the app
 const router = createHashRouter(
   createRoutesFromElements(
-    <>
-      <Route path="/" element={<Email />} errorElement={<ErrorPage />} />
-      <Route path="/signup" element={<Signup />} errorElement={<ErrorPage />} />
-      <Route path="/password" element={<Password />} errorElement={<ErrorPage />} />
-      <Route path="/sensor" element={<Sensor />} errorElement={<ErrorPage />} />
-      <Route path="/camera" element={<Camera />} errorElement={<ErrorPage />} />
+    <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+      <Route index element={<Email />} />
+      <Route path="signup" element={<Signup />} />
+      <Route path="password" element={<Password />} />
+      <Route path="sensor" element={<Sensor />} />
+      <Route path="camera" element={<Camera />} />
       <Route
-        path="/vault"
+        path="vault"
         element={
-          <RequireAuth>
-            <Vault />
-          </RequireAuth>
+          // <RequireAuth>
+          <Vault />
+          // <RequireAuth>
         }
-        errorElement={<ErrorPage />}
       />
-    </>
+    </Route>
   )
 );
 
@@ -59,6 +61,9 @@ const theme = createTheme({
     secondary: {
       // Purple and green play nicely together.
       main: purple[500],
+    },
+    background: {
+      paper: "#1E2839",
     },
   },
 });

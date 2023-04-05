@@ -64,78 +64,78 @@ export function Signup() {
     console.log(json);
   }
   return (
-    <>
-      <div className="flex flex-col justify-center text-center">
-        {error !== "" && <DisplayError text={error} />}
-        <h1>Enter your email, password, and other information</h1>
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            handleSignup();
-            navigate("/");
-          }}>
-          <div className="m-2 flex flex-col gap-y-2">
-            <InputField
-              autoFocus
-              placeholder="Email"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
+    <div className="flex flex-col pt-36 text-center">
+      {error !== "" && <DisplayError text={error} />}
+      <h1>Enter your email, password, and other information</h1>
+      <form
+        className="flex flex-col items-center"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          handleSignup();
+          navigate("/");
+        }}>
+        <div className="m-2 gap-y-2">
+          <InputField
+            autoFocus
+            placeholder="Email"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
+            }}
+            type="email"
+          />
+        </div>
+        <div className="m-2 gap-y-2">
+          <InputField
+            placeholder="Password"
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+            }}
+            type="password"
+          />
+        </div>
+        <HoverCheckbox
+          label="Sensor"
+          onChange={(event) => {
+            setAuthMethods({
+              ...authMethods,
+              motion_pattern: event.target.checked,
+            });
+          }}
+        />
+        {/* render sensor dropdowns if needed */}
+        {authMethods.motion_pattern && (
+          <MotionPattern patterns={patterns} setPatterns={setPatterns} />
+        )}
+        <HoverCheckbox
+          label="Facial Recognition"
+          onChange={(event) => {
+            setAuthMethods({
+              ...authMethods,
+              face_recognition: event.target.checked,
+            });
+          }}
+        />
+        {/* render camera if needed */}
+        {authMethods.face_recognition && (
+          <>
+            <Video
+              setText={setError}
+              onCapture={(blob) => {
+                setPhoto(blob);
               }}
-              type="email"
-            />
-            <InputField
-              placeholder="Password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-              }}
-              type="password"
-            />
-          </div>
-          <div className="flex flex-col justify-center">
-            <HoverCheckbox
-              label="Sensor"
-              onChange={(event) => {
-                setAuthMethods({
-                  ...authMethods,
-                  motion_pattern: event.target.checked,
-                });
+              onClear={() => {
+                setPhoto(null);
               }}
             />
-            {/* render sensor dropdowns if needed */}
-            {authMethods.motion_pattern && (
-              <MotionPattern patterns={patterns} setPatterns={setPatterns} />
-            )}
-            <HoverCheckbox
-              label="Facial Recognition"
-              onChange={(event) => {
-                setAuthMethods({
-                  ...authMethods,
-                  face_recognition: event.target.checked,
-                });
-              }}
-            />
-            {/* render camera if needed */}
-            {authMethods.face_recognition && (
-              <>
-                <Video
-                  setText={setError}
-                  onCapture={(blob) => {
-                    setPhoto(blob);
-                  }}
-                  onClear={() => {
-                    setPhoto(null);
-                  }}
-                />
-              </>
-            )}
-            <Button type="submit">Submit</Button>
-          </div>
-        </form>
-        <Backdoor />
-      </div>
-    </>
+          </>
+        )}
+        <div className="m-2 gap-y-2">
+          <Button type="submit">Submit</Button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -151,6 +151,7 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
           setPatterns(tempPatterns);
         }}
         value={patterns[index].direction}
+        autoWidth
         sx={{
           color: "white",
           ".MuiOutlinedInput-notchedOutline": {
@@ -163,13 +164,27 @@ function SelectMotionPattern({ index, patterns, setPatterns }) {
             fill: "white",
           },
         }}>
-        <MenuItem value="UP">Up</MenuItem>
-        <MenuItem value="DOWN">Down</MenuItem>
-        <MenuItem value="LEFT">Left</MenuItem>
-        <MenuItem value="RIGHT">Right</MenuItem>
-        <MenuItem value="FORWARD">Forward</MenuItem>
-        <MenuItem value="BACKWARD">Backward</MenuItem>
-        <MenuItem value="FLIP">Flip</MenuItem>
+        <MenuItem sx={{ color: "white" }} value="UP">
+          Up
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="DOWN">
+          Down
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="LEFT">
+          Left
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="RIGHT">
+          Right
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="FORWARD">
+          Front
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="BACKWARD">
+          Back
+        </MenuItem>
+        <MenuItem sx={{ color: "white" }} value="FLIP">
+          Flip
+        </MenuItem>
       </Select>
     </>
   );
@@ -189,30 +204,32 @@ function MotionPattern({ patterns, setPatterns }) {
   // the dropdown for user selection (jsx component)
 
   return (
-    <>
-      <div className="grid grid-flow-col grid-cols-5 gap-x-5">
-        <div className="">
-          <NumberButton
-            disabled={patterns.length < 2}
-            onClick={() => {
-              const tempPatterns = [...patterns];
-              tempPatterns.pop();
-              setPatterns(tempPatterns);
-            }}>
-            <Remove />
-          </NumberButton>
+    <div className="flex w-full max-w-lg flex-row py-3">
+      <div className="flex flex-row items-center justify-center align-middle">
+        <NumberButton
+          disabled={patterns.length < 2}
+          onClick={() => {
+            const tempPatterns = [...patterns];
+            tempPatterns.pop();
+            setPatterns(tempPatterns);
+          }}>
+          <Remove />
+        </NumberButton>
+        <span className="self-center">
           <Typography fontWeight="md">{patterns.length}</Typography>
-          <NumberButton
-            disabled={patterns.length > 3}
-            onClick={() => {
-              setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
-            }}>
-            <Add />
-          </NumberButton>
-        </div>
+        </span>
+        <NumberButton
+          disabled={patterns.length > 3}
+          onClick={() => {
+            setPatterns([...patterns, { id: crypto.randomUUID(), direction: "UP" }]);
+          }}>
+          <Add />
+        </NumberButton>
+      </div>
+      <div className="grid flex-1 grid-cols-4 gap-4 lg:grid-cols-4">
         {patterns.map((pattern, index) => {
           return (
-            <div key={pattern.id} className="self-center">
+            <div key={pattern.id} className="self-center text-white">
               <SelectMotionPattern
                 index={index}
                 patterns={patterns}
@@ -222,7 +239,7 @@ function MotionPattern({ patterns, setPatterns }) {
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 

@@ -30,7 +30,6 @@ export function Password() {
           type={"password"}
           setError={setError}
         />
-        <Backdoor />
       </div>
     </>
   );

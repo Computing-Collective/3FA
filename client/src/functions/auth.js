@@ -20,7 +20,6 @@ export async function login(auth) {
   return json.success === 1;
 }
 
-// TODO deactivate '/vault' endpoint (redirect if refresh on page)
 /**
  * deactivates your auth key and navigates you to '/' (home)
  * @param {} auth auth key to deactivate
@@ -40,28 +39,29 @@ export async function logout(auth, setAuth, navigate) {
   });
   const json = await response.json();
   console.log(json);
-  if (json.success === 1) {
-    navigate("/");
-  }
+  navigate("/");
 }
 
 // pages api and returns a unique pico_id in ref to the admin
-export function getUniquePicoID(pico_id) {
+export async function getUniquePicoID(pico_id) {
   const endpoint = "motion_pattern/unique";
   const url = `${api_endpoint}/api/login/${endpoint}/`;
 
-  fetch(url, {
-    method: "POST",
-    body: JSON.stringify({
-      pico_id: pico_id,
-    }),
-    headers: { "Content-Type": "application/json" },
-  }).then((response) => {
-    response.json().then((json) => {
-      if (!response.ok || json.success === 0) {
-        return getUniquePicoID(crypto.randomUUID());
-      }
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        pico_id: pico_id,
+      }),
+      headers: { "Content-Type": "application/json" },
     });
-  });
+    const json = response.json();
+    if (!response.ok || json.success === 0) {
+      return getUniquePicoID(crypto.randomUUID());
+    }
+  } catch (e) {
+    return null;
+  }
+
   return pico_id;
 }
