@@ -14,7 +14,6 @@ import { AccessTime, CheckBox, Error, Event } from "@mui/icons-material";
 import { LogoutButton } from "../components/LogoutButton.jsx";
 import _ from "underscore";
 import { FailedEvents } from "../components/FailedEvents.jsx";
-import fs from "vite-plugin-fs/browser";
 
 /**
  * 
