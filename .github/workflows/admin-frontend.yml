@@ -8,8 +8,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-    # paths:
-    #  - "admin-system/frontend/**"
+    paths:
+     - "admin-system/frontend/**"
 
 jobs:
   build:
