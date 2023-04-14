@@ -67,7 +67,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "mime": "^3.0.0",
     "node-fetch": "^3.3.1",
-    "puppeteer": "^19.8.3",
+    "puppeteer": "^19.9.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-measure": "^2.5.2",
