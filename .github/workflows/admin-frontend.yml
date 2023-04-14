@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: client
+        working-directory: admin-system/frontend
 
     strategy:
       matrix:
