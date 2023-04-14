@@ -6,10 +6,9 @@ updates:
   - package-ecosystem: "pip"
     directory: "/admin-system/backend"
     schedule:
-      interval: "daily"
+      interval: "monthly"
       time: "03:00"
       timezone: "America/Vancouver"
-    insecure-external-code-execution: deny
     labels:
       - "Dependency"
     open-pull-requests-limit: 10
@@ -17,21 +16,9 @@ updates:
       - "ElioDiNino"
       
   - package-ecosystem: "npm"
-    directory: "/client"
-    schedule:
-      interval: "daily"
-      time: "03:00"
-      timezone: "America/Vancouver"
-    labels:
-      - "Dependency"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "im-calvin"
-  
-  - package-ecosystem: "npm"
     directory: "/admin-system/frontend"
     schedule:
-      interval: "daily"
+      interval: "monthly"
       time: "03:00"
       timezone: "America/Vancouver"
     labels:
@@ -39,3 +26,27 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "im-calvin"
+      
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "monthly"
+      time: "03:00"
+      timezone: "America/Vancouver"
+    labels:
+      - "Dependency"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "im-calvin"
+      
+  - package-ecosystem: "pip"
+    directory: "/machine-learning"
+    schedule:
+      interval: "monthly"
+      time: "03:00"
+      timezone: "America/Vancouver"
+    labels:
+      - "Dependency"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "divy-07"
