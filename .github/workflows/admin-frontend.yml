@@ -9,7 +9,7 @@ on:
   pull_request:
     branches: [ "main" ]
     paths:
-     - "admin-system/frontend/**"
+      - "admin-system/frontend/**"
 
 jobs:
   build:
