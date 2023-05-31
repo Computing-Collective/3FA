@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: admin-system-backend
 
 permissions:
   contents: read
@@ -146,6 +146,7 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
     
     - name: Build Image
+      id: build
       uses: docker/build-push-action@v4
       with:
         context: ./admin-system/backend
@@ -157,14 +158,15 @@ jobs:
         cache-from: type=gha
 
     - name: Run Tests
-      run: docker run --rm admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
+      run: docker run --rm ${{ steps.build.outputs.metadata.image.name }} /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
 
     - name: Build & Push Image
       uses: docker/build-push-action@v4
       with:
         context: ./admin-system/backend
         platforms: linux/amd64, linux/arm64, linux/arm/v7
-        push: ${{ github.event_name != 'pull_request' }}
+        # push: ${{ github.event_name != 'pull_request' }}
+        push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-to: type=gha,mode=max
