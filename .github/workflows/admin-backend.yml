@@ -158,7 +158,7 @@ jobs:
         cache-from: type=gha
 
     - name: Run Tests
-      run: docker run --rm ${{ steps.build.outputs.metadata.image.name }} /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
+      run: docker run --rm ${{ fromJSON(steps.build.outputs.metadata)['image.name'] }} /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
 
     - name: Build & Push Image
       uses: docker/build-push-action@v4
