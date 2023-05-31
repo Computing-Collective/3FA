@@ -9,6 +9,10 @@ on:
       - "admin-system/backend/**"
       - "machine-learning/**"
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 permissions:
   contents: read
 
@@ -100,8 +104,11 @@ jobs:
       run: pipenv run pytest --cov=api --cov-branch
 
 
-  build-docker:
+  build-push-docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: ml-model
     defaults:
       run:
@@ -111,6 +118,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -119,17 +129,41 @@ jobs:
       with:
         name: ml-model
         path: admin-system/backend/instance/
+
+    - name: Log in to the Container registry
+      if: ${{ github.event_name != 'pull_request' }}
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
     
-    - name: Build and Push
+    - name: Build Image
       uses: docker/build-push-action@v4
       with:
         context: ./admin-system/backend
-        platforms: linux/amd64
+        platforms: linux/amd64, linux/arm64, linux/arm/v7
         load: true
         push: false
-        tags: admin-system-backend
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
-        cache-to: type=gha,mode=max
 
     - name: Run Tests
       run: docker run --rm admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
+
+    - name: Push Image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./admin-system/backend
+        platforms: linux/amd64, linux/arm64, linux/arm/v7
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-to: type=gha,mode=max
