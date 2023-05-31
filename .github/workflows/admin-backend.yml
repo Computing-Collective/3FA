@@ -8,6 +8,7 @@ on:
     paths:
       - "admin-system/backend/**"
       - "machine-learning/**"
+      - ".github/**"
 
 env:
   REGISTRY: ghcr.io
@@ -148,7 +149,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./admin-system/backend
-        platforms: linux/amd64, linux/arm64, linux/arm/v7
+        platforms: linux/amd64
         load: true
         push: false
         tags: ${{ steps.meta.outputs.tags }}
@@ -158,7 +159,7 @@ jobs:
     - name: Run Tests
       run: docker run --rm admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
 
-    - name: Push Image
+    - name: Build & Push Image
       uses: docker/build-push-action@v4
       with:
         context: ./admin-system/backend
