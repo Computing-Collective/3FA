@@ -35,5 +35,6 @@ RUN chown -R backend:backend /usr/src/
 
 USER backend
 EXPOSE 5000
+VOLUME /app/data
 
 CMD ./.venv/bin/python -m gunicorn -b :5000 -w 4 --pythonpath /usr/src 'api.app:create_app()'
