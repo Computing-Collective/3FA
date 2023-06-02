@@ -73,7 +73,7 @@
     "react-measure": "^2.5.2",
     "react-router-dom": "^6.10.0",
     "reactjs-localstorage": "^1.0.1",
-    "styled-components": "^5.3.10",
+    "styled-components": "^5.3.11",
     "underscore": "^1.13.6"
   }
 }
