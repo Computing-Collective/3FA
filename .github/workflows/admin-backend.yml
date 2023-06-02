@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: '${{ github.repository_owner }}/ 3fa-backend'
+  IMAGE_NAME: '${{ github.repository_owner }}/3fa-backend'
 
 permissions:
   contents: read
