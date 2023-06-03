@@ -150,7 +150,7 @@ jobs:
         platforms: linux/amd64
         load: true
         push: false
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ env.IMAGE_NAME }}:latest
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
 
@@ -163,6 +163,6 @@ jobs:
         context: ./admin-system/backend
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ env.IMAGE_NAME }}:latest
         labels: ${{ steps.meta.outputs.labels }}
         cache-to: type=gha,mode=max
