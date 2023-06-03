@@ -51,10 +51,16 @@ docker rm copy
 ```
 
 #### Run the container
+
+For the following commands, replace `%cd%` with the appropriate current directory command for your shell as follows:
+- Windows Command Prompt: `"%cd%"`
+- Windows PowerShell: `${PWD}`
+- Linux: `"$(pwd)"`
+
 > **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
 ```shell
-docker run -p 192.168.137.1:5000:5000 --name admin-server --mount type=bind,src=instance,target=/usr/src/instance ghcr.io/computing-collective/3fa-backend:latest
+docker run -p 192.168.137.1:5000:5000 --name admin-server --mount type=bind,src="%cd%/instance",target=/usr/src/instance ghcr.io/computing-collective/3fa-backend:latest
 ```
 Access the server at [192.168.137.1:5000](http://192.168.137.1:5000)
 
@@ -62,7 +68,7 @@ With `localhost`:
 ```shell
 docker-compose up # From the admin-system/backend directory
 OR
-docker run -p 5000:5000 --name admin-server --mount type=bind,src=instance,target=/usr/src/instance ghcr.io/computing-collective/3fa-backend:latest
+docker run -p 5000:5000 --name admin-server --mount type=bind,src="%cd%/instance",target=/usr/src/instance ghcr.io/computing-collective/3fa-backend:latest
 ```
 Access the server at [localhost:5000](http://localhost:5000)
 
@@ -72,6 +78,8 @@ docker run --rm ghcr.io/computing-collective/3fa-backend:latest /usr/src/.venv/b
 ```
 
 #### Build the image
+> **Note**
+> You must be in the admin-system/backend directory for this command to work
 ```shell
 docker build -t ghcr.io/computing-collective/3fa-backend:latest .
 ```
