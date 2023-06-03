@@ -37,7 +37,7 @@ def create_app(test_config=None):
     # Load the configuration
     app.secret_key = os.getenv("SECRET_KEY")
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['DATA_FOLDER'] = "data"
 
     if test_config is not None:
