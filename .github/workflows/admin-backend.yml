@@ -141,6 +141,8 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=latest
     
     - name: Build Image
       id: build
@@ -150,7 +152,7 @@ jobs:
         platforms: linux/amd64
         load: true
         push: false
-        tags: ${{ env.IMAGE_NAME }}:latest
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
 
@@ -163,6 +165,6 @@ jobs:
         context: ./admin-system/backend
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ env.IMAGE_NAME }}:latest
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-to: type=gha,mode=max
