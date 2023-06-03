@@ -30,9 +30,6 @@ COPY / /usr/src/
 
 WORKDIR /usr/src/
 
-# Create a volume mount for persistant storage
-VOLUME [ "/usr/src/instance" ]
-
 # Change ownership of the files to the backend user so that the backend user can write to the files
 RUN chown -R backend:backend /usr/src/
 
