@@ -1,0 +1,10 @@
+services:
+  admin-server:
+    image: ghcr.io/computing-collective/3fa-backend:latest
+    volumes:
+      - type: bind
+        source: "instance"
+        target: /usr/src/instance
+    container_name: admin-server
+    ports:
+      - "5000:5000"
