@@ -1,0 +1,7 @@
+# Embedded
+
+### Pinout
+
+
+### Design
+
