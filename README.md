@@ -4,6 +4,21 @@
 
 A secure multifactor authentication system
 
+## Table of Contents
+- [3FA](#3fa)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Getting Started](#getting-started)
+  - [Repo Contents](#repo-contents)
+  - [Architecture Overview](#architecture-overview)
+
+## Overview
+
+Here is a video overview of our system. You can view it on [YouTube](https://www.youtube.com/watch?v=EXM25gpxC9Y) or [download the file directly](/static/Demo%20Video.mp4) if you prefer
+
+https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9f8f-198096261e36
+
 ## Features
 
 - Feature 1
