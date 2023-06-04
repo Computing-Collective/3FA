@@ -37,7 +37,7 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 
 ### Using our servers
 
-1. Install the latest version of the client application from the [releases page](/releases) and run it.
+1. Install the latest version of the client application from the [releases page](https://github.com/Computing-Collective/3FA/releases) and run it.
 2. You can then create an account and start using the application by uploading and managing files.
 3. The admin dashboard can be found at [3fa.netlify.app](https://3fa.netlify.app/). You can use the account `admin@3fa.com` with the password `Password1` to login. Note that you will have to login to the client application with these credentials first.
 > **Note:**
