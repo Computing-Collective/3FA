@@ -57,19 +57,19 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 ├─ .github           # GitHub Actions CI/CD - testing and deployment
 |
 ├─ admin-system      # Admin dashboard and backend server
-│  ├─ backend           # Flask backend server
+│  ├─ backend           # Flask backend server                        - Elio
 │  │  ├─ api               # Implementation of the API
 │  │  └─ tests             # Tests for the API
-│  └─ frontend          # React admin dashboard
+│  └─ frontend          # React admin dashboard                       - Kelvin
 |
-├─ client            # Electron client application
+├─ client            # Electron client application                    - Kelvin
 |
-├─ embedded          # Microcontroller authentication device code
+├─ embedded          # Microcontroller authentication device code     - Matthew
 │  ├─ application       # Top level application code
 │  ├─ demo              # Demo modules for features of the main application
 │  └─ lib               # Saved CircuitPython library dependencies
 |
-├─ machine-learning  # Machine learning model training and testing
+├─ machine-learning  # Machine learning model training and testing    - Divy
 │  └─ data              # Dataset for training and testing
 └─ static            # Static files for project README
 ```
