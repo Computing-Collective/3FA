@@ -2,6 +2,9 @@
 
 ## Setup
 
+> **Note**
+> This can be skipped if you simply want to run the Docker image
+
 1. Install `pipenv`. See the [documentation](https://pipenv.pypa.io/en/latest/) if you run into any issues with it.
    ```shell
    pip install --user pipenv
@@ -31,48 +34,82 @@
 ## Usage
 
 ### Docker
-Build the image:
+
+#### Pull the image
 ```shell
-docker build -t admin-system-backend .
+docker pull ghcr.io/computing-collective/3fa-backend:latest
 ```
 
-Run the container:
+#### Copy the instance folder from the container
+```shell
+mkdir -p instance
+docker run -d --name copy ghcr.io/computing-collective/3fa-backend:latest
+sleep 20 # Wait 20 seconds for the container to initialize
+docker stop copy
+docker cp copy:/usr/src/instance/ ./
+docker rm copy
+```
+
+#### Run the container
+
+For the following commands, replace `%cd%` with the appropriate current directory command for your shell as follows:
+- Windows Command Prompt: `"%cd%"`
+- Windows PowerShell: `${PWD}`
+- Linux: `"$(pwd)"`
+
 > **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
 ```shell
-docker run -p 192.168.137.1:5000:5000 --name admin-server admin-system-backend
+docker run -p 192.168.137.1:5000:5000 --name admin-server --mount type=bind,src="%cd%/instance",target=/usr/src/instance ghcr.io/computing-collective/3fa-backend:latest
 ```
+Access the server at [192.168.137.1:5000](http://192.168.137.1:5000)
 
 With `localhost`:
 ```shell
-docker run -p 5000:5000 --name admin-server admin-system-backend
+docker-compose up # From the admin-system/backend directory
+OR
+docker run -p 5000:5000 --name admin-server --mount type=bind,src="%cd%/instance",target=/usr/src/instance ghcr.io/computing-collective/3fa-backend:latest
+```
+Access the server at [localhost:5000](http://localhost:5000)
+
+#### Run tests with coverage
+```shell
+docker run --rm ghcr.io/computing-collective/3fa-backend:latest /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
 ```
 
-Run tests with coverage:
+#### Build the image
+> **Note**
+> You must be in the admin-system/backend directory for this command to work
 ```shell
-docker run --rm admin-system-backend /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
+docker build -t ghcr.io/computing-collective/3fa-backend:latest .
 ```
 
 ### Local
-Run the server (production):
+
+#### Run the server (production)
 > **Note**
 > Gunicorn does not run on Windows. You will need to use WSL
 ```shell
 pipenv run gunicorn -b :5000 -w 4 'api.app:create_app()'
 ```
+Access the server at [localhost:5000](http://localhost:5000)
 
-Run the server (development mode):
+#### Run the server (development mode)
 > **Note**
 > You will need your laptop's Wi-Fi hotspot turned on to use this IP address. You can always change the IP address to localhost if you don't want to do this.
 ```shell
 pipenv run flask -A api.app.py --debug run -h 192.168.137.1
 ```
+Access the server at [192.168.137.1:5000](http://192.168.137.1:5000)
+
+
 With `localhost`:
 ```shell
 pipenv run flask -A api.app.py --debug run -h 0.0.0.0
 ```
+Access the server at [localhost:5000](http://localhost:5000)
 
-Run tests with coverage:
+#### Run tests with coverage
 ```shell
 pipenv run pytest --cov=api --cov-branch
 ```
