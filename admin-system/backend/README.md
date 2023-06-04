@@ -1,9 +1,18 @@
 # Admin System Backend
 
+## Table of Contents
+1. [Setup](#setup)
+2. [Usage](#usage)
+   1. [Docker](#docker)
+   2. [Local](#local)
+3. [Documentation](#documentation)
+   1. [API](#api)
+   2. [Database](#database)
+
 ## Setup
 
 > **Note**
-> This can be skipped if you simply want to run the Docker image
+> Skip to the [`Usage -> Docker`](#docker) section if you want to run the Docker image instead of installing and running locally.
 
 1. Install `pipenv`. See the [documentation](https://pipenv.pypa.io/en/latest/) if you run into any issues with it.
    ```shell
@@ -29,7 +38,7 @@
    ```shell
    cd ../admin-system/backend
    ```
-4. Move the generated model to the `instance` folder   
+4. Move the generated model into `admin-system/backend/instance/`   
 
 ## Usage
 
@@ -118,7 +127,7 @@ pipenv run pytest --cov=api --cov-branch
 
 ### API
 
-Please see the [`API.md`](API.md) for details on each of the endpoints. Note that there is extensive verification beyond the example requests and responses shown including timing out of tokens, content type verification, and more. Please see the code in the [`api`](api) folder for more details.
+Please see [`API.md`](API.md) for details on each of the endpoints. Note that there is extensive verification beyond the example requests and responses shown including timing out of tokens, content type verification, and more. Please see the code in the [`api`](api) folder for more details.
 
 ### Database
 
