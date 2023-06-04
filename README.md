@@ -52,7 +52,7 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 
 ## Repository Contents
 
-```shell
+```
 3FA
 ├─ .github           # GitHub Actions CI/CD - testing and deployment
 |
