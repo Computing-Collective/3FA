@@ -40,8 +40,9 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 1. Install the latest version of the client application from the [releases page](https://github.com/Computing-Collective/3FA/releases) and run it.
 2. You can then create an account and start using the application by uploading and managing files.
 3. The admin dashboard can be found at [3fa.netlify.app](https://3fa.netlify.app/). You can use the account `admin@3fa.com` with the password `Password1` to login. Note that you will have to login to the client application with these credentials first.
-> **Note:**
-> To avoid having to construct the microcontroller device yourself, you can use either sign up with accounts that do not use the sensor password option or you can use the [mock device script](/embedded/demo/mock_pico.py) in the embedded folder along with a REST client like Postman to authenticate with the server (not recommended without a thorough understanding of the system). If you choose the latter option, you will benefit from reading [`API.md](/admin-system/backend/API.md) to better understand the API.
+
+> **Note**:
+> To avoid having to construct the microcontroller device yourself, you can use either sign up with accounts that do not use the sensor password option or you can use the [mock device script](/embedded/demo/mock_pico.py) in the embedded folder along with a REST client like Postman to authenticate with the server (not recommended without a thorough understanding of the system). If you choose the latter option, you will benefit from reading [`API.md`](/admin-system/backend/API.md) to better understand the API.
 
 ### Setting up your own servers
 
