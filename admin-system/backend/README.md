@@ -116,6 +116,10 @@ pipenv run pytest --cov=api --cov-branch
 
 ## Documentation
 
+### API
+
+Please see the [`API.md`](API.md) for details on each of the endpoints. Note that there is extensive verification beyond the example requests and responses shown including timing out of tokens, content type verification, and more. Please see the code in the [`api`](api) folder for more details.
+
 ### Database
 
 The database is organized into the following tables. Specific table details and their fields can be found in [`models.py`](api/models.py).
