@@ -4,6 +4,8 @@
 
 A secure and scalable multi-factor authentication system including a client application, admin dashboard, and backend server. The implementation seen here implements a secure file storage system but the underlying authentication system could be used for any application.
 
+[View the live status page](https://computing-collective.github.io/3FA-Status)
+
 ## Table of Contents
 - [3FA](#3fa)
   - [Table of Contents](#table-of-contents)
