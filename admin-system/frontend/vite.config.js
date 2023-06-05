@@ -9,7 +9,7 @@ export default ({ mode }) => {
     plugins: [react()],
     server: {
       cors: {
-        origin: [/(localhost|127\.0\.0\.1)/, "http://192.168.137.1", "http://cpen291-24.ece.ubc.ca", "http://cpen291-24.ece.ubc.ca:443"],
+        origin: [/(localhost|127\.0\.0\.1)/, "http://192.168.137.1", "https://3fa.bxian03.systems"],
       },
     },
   });
