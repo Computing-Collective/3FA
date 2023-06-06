@@ -1,6 +1,6 @@
 # This workflow will publish the Electron application files to GitHub Releases when a new tag is created
 
-name: Client Release CI
+name: Client Release CD
 on:
   push:
     tags:
