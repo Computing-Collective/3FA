@@ -6,5 +6,7 @@ services:
         source: "instance"
         target: /usr/src/instance
     container_name: admin-server
+    env_file:
+      - .env
     ports:
       - "5000:5000"
