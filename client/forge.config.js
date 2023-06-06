@@ -48,10 +48,10 @@ module.exports = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "CPEN-291",
-          name: "P2_L2A_G24",
+          owner: "Computing-Collective",
+          name: "3FA",
         },
-        prerelease: true,
+        prerelease: false,
       },
     },
   ],

@@ -1,8 +1,8 @@
 {
-  "name": "3FA",
+  "name": "3fa",
   "productName": "3FA",
   "version": "1.0.0",
-  "description": "Multi-factor authentication system",
+  "description": "A secure and scalable multi-factor authentication system including a client application, admin dashboard, and backend server",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/CPEN-291/P2_L2A_G24.git"
+    "url": "https://github.com/Computing-Collective/3FA.git"
   },
   "build": {
     "publish": [
       {
         "provider": "github",
-        "owner": "CPEN-291",
-        "repo": "P2_L2A_G24"
+        "owner": "Computing-Collective",
+        "repo": "3FA"
       }
     ]
   },
@@ -29,7 +29,7 @@
     "name": "Kelvin Wong",
     "email": "kelvinwong0519@gmail.com"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@babel/core": "^7.22.1",
     "@babel/preset-react": "^7.22.3",
@@ -74,6 +74,7 @@
     "react-router-dom": "^6.11.2",
     "reactjs-localstorage": "^1.0.1",
     "styled-components": "^5.3.11",
-    "underscore": "^1.13.6"
+    "underscore": "^1.13.6",
+    "update-electron-app": "^2.0.1"
   }
 }
