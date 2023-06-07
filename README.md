@@ -78,6 +78,6 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 
 ## Architecture Overview
 
-This is our system overview on how all the elements work between the software and the hardware.
+This is our system overview detailing the interactions between all the hardware and software.
 
 ![Systems Diagram](/static/System%20Diagram.jpg)
