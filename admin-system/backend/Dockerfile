@@ -36,4 +36,6 @@ RUN chown -R backend:backend /usr/src/
 USER backend
 EXPOSE 5000
 
+ENV SECRET_KEY = "secret_to_override"
+
 CMD ./.venv/bin/python -m gunicorn -b :5000 -w 4 --pythonpath /usr/src 'api.app:create_app()'

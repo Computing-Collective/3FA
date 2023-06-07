@@ -1,4 +1,4 @@
-name: Admin Backend CI
+name: Admin Backend CI/CD
 
 on:
   push:
@@ -68,7 +68,7 @@ jobs:
           retention-days: 1
           
           
-  build:
+  build-test:
     runs-on: ${{ matrix.os }}
     needs: ml-model
     defaults:
