@@ -19,7 +19,7 @@ A secure and scalable multi-factor authentication system including a client appl
 
 ## Overview
 
-Here is a video overview of our system. You can [view it on YouTube](https://www.youtube.com/watch?v=EXM25gpxC9Y) or [download the file directly](/static/Demo%20Video.mp4) if you prefer.
+Here is a video overview of our system. You can [view it on YouTube](https://www.youtube.com/watch?v=EXM25gpxC9Y) if you prefer.
 
 https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9f8f-198096261e36
 
@@ -78,6 +78,6 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 
 ## Architecture Overview
 
-![Systems Diagram](/static/System_Diagram.png)
-
 This is our system overview on how all the elements work between the software and the hardware.
+
+![Systems Diagram](/static/System%20Diagram.jpg)
