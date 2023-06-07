@@ -4,6 +4,10 @@ const { readFileSync, writeFile } = require("node:fs");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
+require('update-electron-app')({
+  updateInterval: '1 hour',
+});
+
 app.commandLine.appendSwitch("ignore-certificate-errors");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
