@@ -78,6 +78,6 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 
 ## Architecture Overview
 
-Photo
+![Systems Diagram](/static/System_Diagram.png)
 
-Tldr
+This is our system overview on how all the elements work between the software and the hardware.
