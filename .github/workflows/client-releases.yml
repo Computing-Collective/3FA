@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: write
     runs-on: ${{ matrix.os }}
-    env:
-      API_ENDPOINT: ${{ vars.API_ENDPOINT }}
     defaults:
       run:
         working-directory: client
@@ -29,10 +27,6 @@ jobs:
         check-latest: true
     - name: Install Dependencies
       run: npm ci
-    - name: Setup Environment Variables
-      run: |
-        echo "API_ENDPOINT=$API_ENDPOINT" >> .env
-        echo "PICO_API_ENDPOINT=http://192.168.137.159" >> .env
     - name: Publish Electron Application
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
