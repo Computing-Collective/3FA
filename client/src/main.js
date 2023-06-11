@@ -4,8 +4,10 @@ const { readFileSync, writeFile } = require("node:fs");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
-require('update-electron-app')({
-  updateInterval: '1 hour',
+API_ENDPOINT = "https://3fa.bxian03.systems/";
+
+require("update-electron-app")({
+  updateInterval: "1 hour",
 });
 
 app.commandLine.appendSwitch("ignore-certificate-errors");
@@ -30,7 +32,7 @@ const createWindow = () => {
   });
 
   // send API_ENDPOINT to renderer on the "API_ENDPOINT" channel
-  mainWindow.webContents.send("API_ENDPOINT", process.env.API_ENDPOINT);
+  mainWindow.webContents.send("API_ENDPOINT", API_ENDPOINT);
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);

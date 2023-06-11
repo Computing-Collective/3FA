@@ -90,3 +90,9 @@ out/
 
 # WebStorm
 .idea/
+
+# dotenv
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
