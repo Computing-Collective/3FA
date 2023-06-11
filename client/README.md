@@ -10,8 +10,11 @@ We used Electron Forge to quickly design, develop, and publish our cross-platfor
 
 ## Running Instructions
 
-1. Fork the repository with `dotenv` to obtain a `.env.example` to place the server API endpoint & the IP address of the Pico Microcontroller for sensor inputs 
+1. Fork the repository with `dotenv` to obtain a `.env.example`: 
    a. In `forge.config.js` find `devContentSecurityPolicy` and add the hostnames that you added to this field.
+   b. for the `.env` file:
+      i. `API_ENDPOINT = <SERVER_API_ENDPOINT>`. This is the address for the backend server. 
+      ii. `PICO_API_ENDPOINT = <PICO IP ADDRESS>` where Pico IP address is the address to connect with the Pico Conctroller
 
 2. Install dependencies with `npm i`
 
