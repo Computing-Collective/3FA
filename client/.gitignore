@@ -90,3 +90,6 @@ out/
 
 # WebStorm
 .idea/
+
+# dotenv
+.env*
