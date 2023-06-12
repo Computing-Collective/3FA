@@ -93,6 +93,3 @@ out/
 
 # dotenv
 .env*
-.flaskenv*
-!.env.project
-!.env.vault
