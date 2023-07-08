@@ -14,6 +14,10 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "ElioDiNino"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
       
   - package-ecosystem: "npm"
     directory: "/admin-system/frontend"
@@ -26,6 +30,10 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "im-calvin"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
       
   - package-ecosystem: "npm"
     directory: "/client"
@@ -38,6 +46,10 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "im-calvin"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
       
   - package-ecosystem: "pip"
     directory: "/machine-learning"
@@ -50,3 +62,7 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "divy-07"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
