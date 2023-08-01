@@ -36,13 +36,61 @@ Note the variables `{{hostname}}` and `{{port}}` are placeholders for the hostna
       - [II. Example Response: Count Param](#ii-example-response-count-param)
   - [Client API](#client-api)
     - [1. Login](#1-login)
+      - [a. Email](#a-email)
+        - [I. Example Request: Successful](#i-example-request-successful-2)
+        - [I. Example Response: Successful](#i-example-response-successful-2)
+        - [II. Example Request: Email Doesn't Exist / Bad Formatting](#ii-example-request-email-doesnt-exist--bad-formatting)
+        - [II. Example Response: Email Doesn't Exist / Bad Formatting](#ii-example-response-email-doesnt-exist--bad-formatting)
+      - [b. Password](#b-password)
+        - [I. Example Request: Successful](#i-example-request-successful-3)
+        - [I. Example Response: Successful](#i-example-response-successful-3)
+        - [II. Example Request: Wrong Password](#ii-example-request-wrong-password)
+        - [II. Example Response: Wrong Password](#ii-example-response-wrong-password)
+      - [c. Unique Pico ID](#c-unique-pico-id)
+        - [I. Example Request: Unique](#i-example-request-unique)
+        - [I. Example Response: Unique](#i-example-response-unique)
+        - [II. Example Request: Non-Unique](#ii-example-request-non-unique)
+        - [II. Example Response: Non-Unique](#ii-example-response-non-unique)
+      - [d. Motion Pattern Initialize](#d-motion-pattern-initialize)
+        - [I. Example Request: Successful](#i-example-request-successful-4)
+        - [I. Example Response: Successful](#i-example-response-successful-4)
+        - [II. Example Request: Expired Session](#ii-example-request-expired-session)
+        - [II. Example Response: Expired Session](#ii-example-response-expired-session)
+        - [III. Example Request: Wrong Stage](#iii-example-request-wrong-stage)
+        - [III. Example Response: Wrong Stage](#iii-example-response-wrong-stage)
+        - [IV. Example Request: Incorrect Pattern](#iv-example-request-incorrect-pattern)
+        - [IV. Example Response: Incorrect Pattern](#iv-example-response-incorrect-pattern)
+      - [e. Motion Pattern Validate](#e-motion-pattern-validate)
+        - [I. Example Request: Incorrect Pattern](#i-example-request-incorrect-pattern)
+        - [I. Example Response: Incorrect Pattern](#i-example-response-incorrect-pattern)
+        - [II. Example Request: Successful](#ii-example-request-successful)
+        - [II. Example Response: Successful](#ii-example-response-successful)
+      - [f. Face Recognition](#f-face-recognition)
+        - [I. Example Request: Successful](#i-example-request-successful-5)
+        - [I. Example Response: Successful](#i-example-response-successful-5)
+        - [II. Example Request: Missing Photo](#ii-example-request-missing-photo)
+        - [II. Example Response: Missing Photo](#ii-example-response-missing-photo)
     - [2. Files](#2-files)
+      - [a. Upload File](#a-upload-file)
+        - [I. Example Request: Successful](#i-example-request-successful-6)
+        - [I. Example Response: Successful](#i-example-response-successful-6)
+        - [II. Example Request: Invalid ID](#ii-example-request-invalid-id)
+        - [II. Example Response: Invalid ID](#ii-example-response-invalid-id)
+        - [III. Example Request: Wrong Body Type](#iii-example-request-wrong-body-type)
+        - [III. Example Response: Wrong Body Type](#iii-example-response-wrong-body-type)
+        - [IV. Example Request: Duplicate File Name](#iv-example-request-duplicate-file-name)
+        - [IV. Example Response: Duplicate File Name](#iv-example-response-duplicate-file-name)
+      - [b. List Files](#b-list-files)
+        - [I. Example Request: Successful](#i-example-request-successful-7)
+        - [I. Example Response: Successful](#i-example-response-successful-7)
+      - [c. File Download](#c-file-download)
+      - [d. Delete File](#d-delete-file)
     - [3. Index](#3-index)
       - [I. Example Request: Success](#i-example-request-success)
       - [I. Example Response: Success](#i-example-response-success)
     - [4. Signup](#4-signup)
-      - [I. Example Request: Successful](#i-example-request-successful-2)
-      - [I. Example Response: Successful](#i-example-response-successful-2)
+      - [I. Example Request: Successful](#i-example-request-successful-8)
+      - [I. Example Response: Successful](#i-example-response-successful-8)
       - [II. Example Request: Require An Auth Method](#ii-example-request-require-an-auth-method)
       - [II. Example Response: Require An Auth Method](#ii-example-response-require-an-auth-method)
       - [III. Example Request: Duplicate Email](#iii-example-request-duplicate-email)
@@ -63,10 +111,10 @@ Note the variables `{{hostname}}` and `{{port}}` are placeholders for the hostna
       - [III. Example Request: Expired Session / Logged Out](#iii-example-request-expired-session--logged-out)
       - [III. Example Response: Expired Session / Logged Out](#iii-example-response-expired-session--logged-out)
     - [6. Logout](#6-logout)
-      - [I. Example Request: Successful](#i-example-request-successful-3)
-      - [I. Example Response: Successful](#i-example-response-successful-3)
-      - [II. Example Request: Invalid ID](#ii-example-request-invalid-id)
-      - [II. Example Response: Invalid ID](#ii-example-response-invalid-id)
+      - [I. Example Request: Successful](#i-example-request-successful-9)
+      - [I. Example Response: Successful](#i-example-response-successful-9)
+      - [II. Example Request: Invalid ID](#ii-example-request-invalid-id-1)
+      - [II. Example Response: Invalid ID](#ii-example-response-invalid-id-1)
   - [Pico API](#pico-api)
     - [1. Set Pico ID](#1-set-pico-id)
 
@@ -771,13 +819,619 @@ URL: {{hostname}}:{{port}}/api/dashboard/login_sessions/
 
 
 
+#### a. Email
+
+
+
 ***Endpoint:***
 
 ```bash
-Method: 
-Type: 
-URL: 
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/login/email/
 ```
+
+
+
+***Body:***
+
+```js        
+{
+    "data": "email@domain.com"
+}
+```
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Successful
+
+
+
+***Body:***
+
+```js        
+{
+    "data": "postman@email.com"
+}
+```
+
+
+
+##### I. Example Response: Successful
+```js
+{
+    "msg": "Login sequence initialized.",
+    "next": "password",
+    "session_id": "2c14bef0-6a82-4840-a0f8-3594ca10d141",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+##### II. Example Request: Email Doesn't Exist / Bad Formatting
+
+
+
+***Body:***
+
+```js        
+{
+    "data": "axoiwmk@lx.al"
+}
+```
+
+
+
+##### II. Example Response: Email Doesn't Exist / Bad Formatting
+```js
+{
+    "msg": "Email not found, please try again.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 401
+
+<br>
+
+
+
+#### b. Password
+
+
+Login step with password entry
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/login/password/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "4de606fb-fc13-4a79-afb4-19c5d09e416a",
+    "data": "Password1"
+}
+```
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Successful
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "2c14bef0-6a82-4840-a0f8-3594ca10d141",
+    "data": "Password1"
+}
+```
+
+
+
+##### I. Example Response: Successful
+```js
+{
+    "auth_session_id": null,
+    "msg": "Password validated.",
+    "next": "motion_pattern",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+##### II. Example Request: Wrong Password
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "130b4213-719c-4964-b852-e023d3eacccb",
+    "data": "This1smypassword"
+}
+```
+
+
+
+##### II. Example Response: Wrong Password
+```js
+{
+    "msg": "Invalid password, please try again.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 401
+
+<br>
+
+
+
+#### c. Unique Pico ID
+
+
+Check the uniqueness of a Pico ID generated
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/login/motion_pattern/unique/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "pico_id": "130b4213-719c-4964-b852-e023d3eacccb"
+}
+```
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Unique
+
+
+
+***Body:***
+
+```js        
+{
+    "pico_id": "2c14bef0-6a82-4840-a0f8-3594ca10d141"
+}
+```
+
+
+
+##### I. Example Response: Unique
+```js
+{
+    "msg": "Pico ID is unique.",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+##### II. Example Request: Non-Unique
+
+
+
+***Body:***
+
+```js        
+{
+    "pico_id": "130b4213-719c-4964-b852-e023d3eacccb"
+}
+```
+
+
+
+##### II. Example Response: Non-Unique
+```js
+{
+    "msg": "Pico ID is not unique.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 400
+
+<br>
+
+
+
+#### d. Motion Pattern Initialize
+
+
+Initiate login step with motion device password
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/login/motion_pattern/initialize/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "265f92ae-02e5-44d3-b5ae-b3a22d30f924",
+    "pico_id": "100b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "UP", "DOWN"
+    ]
+}
+```
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Successful
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "2c14bef0-6a82-4840-a0f8-3594ca10d141",
+    "pico_id": "130b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "UP", "DOWN", "RIGHT"
+    ]
+}
+```
+
+
+
+##### I. Example Response: Successful
+```js
+{
+    "auth_session_id": null,
+    "msg": "Motion pattern validated.",
+    "next": "face_recognition",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+##### II. Example Request: Expired Session
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "2c14bef0-6a82-4840-a0f8-3594ca10d141",
+    "pico_id": "",
+    "data": [
+        "UP", "DOWN", "RIGHT"
+    ]
+}
+```
+
+
+
+##### II. Example Response: Expired Session
+```js
+{
+    "msg": "Session expired, please start a new login session.",
+    "next": "email",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 401
+
+<br>
+
+
+
+##### III. Example Request: Wrong Stage
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "25e2bf8f-ae6d-4f06-8c39-e48c887af856",
+    "pico_id": "120b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "UP", "DOWN", "RIGHT"
+    ]
+}
+```
+
+
+
+##### III. Example Response: Wrong Stage
+```js
+{
+    "msg": "Wrong stage of login sequence, please go to specified stage.",
+    "next": "password",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 400
+
+<br>
+
+
+
+##### IV. Example Request: Incorrect Pattern
+
+
+
+***Body:***
+
+```js        
+{
+    "session_id": "25e2bf8f-ae6d-4f06-8c39-e48c887af856",
+    "pico_id": "120b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "UP", "DOWN", "RIGHT"
+    ]
+}
+```
+
+
+
+##### IV. Example Response: Incorrect Pattern
+```js
+{
+    "msg": "Motion pattern incorrect, please retry.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 401
+
+<br>
+
+
+
+#### e. Motion Pattern Validate
+
+
+Motion device password submission endpoint
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/login/motion_pattern/validate/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "pico_id": "100b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "LEFT", "RIGHT", "UP", "FLIP", "UP", "DOWN"
+    ]
+}
+```
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Incorrect Pattern
+
+
+
+***Body:***
+
+```js        
+{
+    "pico_id": "120b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "LEFT", "RIGHT", "UP", "DOWN", "UP", "DOWN"
+    ]
+}
+```
+
+
+
+##### I. Example Response: Incorrect Pattern
+```js
+{
+    "msg": "Incorrect motion pattern, please try again.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 401
+
+<br>
+
+
+
+##### II. Example Request: Successful
+
+
+
+***Body:***
+
+```js        
+{
+    "pico_id": "110b4213-719c-4964-b852-e023d3eacccb",
+    "data": [
+        "LEFT", "RIGHT", "UP", "DOWN", "UP", "DOWN", "RIGHT"
+    ]
+}
+```
+
+
+
+##### II. Example Response: Successful
+```js
+{
+    "msg": "Motion pattern validated.",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+#### f. Face Recognition
+
+
+Login step with face recognition
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: FORMDATA
+URL: {{hostname}}:{{port}}/api/login/face_recognition/
+```
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | {"session_id": "a8956a59-8759-408d-8b7f-e74cfe213083"} |  |
+| photo |  |  |
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Successful
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | {"session_id": "2c14bef0-6a82-4840-a0f8-3594ca10d141"} |  |
+| photo |  |  |
+
+
+
+##### I. Example Response: Successful
+```js
+{
+    "auth_session_id": "e78ace29-54c7-4dfa-baa9-815d6288e5c6",
+    "msg": "Face recognition validated.",
+    "next": null,
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+##### II. Example Request: Missing Photo
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | {"session_id": "6f445663-3bc6-49b2-bf97-3fa0c5f5e2d9"} |  |
+
+
+
+##### II. Example Response: Missing Photo
+```js
+{
+    "msg": "No photo submitted, please try again.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 400
+
+<br>
 
 
 
@@ -785,12 +1439,265 @@ URL:
 
 
 
+#### a. Upload File
+
+
+Upload a file to the authenticated client's account
+
+
 ***Endpoint:***
 
 ```bash
-Method: 
-Type: 
-URL: 
+Method: POST
+Type: FORMDATA
+URL: {{hostname}}:{{port}}/api/client/files/upload/
+```
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | <pre>{<br>    "auth_session_id": "6a8dc068-f2da-4afe-bb0e-0b03ab899fe3",<br>    "file_name": "Example File"<br>}</pre> |  |
+| file | fileName.extension |  |
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Successful
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | <pre>{<br>    "auth_session_id": "3e2dd9ab-03dd-4f8f-9b0d-80e77c35fc78",<br>    "file_name": "picture"<br>}</pre> |  |
+| file | photo.jpg |  |
+
+
+
+##### I. Example Response: Successful
+```js
+{
+    "msg": "File upload successful.",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+##### II. Example Request: Invalid ID
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | <pre>{<br>    "auth_session_id": "b62cd4ff-c6a7-42b9-a841-8b7f4abb1a2c",<br>    "file_name": "picture"<br>}</pre> |  |
+| file | file.txt |  |
+
+
+
+##### II. Example Response: Invalid ID
+```js
+{
+    "msg": "Invalid auth_session_id, please try again.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 401
+
+<br>
+
+
+
+##### III. Example Request: Wrong Body Type
+
+
+
+***Body:***
+
+```js        
+{
+    "auth_session_id": "3e2dd9ab-03dd-4f8f-9b0d-80e77c35fc78"
+}
+```
+
+
+
+##### III. Example Response: Wrong Body Type
+```js
+{
+    "msg": "Missing multipart form data in request.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 400
+
+<br>
+
+
+
+##### IV. Example Request: Duplicate File Name
+
+
+
+***Body:***
+
+| Key | Value | Description |
+| --- | ------|-------------|
+| request | <pre>{<br>    "auth_session_id": "3e2dd9ab-03dd-4f8f-9b0d-80e77c35fc78",<br>    "file_name": "picture"<br>}</pre> |  |
+| file | file.txt |  |
+
+
+
+##### IV. Example Response: Duplicate File Name
+```js
+{
+    "msg": "File name already exists.",
+    "success": 0
+}
+```
+
+
+***Status Code:*** 400
+
+<br>
+
+
+
+#### b. List Files
+
+
+List the files on the authenticated client's account
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/client/files/list/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "auth_session_id": "6a8dc068-f2da-4afe-bb0e-0b03ab899fe3"
+}
+```
+
+
+
+***More example Requests/Responses:***
+
+
+##### I. Example Request: Successful
+
+
+
+***Body: None***
+
+
+
+##### I. Example Response: Successful
+```js
+{
+    "json": [
+        {
+            "date": "2023-03-29 22:50:13",
+            "file_name": "picture",
+            "file_type": "image/jpeg",
+            "id": "aa35b09c-ddec-425f-acf4-442ead625aeb",
+            "size": 1859839
+        },
+        {
+            "date": "2023-03-29 22:50:24",
+            "file_name": "picture2",
+            "file_type": "image/jpeg",
+            "id": "7093be37-dd7e-48e4-b0bd-33da2731eb4b",
+            "size": 1397795
+        }
+    ],
+    "msg": "File fetch successful.",
+    "success": 1
+}
+```
+
+
+***Status Code:*** 200
+
+<br>
+
+
+
+#### c. File Download
+
+
+Download a file from the authenticated client's account
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/client/files/download/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "auth_session_id": "dcec7f7b-64ab-4581-911f-8c2e458c4269",
+    "file_id": "aa56d109-ee59-401f-84dd-ac386d28c3ac"
+}
+```
+
+
+
+#### d. Delete File
+
+
+Delete a file on the authenticated client's account
+
+
+***Endpoint:***
+
+```bash
+Method: POST
+Type: RAW
+URL: {{hostname}}:{{port}}/api/client/files/delete/
+```
+
+
+
+***Body:***
+
+```js        
+{
+    "auth_session_id": "6a8dc068f2da4afebb0e0b03ab899fe3",
+    "file_id": "aa35b09c-ddec-425f-acf4-442ead625aeb"
+}
 ```
 
 
