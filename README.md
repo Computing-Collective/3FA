@@ -4,7 +4,7 @@
 
 A secure and scalable multi-factor authentication system including a client application, admin dashboard, and backend server. The implementation seen here implements a secure file storage system but the underlying authentication system could be used for any application.
 
-![Status Page](https://img.shields.io/badge/Status%20Page-3cc45f?style=for-the-badge&link=https%3A%2F%2Fcomputing-collective.github.io%2F3FA-Status)
+[![Status Page](https://img.shields.io/badge/Status%20Page-2a853f?style=for-the-badge)](https://computing-collective.github.io/3FA-Status/)
 
 ## Table of Contents
 - [3FA](#3fa)
