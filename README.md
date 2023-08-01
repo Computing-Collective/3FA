@@ -4,7 +4,7 @@
 
 A secure and scalable multi-factor authentication system including a client application, admin dashboard, and backend server. The implementation seen here implements a secure file storage system but the underlying authentication system could be used for any application.
 
-[View the live status page](https://computing-collective.github.io/3FA-Status)
+[![Status Page](https://img.shields.io/badge/Status%20Page-2a853f?style=for-the-badge)](https://computing-collective.github.io/3FA-Status/)
 
 ## Table of Contents
 - [3FA](#3fa)
@@ -44,7 +44,7 @@ https://github.com/Computing-Collective/3FA/assets/52972357/1cd9538f-6b38-4530-9
 3. The admin dashboard can be found at [3fa.netlify.app](https://3fa.netlify.app/). You can use the account `admin@3fa.com` with the password `Password1` to login. Note that you will have to login to the client application with these credentials first.
 
 > **Note**:
-> To avoid having to construct the microcontroller device yourself, you can use either sign up with accounts that do not use the sensor password option or you can use the [mock device script](/embedded/demo/mock_pico.py) in the embedded folder along with a REST client like Postman to authenticate with the server (not recommended without a thorough understanding of the system). If you choose the latter option, you will benefit from reading [`API.md`](/admin-system/backend/API.md) to better understand the API.
+> To avoid having to construct the microcontroller device yourself, you can use either sign up with accounts that do not use the sensor password option or you can use the [mock device script](/embedded/demo/mock_pico.py) in the embedded folder along with a REST client like Postman to authenticate with the server (not recommended without a thorough understanding of the system). If you choose the latter option, you will benefit from reading [`API.md`](/admin-system/backend/API.md) to better understand the API. You can also import the [Postman collection](admin-system/backend/postman-collection.json) and [Postman environment](admin-system/backend/postman-environment.json) to get started.
 
 ### Setting up your own servers
 

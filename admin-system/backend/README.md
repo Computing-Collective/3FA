@@ -135,7 +135,7 @@ pipenv run pytest --cov=api --cov-branch
 
 ### API
 
-Please see [`API.md`](API.md) for details on each of the endpoints. Note that there is extensive verification beyond the example requests and responses shown including timing out of tokens, content type verification, and more. Please see the code in the [`api`](api) folder for more details.
+Please see [`API.md`](API.md) for details on each of the endpoints. Note that there is extensive verification beyond the example requests and responses shown including timing out of tokens, content type verification, and more. Please see the code in the [`api`](api) folder for more details. If you want to play with the API yourself in Postman, feel free to import the [Postman collection](admin-system/backend/postman-collection.json) and [Postman environment](admin-system/backend/postman-environment.json).
 
 ### Files
 
