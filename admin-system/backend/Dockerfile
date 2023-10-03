@@ -13,6 +13,7 @@ ADD Pipfile.lock Pipfile /usr/src/
 WORKDIR /usr/src
 
 # Install pipenv packages
+RUN /root/.local/bin/pipenv lock --dev
 RUN /root/.local/bin/pipenv sync --dev
 
 RUN /usr/src/.venv/bin/python -c "import requests; print(requests.__version__)"
