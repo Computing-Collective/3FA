@@ -677,17 +677,17 @@
         },
         "torch": {
             "hashes": [
-                "sha256:ef654427d91600129864644e35deea761fb1fe131710180b952a6f2e2207075e"
+                "sha256:274d4acf486ef50ce1066ffe9d500beabb32bde69db93e3b71d0892dd148956c"
             ],
             "index": "pytorch",
-            "version": "==2.0.1"
+            "version": "==2.0.1+cpu"
         },
         "torchvision": {
             "hashes": [
-                "sha256:5f35f6bd5bcc4568e6522e4137fa60fcc72f4fa3e615321c26cd87e855acd398"
+                "sha256:1633c0b7ead69d2cd3fbe8aeaa146c76a68691bd3599facfffd2da925973e044"
             ],
             "index": "pytorch",
-            "version": "==0.15.2"
+            "version": "==0.15.2+cpu"
         },
         "typing-extensions": {
             "hashes": [
