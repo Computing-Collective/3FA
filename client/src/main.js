@@ -4,7 +4,7 @@ const { readFileSync, writeFile } = require("node:fs");
 const { desktopCapturer } = require("electron");
 require("dotenv").config();
 
-API_ENDPOINT = "https://3fa.bxian03.systems/";
+API_ENDPOINT = "https://3fa.bxian03.com/";
 
 require("update-electron-app")({
   updateInterval: "1 hour",
