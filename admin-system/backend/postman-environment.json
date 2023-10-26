@@ -1,19 +1,19 @@
 {
-	"id": "cf22f32b-d27b-4ec9-8685-912f70de555f",
-	"values": [
-		{
-			"key": "hostname",
-			"value": "https://3fa.bxian03.systems",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "port",
-			"value": "443",
-			"type": "default",
-			"enabled": true
-		}
-	],
-	"name": "Globals",
-	"_postman_variable_scope": "globals"
+  "id": "cf22f32b-d27b-4ec9-8685-912f70de555f",
+  "values": [
+    {
+      "key": "hostname",
+      "value": "https://3fa.bxian03.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "port",
+      "value": "443",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "name": "Globals",
+  "_postman_variable_scope": "globals"
 }

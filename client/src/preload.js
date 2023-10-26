@@ -4,7 +4,7 @@
 
 const { contextBridge, ipcRenderer, app } = require("electron");
 
-API_ENDPOINT = "https://3fa.bxian03.systems/";
+API_ENDPOINT = "https://3fa.bxian03.com/";
 PICO_API_ENDPOINT = "http://192.168.1.153";
 
 // 'internal' channel is used for internal stuff
