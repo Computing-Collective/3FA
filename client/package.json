@@ -1,7 +1,7 @@
 {
   "name": "3FA",
   "productName": "3FA",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A secure and scalable multi-factor authentication system including a client application, admin dashboard, and backend server",
   "main": ".webpack/main",
   "scripts": {
