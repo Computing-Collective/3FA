@@ -1,4 +1,4 @@
 torch >= 2.0.1
-torchvision == 0.15.2
-torchdata == 0.6.1
+torchvision == 0.16.0
+torchdata == 0.7.0
 numpy >= 1.24.2
