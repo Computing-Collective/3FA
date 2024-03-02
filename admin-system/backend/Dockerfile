@@ -16,15 +16,11 @@ WORKDIR /usr/src
 RUN /root/.local/bin/pipenv lock --dev
 RUN /root/.local/bin/pipenv sync --dev
 
-RUN /usr/src/.venv/bin/python -c "import requests; print(requests.__version__)"
-
 FROM python:3.11 AS runtime
 
 RUN mkdir -v /usr/src/.venv
 
 COPY --from=builder /usr/src/.venv/ /usr/src/.venv/
-
-RUN /usr/src/.venv/bin/python -c "import requests; print(requests.__version__)"
 
 RUN adduser --uid 123123 backend
 COPY / /usr/src/
