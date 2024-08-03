@@ -55,7 +55,8 @@ def create_app(test_config=None):
         db.create_all()
         from api.machine_learning_eval import model
         model.load_state_dict(torch.load(os.path.join(app.instance_path, "model.pth"),
-                                         map_location=torch.device('cpu')))
+                                         map_location=torch.device('cpu'),
+                                         weights_only=False))
         model.eval()
 
     # Create the data directory for user files
