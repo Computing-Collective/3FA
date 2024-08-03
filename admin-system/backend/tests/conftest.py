@@ -48,7 +48,6 @@ def list_of_users() -> list[list]:
     ]
 
 
-@pytest.mark.database
 @pytest.fixture(scope='session', autouse=True)
 def users(list_of_users) -> list[api.models.User]:
     """
@@ -91,7 +90,6 @@ def list_of_files() -> list[list]:
     ]
 
 
-@pytest.mark.database
 @pytest.fixture(scope='session')
 def files(users, list_of_files) -> list[api.models.UserFiles]:
     """

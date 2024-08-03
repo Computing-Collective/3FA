@@ -13,7 +13,6 @@ ADD Pipfile.lock Pipfile /usr/src/
 WORKDIR /usr/src
 
 # Install pipenv packages
-RUN /root/.local/bin/pipenv lock --dev
 RUN /root/.local/bin/pipenv sync --dev
 
 FROM python:3.11 AS runtime
