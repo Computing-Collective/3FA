@@ -27,22 +27,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-  
+        uses: actions/checkout@v4
+
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install Machine Learning Dependencies
         run: pip install -r requirements.txt
 
       - name: Generate Machine Learning Model
         run: python model.py
-        
+
       - name: Delete Old Artifacts
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: artifact
         with:
           script: |
@@ -61,13 +61,13 @@ jobs:
               })
 
       - name: Save Machine Learning Model
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ml-model
           path: machine-learning/model.pth
           retention-days: 1
-          
-          
+
+
   build-test:
     runs-on: ${{ matrix.os }}
     needs: ml-model
@@ -81,14 +81,14 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         cache: 'pipenv'
-    
+
     - name: Install pipenv
       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
@@ -98,7 +98,7 @@ jobs:
         pipenv sync --dev
 
     - name: Download Machine Learning Model
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ml-model
         path: admin-system/backend/instance/
@@ -119,20 +119,20 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Download Machine Learning Model
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ml-model
         path: admin-system/backend/instance/
 
     - name: Log in to the Container registry
       if: ${{ github.event_name != 'pull_request' }}
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
@@ -140,15 +140,15 @@ jobs:
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v5
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
           type=raw,value=latest
-    
+
     - name: Build Image
       id: build
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: ./admin-system/backend
         platforms: linux/amd64
@@ -162,7 +162,7 @@ jobs:
       run: docker run --rm ${{ fromJSON(steps.build.outputs.metadata)['image.name'] }} /usr/src/.venv/bin/python -m pytest --cov=api --cov-branch
 
     - name: Build & Push Image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: ./admin-system/backend
         platforms: linux/amd64
